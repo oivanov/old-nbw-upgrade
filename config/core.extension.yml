@@ -203,7 +203,6 @@ module:
   webform_user_registration: 0
   webform_views: 0
   webform_views_example: 0
-  workflow: 0
   workflows: 0
   ds: 1
   pathauto: 1
