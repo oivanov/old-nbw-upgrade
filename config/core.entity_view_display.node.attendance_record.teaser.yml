@@ -5,6 +5,7 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.attendance_record.body
+    - field.field.node.attendance_record.field_auto_checked_out
     - field.field.node.attendance_record.field_checkin_time
     - field.field.node.attendance_record.field_class_name
     - field.field.node.attendance_record.field_class_session_record
@@ -40,6 +41,7 @@ hidden:
   entity_print_view_epub: true
   entity_print_view_pdf: true
   entity_print_view_word_docx: true
+  field_auto_checked_out: true
   field_checkin_time: true
   field_class_name: true
   field_class_session_record: true

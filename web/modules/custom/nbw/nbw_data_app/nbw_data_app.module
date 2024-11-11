@@ -69,6 +69,24 @@ function nbw_data_app_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $f
       \Drupal::messenger()->addMessage(t("form id is - " . $form_id));
       //dpr($form_state);
     }
+
+  // Check if this is the special form for "Drop In Class Record".
+  if (\Drupal::routeMatch()->getRouteName() == 'entity.node.add_form' && $form['#node']->bundle() == 'attendance_record') {
+    // Change the form title.
+    $form['#title'] = t('Create Drop In Class Record');
+
+    // Find or create today's class session.
+    $today = new \DateTime('today');
+    $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery()
+      ->condition('type', 'class_session')
+      ->condition('field_class_date', $today->format('Y-m-d'));
+
+    $nids = $query->execute();
+    if (!empty($nids)) {
+      $class_session_id = reset($nids);
+      $form['field_class_session_record']['#default_value'] = $class_session_id;
+    }
+  }
 }
 
 /**
@@ -293,3 +311,28 @@ function nbw_data_app_element_info_alter(array &$types) {
   dpq($view->build_info['query']);
 }*/
 //webform_submission
+function nbw_data_app_cron() {
+  $current_time = new \DateTime();
+  $class_end_time = new \DateTime('14:00');
+
+  if ($current_time >= $class_end_time) {
+    $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery()
+      ->condition('type', 'attendance_record')
+      ->condition('field_time_out', NULL, 'IS NULL')
+      ->condition('field_class_session_record.entity.field_end_time', '14:00:00');
+
+    $nids = $query->execute();
+    if (!empty($nids)) {
+      foreach ($nids as $nid) {
+        $attendance_record = \Drupal\node\Entity\Node::load($nid);
+        $attendance_record->set('field_time_out', $class_end_time->format('H:i:s'));
+        $attendance_record->set('field_auto_checked_out', TRUE);
+        $attendance_record->save();
+
+        // Log an alert for admin.
+        \Drupal::logger('attendance')->notice('Youth auto-checked out for node ID: @nid', ['@nid' => $nid]);
+      }
+    }
+  }
+}
+

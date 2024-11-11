@@ -1,0 +1,11 @@
+uuid: 268df49e-5d61-4fde-8293-59fc40c23dda
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.create_drop_in_class_record
+label: 'Create Drop In Class Record'
+description: ''
+targetEntityType: node
+cache: true

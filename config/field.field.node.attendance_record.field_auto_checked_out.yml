@@ -1,0 +1,23 @@
+uuid: a42a921f-d763-4751-bf45-4342cc381141
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_auto_checked_out
+    - node.type.attendance_record
+id: node.attendance_record.field_auto_checked_out
+field_name: field_auto_checked_out
+entity_type: node
+bundle: attendance_record
+label: 'Auto Checked Out'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'Yes'
+  off_label: 'No'
+field_type: boolean

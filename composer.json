@@ -82,7 +82,9 @@
         "drupal/asset_injector": "^2.21",
         "drupal/workflow": "^1.8",
         "drupal/symfony_mailer_log": "^1.2",
-        "drupal/symfony_mailer_queue": "^1.1"
+        "drupal/symfony_mailer_queue": "^1.1",
+        "drupal/rules": "^4.0",
+        "drupal/scheduler": "^2.1"
     },
     "require-dev": {
         "drupal/core-dev": "^10"

@@ -1,8 +1,9 @@
-uuid: 0eee8cf8-1719-41ce-90df-da8d88947a19
+uuid: 3df1d2ff-cd87-4a26-bf0b-66b98862b698
 langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_form_mode.node.create_drop_in_class_record
     - field.field.node.attendance_record.body
     - field.field.node.attendance_record.field_auto_checked_out
     - field.field.node.attendance_record.field_checkin_time
@@ -25,10 +26,10 @@ third_party_settings:
     id: layout_onecol
     settings:
       label: ''
-id: node.attendance_record.default
+id: node.attendance_record.create_drop_in_class_record
 targetEntityType: node
 bundle: attendance_record
-mode: default
+mode: create_drop_in_class_record
 content:
   body:
     type: text_textarea_with_summary
@@ -39,13 +40,6 @@ content:
       summary_rows: 3
       placeholder: ''
       show_summary: false
-    third_party_settings: {  }
-  field_auto_checked_out:
-    type: boolean_checkbox
-    weight: 27
-    region: content
-    settings:
-      display_label: true
     third_party_settings: {  }
   field_checkin_time:
     type: datetime_default
@@ -61,7 +55,7 @@ content:
     third_party_settings: {  }
   field_class_session_record:
     type: entity_reference_autocomplete
-    weight: 26
+    weight: 10
     region: content
     settings:
       match_operator: CONTAINS
@@ -92,7 +86,7 @@ content:
     third_party_settings: {  }
   field_student:
     type: entity_reference_autocomplete
-    weight: 2
+    weight: 0
     region: content
     settings:
       match_operator: CONTAINS
@@ -114,7 +108,7 @@ content:
     third_party_settings: {  }
   title:
     type: string_textfield
-    weight: 0
+    weight: 2
     region: content
     settings:
       size: 60
@@ -122,8 +116,11 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
+  field_auto_checked_out: true
   path: true
   promote: true
+  publish_on: true
   status: true
   sticky: true
   uid: true
+  unpublish_on: true
