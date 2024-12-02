@@ -140,6 +140,10 @@ class NbwUsersRegistrationWebformHandler extends UserRegistrationWebformHandler 
             if ($this->handler_id == 'nbw_guardian_user_registration') {
               $session->set('guardian_id', $existingUser->id());
             }
+//            foreach ($user_data as $name => $value) {
+//              $existingUser->set($name, $value);
+//            }
+
             return;
           }
           if($form['#webform_id'] == 'nbw_youth_application_waiver') {
