@@ -1,0 +1,7 @@
+uuid: 3778a85d-aad5-414c-9c79-8b1dd9031c28
+langcode: en
+status: false
+dependencies: {  }
+formId: node_class_registration_form
+captchaType: default
+label: node_class_registration_form

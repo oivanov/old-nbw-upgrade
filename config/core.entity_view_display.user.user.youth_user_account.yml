@@ -22,7 +22,6 @@ dependencies:
     - address
     - image
     - layout_builder
-    - layout_discovery
     - options
     - telephone
     - user

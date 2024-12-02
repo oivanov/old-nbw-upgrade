@@ -13,6 +13,8 @@ dependencies:
     - field.field.profile.nbw_youth_profile.field_any_medications_we_should_
     - field.field.profile.nbw_youth_profile.field_bicycle_by_themsel
     - field.field.profile.nbw_youth_profile.field_can_leave_with
+    - field.field.profile.nbw_youth_profile.field_completed_full_profile_for
+    - field.field.profile.nbw_youth_profile.field_completed_program_interest
     - field.field.profile.nbw_youth_profile.field_current_grade_level
     - field.field.profile.nbw_youth_profile.field_date_of_birth
     - field.field.profile.nbw_youth_profile.field_emergency_contact_phone_nu
@@ -125,6 +127,20 @@ content:
     settings:
       rows: 5
       placeholder: ''
+    third_party_settings: {  }
+  field_completed_full_profile_for:
+    type: boolean_checkbox
+    weight: 63
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_completed_program_interest:
+    type: boolean_checkbox
+    weight: 62
+    region: content
+    settings:
+      display_label: true
     third_party_settings: {  }
   field_current_grade_level:
     type: number

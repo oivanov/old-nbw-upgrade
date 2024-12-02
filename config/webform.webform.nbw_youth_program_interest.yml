@@ -1,0 +1,614 @@
+uuid: 72b06e04-e5ec-4e6f-8516-d7ffbaed3570
+langcode: en
+status: open
+dependencies:
+  module:
+    - nbw_users_registration
+    - webform_entity_print
+    - webform_user_registration
+third_party_settings:
+  webform_entity_print:
+    template:
+      header: ''
+      footer: ''
+      css: ''
+    export_types:
+      pdf:
+        enabled: true
+        link_text: ''
+        link_attributes: {  }
+weight: 0
+open: null
+close: null
+uid: 1
+template: false
+archive: false
+id: nbw_youth_program_interest
+title: 'NBW YOUTH PROGRAM INTEREST'
+description: '<p>The first form of the Youth Registration Process - gathering the interest data and creating the User and Guardian users</p>'
+categories:
+  - 'NBW Forms'
+elements: |-
+  email_and_guardian_card:
+    '#type': webform_card
+    '#title': 'Guardian information'
+    '#next_button_label': Next
+    email:
+      '#type': email
+      '#title': 'Guardian Email'
+      '#required': true
+    guardian_address_label:
+      '#type': label
+      '#title': 'Guardian Address And Name:'
+      '#attributes':
+        class:
+          - webform-nbw-label
+    horizontal_rule_before_guardian_address:
+      '#type': webform_horizontal_rule
+      '#display_on': both
+    guardian_address:
+      '#type': address
+      '#title': 'Guardian Address'
+      '#available_countries':
+        - US
+      '#field_overrides':
+        dependentLocality: optional
+      '#required': true
+    horizontal_rule_after_guardian_address:
+      '#type': webform_horizontal_rule
+    primary_phone:
+      '#type': tel
+      '#title': 'Primary Phone'
+      '#required': true
+    primary_phone_type:
+      '#type': radios
+      '#title': 'Primary Phone Type'
+      '#options':
+        Cell: Cell
+        Home: Home
+        Work: Work
+      '#required': true
+    secondary_phone:
+      '#type': tel
+      '#title': 'Secondary Phone'
+    secondary_phone_type:
+      '#type': radios
+      '#title': 'Secondary Phone Type'
+      '#options':
+        Cell: Cell
+        Home: Home
+        Work: Work
+    preferred_contact_method:
+      '#type': fieldset
+      '#title': 'Preferred Contact Method'
+      email_contact_method:
+        '#type': checkbox
+        '#title': Email
+      phone_contact_method:
+        '#type': checkbox
+        '#title': Phone
+      mail_contact_method:
+        '#type': checkbox
+        '#title': Mail
+    guardian_relationship_to_participant:
+      '#type': radios
+      '#title': 'Guardian Relationship to Participant'
+      '#options':
+        Mother: Mother
+        Father: Father
+        'Legal Guardian': 'Legal Guardian'
+      '#required': true
+  youth_info:
+    '#type': webform_card
+    '#title': 'YOUTH INFO'
+    '#next_button_label': Next
+    horizontal_rule_before_interests:
+      '#type': webform_horizontal_rule
+    i_m_interested_in:
+      '#type': fieldset
+      '#title': "I'm interested in (check all that apply):"
+      '#required': true
+      earn_a_bike_monday_wednesday_:
+        '#type': checkbox
+        '#title': 'Earn-A-Bike (Monday & Wednesday)'
+      earn_a_bike_tuesday_thursday_:
+        '#type': checkbox
+        '#title': 'Earn-A-Bike (Tuesday & Thursday)'
+      leadership_advanced_mechanics_class:
+        '#type': checkbox
+        '#title': 'Leadership & Advanced Mechanics Class'
+      job_opportunities_for_youth:
+        '#type': checkbox
+        '#title': 'Job Opportunities for Youth'
+      summer_camp_mondays_and_wednesdays:
+        '#type': checkbox
+        '#title': 'Summer Camp: Mondays and Wednesdays'
+      summer_camp_tuesday_and_thursday:
+        '#type': checkbox
+        '#title': 'Summer Camp: Tuesday and Thursday'
+      ride_club_monday_and_wednesday:
+        '#type': checkbox
+        '#title': 'Ride Club: Monday and Wednesday'
+      ride_club_tuesday_and_thursdays:
+        '#type': checkbox
+        '#title': 'Ride Club: Tuesday and Thursdays'
+      horizontal_rule_after_interests:
+        '#type': webform_horizontal_rule
+    youth_cell_phone:
+      '#type': tel
+      '#title': 'Youth Cell Phone'
+    youth_email:
+      '#type': email
+      '#title': 'Youth Email'
+    date_of_birth:
+      '#type': date
+      '#title': 'Date of Birth'
+      '#datepicker': true
+    youth_address_label:
+      '#type': label
+      '#title': 'Youth Address And Name:'
+    horizontal_rule_before_youth_address:
+      '#type': webform_horizontal_rule
+      '#display_on': view
+    youth_address:
+      '#type': address
+      '#title': 'Youth Address'
+      '#available_countries':
+        - US
+    horizontal_rule_after_youth_address:
+      '#type': webform_horizontal_rule
+    current_grade_level:
+      '#type': number
+      '#title': 'Current Grade Level'
+    school:
+      '#type': textarea
+      '#title': School
+      '#maxlength': 254
+    height:
+      '#type': radios
+      '#title': Height
+      '#options':
+        4: 'around 4 feet'
+        5: 'around 5 feet'
+        6: 'around 6 feet'
+    nbw_has_permission_to_contact:
+      '#type': fieldset
+      '#title': 'NBW has permission to contact the participant by (check all that apply):'
+      email_to_contact:
+        '#type': checkbox
+        '#title': Email
+      text_to_contact:
+        '#type': checkbox
+        '#title': Text
+      phone_call_to_contact:
+        '#type': checkbox
+        '#title': 'Phone Call'
+    i_identify_my_gender_as:
+      '#type': fieldset
+      '#title': 'I identify my gender as (check all that apply):'
+      '#description': '<span style="-webkit-text-stroke-width:0px; background-color:#ffffff; color:#202124; display:inline !important; float:none; font-family:Roboto,Arial,sans-serif; font-size:14.6667px; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; orphans:2; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-decoration-thickness:initial; text-indent:0px; text-transform:none; white-space:normal; widows:2; word-spacing:0px">Please help us ensure our programs are serving everyone, equitably.</span>'
+      male:
+        '#type': checkbox
+        '#title': Male
+      female:
+        '#type': checkbox
+        '#title': Female
+      transgender:
+        '#type': checkbox
+        '#title': Transgender
+      nonconforming:
+        '#type': checkbox
+        '#title': Nonconforming
+      describe_if_other:
+        '#type': textfield
+        '#title': 'describe if other'
+    i_identify_my_race_as:
+      '#type': fieldset
+      '#title': 'I identify my race as (check all that apply):'
+      '#description': '<span style="-webkit-text-stroke-width:0px; background-color:#ffffff; color:#202124; display:inline !important; float:none; font-family:Roboto,Arial,sans-serif; font-size:14.6667px; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; orphans:2; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-decoration-thickness:initial; text-indent:0px; text-transform:none; white-space:normal; widows:2; word-spacing:0px">Please help us ensure our programs are serving everyone, equitably.</span>'
+      black_or_african_american:
+        '#type': checkbox
+        '#title': 'Black or African American'
+      white_or_caucasian:
+        '#type': checkbox
+        '#title': 'White or Caucasian'
+      hispanic_or_latinx:
+        '#type': checkbox
+        '#title': 'Hispanic or Latinx'
+      asian:
+        '#type': checkbox
+        '#title': Asian
+      american_indian_or_alaska_native:
+        '#type': checkbox
+        '#title': 'American Indian or Alaska Native'
+      native_hawaiian_or_other_pacific_islander:
+        '#type': checkbox
+        '#title': 'Native Hawaiian or other Pacific Islander'
+      describe_if_other_race:
+        '#type': textfield
+        '#title': 'Describe if other'
+  word_on_the_street_card:
+    '#type': webform_card
+    '#title': 'WORD ON THE STREET'
+    how_did_your_family_hear_about_nbw:
+      '#type': fieldset
+      '#title': 'How did your family hear about NBW? (check all that apply):'
+      '#required': true
+      participant_s_school:
+        '#type': checkbox
+        '#title': "Participant's School"
+      family:
+        '#type': checkbox
+        '#title': Family
+      friend:
+        '#type': checkbox
+        '#title': Friend
+      flyer_in_the_neighborhood:
+        '#type': checkbox
+        '#title': 'Flyer in the Neighborhood'
+      nbw_website:
+        '#type': checkbox
+        '#title': 'NBW Website'
+      facebook:
+        '#type': checkbox
+        '#title': Facebook
+      twitter:
+        '#type': checkbox
+        '#title': Twitter
+      instagram:
+        '#type': checkbox
+        '#title': Instagram
+      describe_if_other_way_to_hear:
+        '#type': textfield
+        '#title': 'Describe if other'
+  have_questions_for_us_card:
+    '#type': webform_card
+    '#title': 'HAVE QUESTIONS FOR US?'
+    ask_us_anything:
+      '#type': textarea
+      '#title': 'Ask us anything!'
+    ask_anything_horizontal_rule:
+      '#type': webform_horizontal_rule
+    copy_will_be_emailed_markup:
+      '#type': webform_markup
+      '#markup': '<strong>A copy of your responses will be emailed to the address you provided.</strong>'
+  nbw_youth_application_waiver:
+    '#type': 'webform_entity_print_attachment:pdf'
+    '#title': 'PDF Attachment'
+    '#filename': NBW_WAIVER.pdf
+    '#view_mode': table
+css: ".webform-nbw-label {\r\n  color: red\r\n}"
+javascript: ''
+settings:
+  ajax: false
+  ajax_scroll_top: form
+  ajax_progress_type: ''
+  ajax_effect: ''
+  ajax_speed: null
+  page: true
+  page_submit_path: ''
+  page_confirm_path: ''
+  page_theme_name: ''
+  form_title: source_entity_webform
+  form_submit_once: false
+  form_open_message: ''
+  form_close_message: ''
+  form_exception_message: ''
+  form_previous_submissions: true
+  form_confidential: false
+  form_confidential_message: ''
+  form_disable_remote_addr: false
+  form_convert_anonymous: false
+  form_prepopulate: false
+  form_prepopulate_source_entity: false
+  form_prepopulate_source_entity_required: false
+  form_prepopulate_source_entity_type: ''
+  form_unsaved: false
+  form_disable_back: false
+  form_submit_back: false
+  form_disable_autocomplete: false
+  form_novalidate: false
+  form_disable_inline_errors: false
+  form_required: false
+  form_autofocus: false
+  form_details_toggle: false
+  form_reset: false
+  form_access_denied: default
+  form_access_denied_title: ''
+  form_access_denied_message: ''
+  form_access_denied_attributes: {  }
+  form_file_limit: ''
+  form_attributes: {  }
+  form_method: ''
+  form_action: ''
+  share: false
+  share_node: false
+  share_theme_name: ''
+  share_title: true
+  share_page_body_attributes: {  }
+  submission_label: ''
+  submission_exception_message: ''
+  submission_locked_message: ''
+  submission_log: false
+  submission_excluded_elements: {  }
+  submission_exclude_empty: false
+  submission_exclude_empty_checkbox: false
+  submission_views: {  }
+  submission_views_replace: {  }
+  submission_user_columns: {  }
+  submission_user_duplicate: false
+  submission_access_denied: default
+  submission_access_denied_title: ''
+  submission_access_denied_message: ''
+  submission_access_denied_attributes: {  }
+  previous_submission_message: ''
+  previous_submissions_message: ''
+  autofill: false
+  autofill_message: ''
+  autofill_excluded_elements: {  }
+  wizard_progress_bar: true
+  wizard_progress_pages: false
+  wizard_progress_percentage: false
+  wizard_progress_link: false
+  wizard_progress_states: false
+  wizard_start_label: ''
+  wizard_preview_link: false
+  wizard_confirmation: true
+  wizard_confirmation_label: ''
+  wizard_auto_forward: true
+  wizard_auto_forward_hide_next_button: false
+  wizard_keyboard: false
+  wizard_track: ''
+  wizard_prev_button_label: ''
+  wizard_next_button_label: ''
+  wizard_toggle: false
+  wizard_toggle_show_label: ''
+  wizard_toggle_hide_label: ''
+  wizard_page_type: container
+  wizard_page_title_tag: h2
+  preview: 0
+  preview_label: ''
+  preview_title: ''
+  preview_message: ''
+  preview_attributes: {  }
+  preview_excluded_elements: {  }
+  preview_exclude_empty: true
+  preview_exclude_empty_checkbox: false
+  draft: none
+  draft_multiple: false
+  draft_auto_save: false
+  draft_saved_message: ''
+  draft_loaded_message: ''
+  draft_pending_single_message: ''
+  draft_pending_multiple_message: ''
+  confirmation_type: page
+  confirmation_url: ''
+  confirmation_title: ''
+  confirmation_message: "The Waiver <span class=\"form-item__suffix\"><small><span class=\"machine-name-value\">has been recorded, and a youth user account created for </span></small></span>[webform_submission:values:volunteer_name_and_address:given_name] [webform_submission:values:volunteer_name_and_address:family_name]<span class=\"form-item__suffix\"><small><span class=\"machine-name-value\">. Ask the admin for furter details.</span></small></span><br />\r\n&nbsp;"
+  confirmation_attributes: {  }
+  confirmation_back: true
+  confirmation_back_label: ''
+  confirmation_back_attributes: {  }
+  confirmation_exclude_query: false
+  confirmation_exclude_token: false
+  confirmation_update: false
+  limit_total: null
+  limit_total_interval: null
+  limit_total_message: ''
+  limit_total_unique: false
+  limit_user: null
+  limit_user_interval: null
+  limit_user_message: ''
+  limit_user_unique: false
+  entity_limit_total: null
+  entity_limit_total_interval: null
+  entity_limit_user: null
+  entity_limit_user_interval: null
+  purge: none
+  purge_days: null
+  results_disabled: false
+  results_disabled_ignore: false
+  results_customize: false
+  token_view: false
+  token_update: false
+  token_delete: false
+  serial_disabled: false
+access:
+  create:
+    roles:
+      - authenticated
+    users: {  }
+    permissions: {  }
+  view_any:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  update_any:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  delete_any:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  purge_any:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  view_own:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  update_own:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  delete_own:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  administer:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  test:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  configuration:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+handlers:
+  email:
+    id: email
+    handler_id: email
+    label: Email
+    notes: ''
+    status: true
+    conditions: {  }
+    weight: 11
+    settings:
+      states:
+        - completed
+      to_mail: '[webform_submission:values:email:raw]'
+      to_options: {  }
+      bcc_mail: ''
+      bcc_options: {  }
+      cc_mail: ''
+      cc_options: {  }
+      from_mail: _default
+      from_options: {  }
+      from_name: _default
+      reply_to: ''
+      return_path: ''
+      sender_mail: ''
+      sender_name: ''
+      subject: _default
+      body: _default
+      excluded_elements: {  }
+      ignore_access: false
+      exclude_empty: true
+      exclude_empty_checkbox: false
+      exclude_attachments: false
+      html: true
+      attachments: true
+      twig: false
+      theme_name: ''
+      parameters: {  }
+      debug: false
+  nbw_guardian_user_registration:
+    id: nbw_users_registration
+    handler_id: nbw_guardian_user_registration
+    label: 'NBW Guardian User Registration'
+    notes: 'This handler will create a Guardian user if they are not in the database already'
+    status: false
+    conditions: {  }
+    weight: 12
+    settings:
+      create_user:
+        enabled: true
+        roles:
+          guardian: guardian
+          authenticated: authenticated
+          content_editor: '0'
+          administrator: '0'
+          youth: '0'
+          volunteer: '0'
+          board_member: '0'
+          bike_church_patron: '0'
+          demo_region_admin: '0'
+          demo_region_user: '0'
+          staff: '0'
+          donor: '0'
+        admin_approval: false
+        admin_approval_message: ''
+        email_verification: true
+        email_verification_message: ''
+        success_message: ''
+      update_user:
+        enabled: false
+      user_field_mapping:
+        email: mail
+        guardian_address: field_address
+        primary_phone: field_primary_phone
+        primary_phone_type: field_primary_phone_type
+        secondary_phone: field_secondary_phone
+        secondary_phone_type: field_secondary_phone_type
+  nbw_youth_user_registration:
+    id: nbw_users_registration
+    handler_id: nbw_youth_user_registration
+    label: 'NBW Youth User Registration'
+    notes: 'This will create a Youth user'
+    status: false
+    conditions: {  }
+    weight: 12
+    settings:
+      create_user:
+        enabled: true
+        roles:
+          youth: youth
+          authenticated: authenticated
+          content_editor: '0'
+          administrator: '0'
+          volunteer: '0'
+          board_member: '0'
+          bike_church_patron: '0'
+          demo_region_admin: '0'
+          demo_region_user: '0'
+          staff: '0'
+          guardian: '0'
+          donor: '0'
+        admin_approval: false
+        admin_approval_message: ''
+        email_verification: true
+        email_verification_message: ''
+        success_message: ''
+      update_user:
+        enabled: false
+      user_field_mapping:
+        youth_cell_phone: field_primary_phone
+        youth_email: mail
+        youth_address: field_address
+        emergency_contact_name: field_emergency_contact_name
+        emergency_contact_phone_number: field_emergency_contact_phone
+  user_registration:
+    id: user_registration
+    handler_id: user_registration
+    label: 'Guardian User Registration'
+    notes: ''
+    status: true
+    conditions: {  }
+    weight: 12
+    settings:
+      create_user:
+        enabled: true
+        roles:
+          guardian: guardian
+          authenticated: authenticated
+          content_editor: '0'
+          administrator: '0'
+          youth: '0'
+          volunteer: '0'
+          board_member: '0'
+          bike_church_patron: '0'
+          demo_region_admin: '0'
+          demo_region_user: '0'
+          donor: '0'
+          staff: '0'
+          mentor: '0'
+        admin_approval: false
+        admin_approval_message: ''
+        email_verification: true
+        email_verification_message: ''
+        success_message: ''
+      update_user:
+        enabled: false
+      user_field_mapping:
+        email: mail
+        guardian_address: field_address
+        primary_phone: field_primary_phone
+        primary_phone_type: field_primary_phone_type
+        secondary_phone: field_secondary_phone
+        secondary_phone_type: field_secondary_phone_type
+variants: {  }

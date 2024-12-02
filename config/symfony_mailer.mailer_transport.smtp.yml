@@ -1,0 +1,18 @@
+uuid: f1823440-799e-4be4-bd9a-c9d2bcfd1282
+langcode: en
+status: true
+dependencies: {  }
+id: smtp
+label: SMTP
+plugin: smtp
+configuration:
+  user: office@neighborhoodbikeworks.org
+  pass: zuldgewdblkbufcf
+  host: smtp.gmail.com
+  port: 587
+  query:
+    verify_peer: true
+    local_domain: neighborhoodbikeworks.org
+    restart_threshold: null
+    restart_threshold_sleep: null
+    ping_threshold: null

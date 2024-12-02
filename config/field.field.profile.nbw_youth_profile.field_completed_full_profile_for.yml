@@ -1,0 +1,21 @@
+uuid: 5033dfca-6c34-4f6f-a166-699273aaebd2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.profile.field_completed_full_profile_for
+    - profile.type.nbw_youth_profile
+id: profile.nbw_youth_profile.field_completed_full_profile_for
+field_name: field_completed_full_profile_for
+entity_type: profile
+bundle: nbw_youth_profile
+label: 'Completed Full Profile Form'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'Yes'
+  off_label: 'No'
+field_type: boolean

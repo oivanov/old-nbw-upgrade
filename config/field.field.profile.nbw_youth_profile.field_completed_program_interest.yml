@@ -1,0 +1,21 @@
+uuid: 2f5559f4-4070-4113-a07e-3dce19fedfe7
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.profile.field_completed_program_interest
+    - profile.type.nbw_youth_profile
+id: profile.nbw_youth_profile.field_completed_program_interest
+field_name: field_completed_program_interest
+entity_type: profile
+bundle: nbw_youth_profile
+label: 'Completed Program Interest Form'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'Yes'
+  off_label: 'No'
+field_type: boolean

@@ -109,3 +109,4 @@ hidden:
   nbw_staff_profile_profiles: true
   nbw_volunteer_profile_profiles: true
   nbw_youth_profile_profiles: true
+  search_api_excerpt: true

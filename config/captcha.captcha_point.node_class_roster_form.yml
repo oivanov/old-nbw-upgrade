@@ -1,0 +1,7 @@
+uuid: afe3da52-c166-46ef-ac78-9b6a3e3f9008
+langcode: en
+status: false
+dependencies: {  }
+formId: node_class_roster_form
+captchaType: default
+label: node_class_roster_form

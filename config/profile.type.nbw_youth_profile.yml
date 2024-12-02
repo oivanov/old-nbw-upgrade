@@ -9,5 +9,5 @@ multiple: false
 registration: false
 roles:
   youth: youth
-allow_revisions: true
+allow_revisions: false
 new_revision: true

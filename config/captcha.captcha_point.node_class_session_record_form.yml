@@ -1,0 +1,7 @@
+uuid: a6cb0fcc-6619-466e-920e-06f8a64db911
+langcode: en
+status: false
+dependencies: {  }
+formId: node_class_session_record_form
+captchaType: default
+label: node_class_session_record_form

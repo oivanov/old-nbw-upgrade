@@ -4,14 +4,10 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_where_will_this_be_used_
+    - filter.format.basic_html
     - node.type.nbw_documents_and_wavers
   module:
-    - allowed_formats
     - text
-third_party_settings:
-  allowed_formats:
-    allowed_formats:
-      - basic_html
 id: node.nbw_documents_and_wavers.field_where_will_this_be_used_
 field_name: field_where_will_this_be_used_
 entity_type: node
@@ -22,5 +18,7 @@ required: false
 translatable: false
 default_value: {  }
 default_value_callback: ''
-settings: {  }
+settings:
+  allowed_formats:
+    - basic_html
 field_type: text

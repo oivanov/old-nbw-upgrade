@@ -6,11 +6,7 @@ dependencies:
     - field.storage.paragraph.field_title_formatted
     - paragraphs.paragraphs_type.view
   module:
-    - allowed_formats
     - text
-third_party_settings:
-  allowed_formats:
-    allowed_formats: {  }
 id: paragraph.view.field_title_formatted
 field_name: field_title_formatted
 entity_type: paragraph

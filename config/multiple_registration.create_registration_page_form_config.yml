@@ -1,4 +1,11 @@
 youth:
+  youth:
+    path: /admin/people/create-youth
+    url: /user/register/youth
+    redirect_path: /admin/people/youth
+    hidden: 0
+    form_mode_register: register_youth_user
+    form_mode_edit: youth_user
   path: /admin/people/create-youth
   url: /user/register/youth
   redirect_path: /admin/people/youth

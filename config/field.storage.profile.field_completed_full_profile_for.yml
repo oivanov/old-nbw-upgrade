@@ -1,0 +1,18 @@
+uuid: 4605d998-8381-4faa-bd89-41d730ef3450
+langcode: en
+status: true
+dependencies:
+  module:
+    - profile
+id: profile.field_completed_full_profile_for
+field_name: field_completed_full_profile_for
+entity_type: profile
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

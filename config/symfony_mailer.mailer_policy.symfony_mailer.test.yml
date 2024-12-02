@@ -8,7 +8,7 @@ id: symfony_mailer.test
 configuration:
   email_body:
     content:
-      value: '<p>This is a test email from <a href="[site:url]">[site:name]</a>.</p>'
+      value: '<p>This is a test email from <a href="https://neighborhoodbikeworks.org/">[site:name]</a>.</p>'
       format: email_html
   email_subject:
-    value: 'Test email from [site:name]'
+    value: 'Test email from [site:name] '

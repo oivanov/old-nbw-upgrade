@@ -14,6 +14,8 @@ dependencies:
     - field.field.profile.nbw_youth_profile.field_any_medications_we_should_
     - field.field.profile.nbw_youth_profile.field_bicycle_by_themsel
     - field.field.profile.nbw_youth_profile.field_can_leave_with
+    - field.field.profile.nbw_youth_profile.field_completed_full_profile_for
+    - field.field.profile.nbw_youth_profile.field_completed_program_interest
     - field.field.profile.nbw_youth_profile.field_current_grade_level
     - field.field.profile.nbw_youth_profile.field_date_of_birth
     - field.field.profile.nbw_youth_profile.field_emergency_contact_phone_nu
@@ -101,6 +103,8 @@ hidden:
   field_any_medications_we_should_: true
   field_bicycle_by_themsel: true
   field_can_leave_with: true
+  field_completed_full_profile_for: true
+  field_completed_program_interest: true
   field_current_grade_level: true
   field_date_of_birth: true
   field_emergency_contact_phone_nu: true

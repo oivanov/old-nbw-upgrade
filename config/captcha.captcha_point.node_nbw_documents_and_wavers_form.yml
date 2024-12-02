@@ -1,0 +1,7 @@
+uuid: aeecbf76-63a3-481a-ab15-1a0f02777915
+langcode: en
+status: false
+dependencies: {  }
+formId: node_nbw_documents_and_wavers_form
+captchaType: default
+label: node_nbw_documents_and_wavers_form

@@ -1,0 +1,7 @@
+uuid: 95d099eb-bc0b-475e-b6fa-5999fd580c82
+langcode: en
+status: false
+dependencies: {  }
+formId: node_attendance_record_form
+captchaType: default
+label: node_attendance_record_form

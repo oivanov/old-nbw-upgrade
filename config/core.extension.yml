@@ -24,8 +24,10 @@ module:
   block_content: 0
   block_example: 0
   block_field: 0
+  bpmn_io: 0
   breakpoint: 0
   cache_example: 0
+  captcha: 0
   ckeditor5: 0
   clientside_validation: 0
   clientside_validation_demo: 0
@@ -52,6 +54,13 @@ module:
   ds_devel: 0
   ds_switch_view_mode: 0
   dynamic_page_cache: 0
+  eca: 0
+  eca_access: 0
+  eca_base: 0
+  eca_misc: 0
+  eca_modeller_bpmn: 0
+  eca_ui: 0
+  eca_user: 0
   editor: 0
   email_example: 0
   enhanced_button_link: 0
@@ -80,6 +89,7 @@ module:
   group: 0
   help: 0
   history: 0
+  honeypot: 0
   image: 0
   inline_form_errors: 0
   jquery_ui: 0
@@ -208,6 +218,7 @@ module:
   webform_views_example: 0
   workflows: 0
   ds: 1
+  eca_form: 1
   pathauto: 1
   webform_bootstrap: 1
   ds_extras: 2
