@@ -3,9 +3,7 @@ langcode: en
 status: open
 dependencies:
   module:
-    - nbw_users_registration
     - webform_entity_print
-    - webform_user_registration
 third_party_settings:
   webform_entity_print:
     template:
@@ -384,7 +382,7 @@ settings:
   confirmation_type: page
   confirmation_url: ''
   confirmation_title: ''
-  confirmation_message: "The Waiver <span class=\"form-item__suffix\"><small><span class=\"machine-name-value\">has been recorded, and a youth user account created for </span></small></span>[webform_submission:values:volunteer_name_and_address:given_name] [webform_submission:values:volunteer_name_and_address:family_name]<span class=\"form-item__suffix\"><small><span class=\"machine-name-value\">. Ask the admin for furter details.</span></small></span><br />\r\n&nbsp;"
+  confirmation_message: '<p>The Waiver<small><span class="form-item__suffix machine-name-value">has been recorded, and an email was sent to the Guardian Email provided. Ask the admin for furter details.</span></small><br>&nbsp;</p>'
   confirmation_attributes: {  }
   confirmation_back: true
   confirmation_back_label: ''
@@ -416,6 +414,7 @@ settings:
 access:
   create:
     roles:
+      - anonymous
       - authenticated
     users: {  }
     permissions: {  }
@@ -452,7 +451,8 @@ access:
     users: {  }
     permissions: {  }
   test:
-    roles: {  }
+    roles:
+      - anonymous
     users: {  }
     permissions: {  }
   configuration:
@@ -467,7 +467,7 @@ handlers:
     notes: ''
     status: true
     conditions: {  }
-    weight: 11
+    weight: -49
     settings:
       states:
         - completed
@@ -475,7 +475,7 @@ handlers:
       to_options: {  }
       bcc_mail: ''
       bcc_options: {  }
-      cc_mail: ''
+      cc_mail: '[site:mail]'
       cc_options: {  }
       from_mail: _default
       from_options: {  }
@@ -497,118 +497,4 @@ handlers:
       theme_name: ''
       parameters: {  }
       debug: false
-  nbw_guardian_user_registration:
-    id: nbw_users_registration
-    handler_id: nbw_guardian_user_registration
-    label: 'NBW Guardian User Registration'
-    notes: 'This handler will create a Guardian user if they are not in the database already'
-    status: false
-    conditions: {  }
-    weight: 12
-    settings:
-      create_user:
-        enabled: true
-        roles:
-          guardian: guardian
-          authenticated: authenticated
-          content_editor: '0'
-          administrator: '0'
-          youth: '0'
-          volunteer: '0'
-          board_member: '0'
-          bike_church_patron: '0'
-          demo_region_admin: '0'
-          demo_region_user: '0'
-          staff: '0'
-          donor: '0'
-        admin_approval: false
-        admin_approval_message: ''
-        email_verification: true
-        email_verification_message: ''
-        success_message: ''
-      update_user:
-        enabled: false
-      user_field_mapping:
-        email: mail
-        guardian_address: field_address
-        primary_phone: field_primary_phone
-        primary_phone_type: field_primary_phone_type
-        secondary_phone: field_secondary_phone
-        secondary_phone_type: field_secondary_phone_type
-  nbw_youth_user_registration:
-    id: nbw_users_registration
-    handler_id: nbw_youth_user_registration
-    label: 'NBW Youth User Registration'
-    notes: 'This will create a Youth user'
-    status: false
-    conditions: {  }
-    weight: 12
-    settings:
-      create_user:
-        enabled: true
-        roles:
-          youth: youth
-          authenticated: authenticated
-          content_editor: '0'
-          administrator: '0'
-          volunteer: '0'
-          board_member: '0'
-          bike_church_patron: '0'
-          demo_region_admin: '0'
-          demo_region_user: '0'
-          staff: '0'
-          guardian: '0'
-          donor: '0'
-        admin_approval: false
-        admin_approval_message: ''
-        email_verification: true
-        email_verification_message: ''
-        success_message: ''
-      update_user:
-        enabled: false
-      user_field_mapping:
-        youth_cell_phone: field_primary_phone
-        youth_email: mail
-        youth_address: field_address
-        emergency_contact_name: field_emergency_contact_name
-        emergency_contact_phone_number: field_emergency_contact_phone
-  user_registration:
-    id: user_registration
-    handler_id: user_registration
-    label: 'Guardian User Registration'
-    notes: ''
-    status: true
-    conditions: {  }
-    weight: 12
-    settings:
-      create_user:
-        enabled: true
-        roles:
-          guardian: guardian
-          authenticated: authenticated
-          content_editor: '0'
-          administrator: '0'
-          youth: '0'
-          volunteer: '0'
-          board_member: '0'
-          bike_church_patron: '0'
-          demo_region_admin: '0'
-          demo_region_user: '0'
-          donor: '0'
-          staff: '0'
-          mentor: '0'
-        admin_approval: false
-        admin_approval_message: ''
-        email_verification: true
-        email_verification_message: ''
-        success_message: ''
-      update_user:
-        enabled: false
-      user_field_mapping:
-        email: mail
-        guardian_address: field_address
-        primary_phone: field_primary_phone
-        primary_phone_type: field_primary_phone_type
-        secondary_phone: field_secondary_phone
-        secondary_phone_type: field_secondary_phone_type
 variants: {  }

@@ -1,0 +1,14 @@
+uuid: ecb6c7e7-f05c-4015-b4cb-057e3e207b25
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.office_email_group
+  module:
+    - user
+id: user_add_role_action.office_email_group
+label: 'Add the Office Email Group role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: office_email_group

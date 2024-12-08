@@ -1,0 +1,9 @@
+uuid: 034a04e5-3e2b-4703-8015-0897e0e3ed29
+langcode: en
+status: true
+dependencies: {  }
+id: office_email_group
+label: 'Office Email Group'
+weight: 15
+is_admin: null
+permissions: {  }

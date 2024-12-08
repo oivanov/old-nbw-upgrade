@@ -1,0 +1,14 @@
+uuid: 04a9b36d-7114-41df-bb27-fe98b5b8c267
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.office_email_group
+  module:
+    - user
+id: user_remove_role_action.office_email_group
+label: 'Remove the Office Email Group role from the selected user(s)'
+type: user
+plugin: user_remove_role_action
+configuration:
+  rid: office_email_group
