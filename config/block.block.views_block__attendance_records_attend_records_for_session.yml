@@ -12,7 +12,7 @@ dependencies:
 id: views_block__attendance_records_attend_records_for_session
 theme: nbw_custom_theme
 region: content
-weight: -8
+weight: -9
 provider: null
 plugin: 'views_block:attendance_records-attend_records_for_session'
 settings:

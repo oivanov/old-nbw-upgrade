@@ -12,7 +12,7 @@ dependencies:
 id: nbw_custom_theme_views_block__class_students_block_1
 theme: nbw_custom_theme
 region: content
-weight: -6
+weight: -5
 provider: null
 plugin: 'views_block:class_students-block_1'
 settings:

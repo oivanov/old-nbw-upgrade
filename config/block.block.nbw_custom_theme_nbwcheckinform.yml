@@ -10,7 +10,7 @@ dependencies:
 id: nbw_custom_theme_nbwcheckinform
 theme: nbw_custom_theme
 region: content
-weight: -7
+weight: -8
 provider: null
 plugin: nbw_tools_nbw_checkin_form
 settings:

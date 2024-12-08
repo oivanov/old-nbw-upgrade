@@ -89,7 +89,8 @@
         "drupal/captcha": "^2.0",
         "drupal/smtp": "^1.4",
         "drupal/eca": "^2.0",
-        "drupal/bpmn_io": "^2.0"
+        "drupal/bpmn_io": "^2.0",
+        "drupal/views_autocomplete_filters": "^2.0"
     },
     "require-dev": {
         "drupal/core-dev": "^10"
