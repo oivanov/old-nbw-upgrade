@@ -80,7 +80,19 @@ final class CheckInOut extends FormBase {
       ->execute());
     $class_list = [];
     foreach ($node_classes as $nid => $node) {
-      $class_list[$nid] = $node->field_class_name->entity->label();
+      if ($node->hasField('field_class_name') && !$node->get('field_class_name')->isEmpty()) {
+        $target_id = $node->get('field_class_name')->target_id; // Get the target ID.
+        if ($target_id) {
+          $referenced_entity = \Drupal::entityTypeManager()->getStorage('node')->load($target_id); // Load the entity manually.
+          if ($referenced_entity) {
+            $class_list[$nid] = $referenced_entity->label();
+          } else {
+            \Drupal::logger('mymodule')->warning('Entity with ID @id could not be loaded.', ['@id' => $target_id]);
+          }
+        }
+      } else {
+        \Drupal::logger('mymodule')->warning('field_class_name is empty or missing for node @nid.', ['@nid' => $nid]);
+      }
     }
     $form['class'] = [
       '#type' => 'select',
