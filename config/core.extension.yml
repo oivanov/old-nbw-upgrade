@@ -111,6 +111,7 @@ module:
   mailchimp_events_example: 0
   mailchimp_lists: 0
   mailchimp_signup: 0
+  mailchimp_webform_handler: 0
   media: 0
   media_library: 0
   menu_example: 0

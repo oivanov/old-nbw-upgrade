@@ -76,18 +76,27 @@ elements: |-
         Cell: Cell
         Home: Home
         Work: Work
+    can_we_add_you_to_our_newsletter:
+      '#type': radios
+      '#title': 'Can we add your email to our e-mail newsletter list?'
+      '#options': yes_no
+      '#options_display': side_by_side
     preferred_contact_method:
       '#type': fieldset
-      '#title': 'Preferred Contact Method'
+      '#title': 'I give NBW permission to contact the participant by (check all that apply):'
+      text_contact_method:
+        '#type': checkbox
+        '#title': Text
       email_contact_method:
         '#type': checkbox
         '#title': Email
       phone_contact_method:
         '#type': checkbox
-        '#title': Phone
+        '#title': 'Phone Call'
       mail_contact_method:
         '#type': checkbox
         '#title': Mail
+        '#access': false
     guardian_relationship_to_participant:
       '#type': radios
       '#title': 'Guardian Relationship to Participant'
