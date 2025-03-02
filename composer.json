@@ -26,7 +26,7 @@
         "drupal/core-composer-scaffold": "^10",
         "drupal/core-project-message": "^10",
         "drupal/core-recommended": "^10",
-        "drupal/devel": "5.1.2",
+        "drupal/devel": "5.1",
         "drupal/devel_kint_extras": "^1.1",
         "drupal/download_statistics": "^1.0@beta",
         "drupal/ds": "^3.15",

@@ -147,11 +147,19 @@ class NbwUsersRegistrationWebformHandler extends UserRegistrationWebformHandler 
         if ($this->handler_id === 'nbw_guardian_user_registration') {
           // Store guardian ID in session and return early
           $session->set('guardian_id', $existingUser->id());
+          // Check if the user has the "Guardian" role
+          if ($existingUser->hasRole('guardian')) {
+            \Drupal::logger('custom_module')->notice('User with email ' . $user_data['mail'] . ' has the Guardian role.');
+
+          }
           return;
-        }
-        // Replace email if the handler is for youth registration
-        if ($this->handler_id === 'nbw_youth_user_registration') {
-          $user_data['mail'] = $generateDummyEmail();
+        } else {
+          if ($this->handler_id === 'nbw_youth_user_registration' && $existingUser->hasRole('youth')) {
+            \Drupal::logger('custom_module')->notice('User with email ' . $user_data['mail'] . ' has the Youth role.');
+            return;
+          } else {
+            $user_data['mail'] = $generateDummyEmail();
+          }
         }
       }
 
@@ -234,7 +242,7 @@ class NbwUsersRegistrationWebformHandler extends UserRegistrationWebformHandler 
         elseif ($email_verification) {
           $message = $this->configuration['create_user']['email_verification_message'];
 
-          //_user_mail_notify('register_no_approval_required', $account); O.I. - blocking emails for now 
+          //_user_mail_notify('register_no_approval_required', $account); O.I. - blocking emails for now
 
           // As it's a new account and the user will not be automatically logged
           // in - as email verification is required - set the submission owner.
