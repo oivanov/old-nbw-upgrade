@@ -1,0 +1,5 @@
+add_content_modal.settings_form:
+  title: 'Add content modal'
+  parent: system.admin_config_content
+  description: 'Configure which content types should be added in a modal.'
+  route_name: add_content_modal.settings_form

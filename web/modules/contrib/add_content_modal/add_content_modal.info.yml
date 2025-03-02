@@ -1,0 +1,11 @@
+name: Manage content modal
+description: Allows to manage(add, edit, delete, translate) content in a modal (configurable which content types)
+type: module
+package: Content
+core_version_requirement: ^8 || ^9 || ^10
+configure: add_content_modal.settings_form
+
+# Information added by Drupal.org packaging script on 2022-10-24
+version: '1.0.2'
+project: 'add_content_modal'
+datestamp: 1666611219

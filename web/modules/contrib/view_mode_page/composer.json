@@ -1,0 +1,16 @@
+{
+    "name": "drupal/view_mode_page",
+    "license": "GPL-2.0-or-later",
+    "type": "drupal-module",
+    "description": "Makes it possible to create (additional) paths where entities will be shown in a given view_mode",
+    "support": {
+      "issues": "https://drupal.org/project/issues/view_mode_page",
+      "source": "https://drupal.org/project/view_mode_page"
+    },
+    "require": {
+      "drupal/core": "^10.3||^11.0",
+      "drupal/ctools": "*",
+      "drupal/token": "*"
+    }
+  }
+  

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - symfony_mailer_queue_test
+id: symfony_mailer_queue.suspend
+configuration:
+  email_body:
+    content:
+      value: |-
+        This email was sent after queueing.
+      format: email_html
+  queue_sending:
+    queue_behavior: suspend
+    requeue_delay: '0'
+    maximum_attempts: '2'
+    send_wait_time: '0'
+  email_subject:
+    value: 'Symfony Mailer Queue Suspend Test'

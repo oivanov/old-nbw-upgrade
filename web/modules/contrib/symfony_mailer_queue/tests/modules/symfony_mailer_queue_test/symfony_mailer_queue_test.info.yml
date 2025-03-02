@@ -1,0 +1,13 @@
+name: Symfony Mailer Queue Test
+type: module
+description: For testing of Symfony Mailer Queue module.
+package: Testing
+hidden: true
+dependencies:
+  - symfony_mailer:symfony_mailer
+  - symfony_mailer_queue:symfony_mailer_queue
+
+# Information added by Drupal.org packaging script on 2024-08-25
+version: '1.1.0'
+project: 'symfony_mailer_queue'
+datestamp: 1724602629

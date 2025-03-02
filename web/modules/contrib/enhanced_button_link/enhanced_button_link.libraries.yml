@@ -1,0 +1,5 @@
+enhanced_button_link.field:
+  version: VERSION
+  css:
+    component:
+      css/enhanced_button_link.field.css: {}

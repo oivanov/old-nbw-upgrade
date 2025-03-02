@@ -1,0 +1,18 @@
+message_banner.settings:
+  type: config_entity
+  label: 'Message banner settings'
+  mapping:
+    banner_enabled:
+      type: integer
+      label: 'Banner enabled'
+    banner_enabled_on_admin_routes:
+      type: integer
+      label: 'Banner enabled on admin routes'
+    banner_show_again_minutes:
+      type: integer
+      label: 'Number of minutes to elapse before showing banner again'
+    banner_color:
+      type: string
+      label: 'Banner color'
+    banner_text:
+      type: text_format

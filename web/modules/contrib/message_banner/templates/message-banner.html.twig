@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Template file for the message banner.
+ *
+ * @see template_preprocess_message_banner
+ *
+ * Available variables:
+ *   - message: The formatted message.
+ */
+#}
+
+<div{{ attributes }}>
+  <div class="message-banner__content">
+    <div class="message-banner__text">
+      {{ message }}
+    </div>
+    <div class="message-banner__close-button">
+      <button type="button">{{ 'Dismiss message'|t }}</button>
+    </div>
+  </div>
+</div>

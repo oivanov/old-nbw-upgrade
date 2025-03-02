@@ -1,0 +1,5 @@
+message_banner.settings:
+  title: 'Message banner'
+  base_route_name: message_banner.settings
+  names:
+    - message_banner.settings

@@ -1,0 +1,7 @@
+enhanced_button_link.admin_settings:
+  path: '/admin/config/content/enhanced-button-link'
+  defaults:
+    _form: '\Drupal\enhanced_button_link\Form\SettingsForm'
+    _title: 'Enhanced Button Link Settings'
+  requirements:
+    _permission: 'administer site configuration'

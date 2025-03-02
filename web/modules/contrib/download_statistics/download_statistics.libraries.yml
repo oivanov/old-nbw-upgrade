@@ -1,0 +1,6 @@
+download_statistics.download_statistics:
+  version: VERSION
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings

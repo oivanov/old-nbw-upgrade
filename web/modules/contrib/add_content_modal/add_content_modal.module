@@ -1,0 +1,333 @@
+<?php
+
+/**
+ * @file
+ * Contains hooks for the add_content_modal module.
+ */
+
+use Drupal\add_content_modal\Form\SettingsForm;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Put our module at the end.
+ */
+function add_content_modal_module_implements_alter(&$implementations, $hook) {
+  $hookAlters = [
+    'menu_links_discovered_alter',
+    'form_alter',
+  ];
+
+  foreach ($hookAlters as $hookAlter) {
+    if ($hook === $hookAlter) {
+      $settings = $implementations['add_content_modal'];
+      unset($implementations['add_content_modal']);
+      $implementations['add_content_modal'] = $settings;
+    }
+  }
+}
+
+/**
+ * Implements hook_link_alter().
+ *
+ * Altering links in popup of translate local task.
+ */
+function add_content_modal_link_alter(&$variables) {
+  /** @var \Drupal\Core\Url $url */
+  $url = $variables['url'];
+
+  $allowedRouteNames = [
+    'entity.node.content_translation_add',
+    'entity.node.edit_form',
+    'entity.node.delete_form',
+  ];
+
+  if ($url->isRouted() && in_array($url->getRouteName(), $allowedRouteNames)) {
+    if (isset($variables['options']['entity'])) {
+      $node = $variables['options']['entity'];
+      $config = \Drupal::config(SettingsForm::SETTINGSNAME);
+      $allowedNodeTypesToPopupped = $config->get('node_add_content_types_modal');
+
+      if (empty($allowedNodeTypesToPopupped)) {
+        return;
+      }
+
+      if (in_array($node->bundle(), $allowedNodeTypesToPopupped)) {
+        $variables = _add_content_modal_add_modal_options($config, $variables);
+      }
+    }
+  }
+
+  // /en/admin/content > "Add Content (popup)" > Links there needs altering aswell.
+  // DOENST WORK DUE TO:
+  //        <a class="admin-item__link" title="{{ bundle.add_link.text }}" href="{{ bundle.add_link.url }}"></a>
+  // inside of entity-add-list.html.twig ==> No rendering of LINK!!!!
+}
+
+/**
+ * Extra helper function for two functions.
+ *
+ * @param \Drupal\Core\Config\ImmutableConfig $config
+ * @param array $variables
+ *
+ * @return array
+ */
+function _add_content_modal_add_modal_options(\Drupal\Core\Config\ImmutableConfig $config, array $variables): array {
+  $modalWidth = $config->get('width_modal_node_add');
+  $typeDialog = $config->get('type_of_dialog');
+
+  _add_content_modal_helper_modal_options_array($variables['options'] ['attributes'], $typeDialog, $modalWidth);
+
+  return $variables;
+}
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ *
+ * @see \Drupal\admin_toolbar_content\Plugin\Derivative\ContentMenuLinkDerivative
+ * @see \Drupal\admin_toolbar_content\Plugin\Derivative\MediaMenuLinkDerivative
+ * @see \Drupal\admin_toolbar_content\Plugin\Derivative\CategoriesMenuLinkDerivative
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ */
+function add_content_modal_menu_links_discovered_alter(array &$links) {
+  $config = \Drupal::config(SettingsForm::SETTINGSNAME);
+  $allowedNodeTypesToPopupped = $config->get('node_add_content_types_modal');
+
+  if (empty($allowedNodeTypesToPopupped)) {
+    return;
+  }
+
+  foreach ($links as $key => &$link) {
+    $isAllowed = FALSE;
+
+    array_walk($allowedNodeTypesToPopupped, function ($allowedNodeType) use ($key, &$isAllowed) {
+      if (str_contains($key, $allowedNodeType)) {
+        $isAllowed = TRUE;
+        return;
+      }
+    });
+
+    if ($isAllowed && isset($link['route_name']) && in_array($link['route_name'],
+        [
+          'node.add', 'entity.node.edit_form',
+        ])) {
+
+      $link = _add_content_modal_add_modal_options($config, $link);
+    }
+  }
+}
+
+/**
+ * Implements hook_menu_local_actions_alter().
+ */
+function add_content_modal_menu_local_actions_alter(&$local_actions) {
+  $config = \Drupal::config(SettingsForm::SETTINGSNAME);
+  $allowedNodeTypesToPopupped = $config->get('node_add_content_types_modal');
+  if (empty($allowedNodeTypesToPopupped)) {
+    return;
+  }
+
+  foreach ($allowedNodeTypesToPopupped as $type) {
+    $key = 'node.add_' . $type;
+
+    if (!isset($local_actions[$key])) {
+      continue;
+    }
+
+    $local_actions[$key] = _add_content_modal_add_modal_options($config, $local_actions[$key]);
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ *
+ * Local task links in a modal.
+ *
+ * @todo maybe make it configurable if you want edit tabs in a modal?
+ */
+function add_content_modal_menu_local_tasks_alter(&$data, $route_name) {
+  $allowedRouteNames = [
+    'layout_builder.overrides.node.view',
+    'entity.node.canonical'
+  ];
+
+  if (!in_array($route_name, $allowedRouteNames)) {
+    return;
+  }
+
+  // Try to get the currently displayed node.
+  $node = \Drupal::routeMatch()->getParameter('node');
+
+  $config = \Drupal::config(SettingsForm::SETTINGSNAME);
+  $allowedNodeTypesToPopupped = $config->get('node_add_content_types_modal');
+
+  if (empty($allowedNodeTypesToPopupped)) {
+    return;
+  }
+
+  if (in_array($node->bundle(), $allowedNodeTypesToPopupped)) {
+
+    $allowedFormKeys = [
+      'entity.node.edit_form',
+      'entity.node.delete_form',
+      'entity.node.translate_form',
+      'content_translation.local_tasks:entity.node.content_translation_overview',
+    ];
+
+    foreach ($allowedFormKeys as $allowedFormKey) {
+      if (isset($data['tabs'][0][$allowedFormKey])) {
+        /** @var \Drupal\Core\Url $url */
+        $url = $data['tabs'][0][$allowedFormKey]['#link']['url'];
+        $options = $url->getOptions();
+
+        $typeDialog = $config->get('type_of_dialog');
+        _add_content_modal_helper_modal_options_array(
+          $options['attributes'],
+          $typeDialog,
+          $config->get('width_modal_node_add')
+        );
+        $url->setOptions($options);
+        $data['tabs'][0][$allowedFormKey]['#link']['url'] = $url;
+      }
+    }
+  }
+}
+
+/**
+ * Alter entity operations.
+ *
+ * Used on the overview of content.
+ *
+ * @param array $operations
+ *   Operations array as returned by
+ *   \Drupal\Core\Entity\EntityListBuilderInterface::getOperations().
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity on which the linked operations will be performed.
+ */
+function add_content_modal_entity_operation_alter(array &$operations, EntityInterface $entity) {
+  $config = \Drupal::config(SettingsForm::SETTINGSNAME);
+  $allowedNodeTypesToPopupped = $config->get('node_add_content_types_modal');
+
+  if (!in_array($entity->bundle(), $allowedNodeTypesToPopupped)) {
+    return;
+  }
+
+  $alterableOps = ['edit', 'delete', 'translate'];
+
+  foreach ($alterableOps as $alterableOp) {
+    if (!isset($operations[$alterableOp])) {
+      continue;
+    }
+
+    $url = $operations[$alterableOp]['url'];
+    $options = $url->getOptions();
+    $typeDialog = $config->get('type_of_dialog');
+    _add_content_modal_helper_modal_options_array(
+      $options['attributes'],
+      $typeDialog,
+      $config->get('width_modal_node_add')
+    );    $url->setOptions($options);
+    $operations[$alterableOp]['url'] = $url;
+  }
+}
+
+/**
+ * Internal helper function at the lowest level to return the options array.
+ *
+ * @param $modalWidth
+ *
+ * @return array
+ */
+function _add_content_modal_helper_modal_options_array(&$settings, $typeDialog, $modalWidth) {
+  $settings['class'][] = 'use-ajax';
+
+  switch ($typeDialog) {
+    case 'dialog':
+      $settings['data-dialog-type'] = 'dialog';
+      $settings['data-dialog-renderer'] = 'off_canvas';
+      $settings['data-dialog-options'] = json_encode([
+        'width' => $modalWidth,
+      ]);
+      break;
+
+    default:
+      $settings['data-dialog-type'] = 'modal';
+      $settings['data-dialog-options'] = json_encode([
+         'width' => $modalWidth,
+      ]);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Alters the delete a node XXX form to allow closing via ajax.
+ */
+function add_content_modal_form_alter(&$form, $form_state, $form_id) {
+  $config = \Drupal::config(SettingsForm::SETTINGSNAME);
+  $allowedNodeTypesToPopupped = $config->get('node_add_content_types_modal');
+  $typeOfDialog = $config->get('type_of_dialog');
+
+  if (empty($allowedNodeTypesToPopupped)) {
+    return;
+  }
+
+  if (str_contains($form_id, 'node_') && str_contains($form_id, '_delete_form')) {
+    $nodeType = str_replace('node_', '', $form_id);
+    $nodeType = str_replace('_delete_form', '', $nodeType);
+
+    if (in_array($nodeType, $allowedNodeTypesToPopupped)) {
+      $form['actions']['cancel']['#url'] = Url::fromRoute('add_content_modal.close_dialog');
+      $form['actions']['cancel']['#attributes']['class'][] = 'use-ajax';
+      $form['actions']['#attached']['library'][] = 'core/drupal.dialog.ajax';
+    }
+  }
+
+  // Second part.
+  foreach ($allowedNodeTypesToPopupped as $nodeType) {
+    $allowedIds = [
+      'node_' . $nodeType . '_form',
+      'node_' . $nodeType . '_edit_form',
+    ];
+    if (in_array($form_id, $allowedIds)) {
+      if ($typeOfDialog === 'dialog') {
+        $form['#process'][] = '_add_content_modal_process_node_X_form';
+      }
+    }
+  }
+}
+
+/**
+ * Process callback for node_X_forms.
+ *
+ * Allows us to alter the layout.
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return array
+ */
+function _add_content_modal_process_node_X_form($form, $form_state) {
+  // Change advanced to container so that it looks better. (Were vertical tabs).
+  $form['advanced']['#type'] = 'container';
+
+  if (isset($form['revision_information'])) {
+    $form['revision_information']['#open'] = FALSE;
+  }
+
+  // Swap horizontal fieldgroups if any, just to details.
+  // Uniform layout.
+  if (isset($form['#fieldgroups'])) {
+    foreach ($form['#fieldgroups'] as $name => $fieldgroup) {
+      if (isset($form[$name])) {
+        $form[$name]['#type'] = 'details';
+      }
+    }
+  }
+
+  return $form;
+}

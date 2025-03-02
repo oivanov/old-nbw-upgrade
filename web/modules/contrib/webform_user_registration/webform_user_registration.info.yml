@@ -1,0 +1,12 @@
+name: 'Webform User Registration'
+type: module
+description: 'Create a new user upon form submission!'
+core_version_requirement: ^9.1 || ^10
+package: 'Webform'
+dependencies:
+  - 'webform:webform'
+
+# Information added by Drupal.org packaging script on 2024-01-09
+version: '8.x-1.0-alpha2'
+project: 'webform_user_registration'
+datestamp: 1704802770

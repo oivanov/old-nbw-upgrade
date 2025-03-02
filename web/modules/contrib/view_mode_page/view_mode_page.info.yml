@@ -1,0 +1,15 @@
+name: View mode page
+type: module
+description: Makes it possible to create (additional) paths where entities will be shown in a given view_mode
+core_version_requirement: ^10.3 || ^11.0
+package: Other
+configure: 'entity.view_mode_page_pattern.collection'
+dependencies:
+- drupal:path
+- ctools:ctools
+- token:token
+
+# Information added by Drupal.org packaging script on 2025-01-09
+version: '4.0.3'
+project: 'view_mode_page'
+datestamp: 1736419298

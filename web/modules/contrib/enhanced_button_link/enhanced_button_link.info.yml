@@ -1,0 +1,14 @@
+name: Enhanced Button Link
+type: module
+description: 'Provides an enhanced link field widget and formatter with extended capabilities.'
+core_version_requirement: ^8.8 || ^9 || ^10 || ^11
+package: Field types
+configure: enhanced_button_link.admin_settings
+
+dependencies:
+  - drupal:link
+
+# Information added by Drupal.org packaging script on 2024-05-08
+version: '8.x-1.2'
+project: 'enhanced_button_link'
+datestamp: 1715173073

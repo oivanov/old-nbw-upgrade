@@ -1,0 +1,8 @@
+/**
+ * @file
+ * Styling for enhanced button link toolbar module.
+ */
+
+.enhanced-button-link-inline .field__item {
+  display: inline-block;
+}

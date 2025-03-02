@@ -1,0 +1,15 @@
+add_content_modal.settings_form:
+  path: '/admin/config/content/add-content-modal'
+  defaults:
+    _form: 'Drupal\add_content_modal\Form\SettingsForm'
+    _title: 'Add content modal'
+  requirements:
+    _permission: 'manage add_content_modal settings'
+
+add_content_modal.close_dialog:
+  path: '/add-content-modal/close-dialog'
+  defaults:
+    _controller: 'Drupal\add_content_modal\Controller\DialogController::closeDialogForm'
+    _title: 'Close dialog'
+  requirements:
+    _role: 'authenticated'

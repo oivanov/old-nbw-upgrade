@@ -1,0 +1,13 @@
+message_banner:
+  version: VERSION
+  js:
+    js/message_banner.js: {}
+    js/message_banner.banner.js: {}
+  css:
+    component:
+      css/message_banner.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings

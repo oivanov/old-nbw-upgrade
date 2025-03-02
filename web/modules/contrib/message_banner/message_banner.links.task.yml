@@ -1,0 +1,4 @@
+message_banner.settings_tab:
+  route_name: message_banner.settings
+  title: Settings
+  base_route: message_banner.settings

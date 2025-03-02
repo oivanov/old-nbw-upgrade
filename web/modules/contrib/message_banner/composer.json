@@ -1,0 +1,17 @@
+{
+    "name": "drupal/message_banner",
+    "type": "drupal-module",
+    "description": "Display a message banner to site visitors.",
+    "homepage": "http://drupal.org/project/message_banner",
+    "license": "GPL-2.0+",
+    "require": { },
+    "authors": [
+        {
+            "name": "Sophie Shanahan-Kluth",
+            "homepage": "https://www.drupal.org/u/sophie.sk"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/message_banner"
+    }
+}

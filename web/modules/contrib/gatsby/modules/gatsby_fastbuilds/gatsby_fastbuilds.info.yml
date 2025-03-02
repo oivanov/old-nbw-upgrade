@@ -1,0 +1,11 @@
+name: 'Gatsby Fast Builds'
+type: module
+description: 'This functionality was moved into the main module.'
+core_version_requirement: ^9 || ^10
+package: 'Gatsby'
+hidden: true
+
+# Information added by Drupal.org packaging script on 2023-05-09
+version: '2.0.0-rc6'
+project: 'gatsby'
+datestamp: 1683654349

@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * Install, uninstall and update hooks for the message_banner module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function message_banner_install() {
+  $role_storage = Drupal::entityTypeManager()->getStorage('user_role');
+  $roles = ['authenticated', 'anonymous'];
+
+  foreach ($roles as $role) {
+    $role = $role_storage->load($role);
+    $role->grantPermission('view message banner');
+    $role->save();
+  }
+}
+
+/**
+ * Assign the new 'view message banner' permission to default roles.
+ */
+function message_banner_update_8001() {
+  $role_storage = Drupal::entityTypeManager()->getStorage('user_role');
+  $roles = ['authenticated', 'anonymous'];
+
+  foreach ($roles as $role) {
+    $role = $role_storage->load($role);
+    $role->grantPermission('view message banner');
+    $role->save();
+  }
+}
+
+/**
+ * Add minutes before showing again setting.
+ */
+function message_banner_update_8002() {
+  Drupal::configFactory()->getEditable('message_banner.settings')
+    ->set('banner_show_again_minutes', 0)
+    ->save(TRUE);
+}

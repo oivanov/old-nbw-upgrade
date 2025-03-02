@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Defines enhanced button link field types.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function enhanced_button_link_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.enhanced_button_link':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Enhanced Button Link module improves core link field widget and formatter in order to render a link as a bootstrap button. It has the ability to configure style, size, status (if disabled) and target.') . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Enhanced Button Link Widget') . '</dt>';
+      $output .= '<dd>' . t('Adds a widget with extra fields for adding settings to a link field for managing button style, size, target and status') . '</dd>';
+      $output .= '<dt>' . t('Enhanced Button Link Formatter') . '</dt>';
+      $output .= '<dd>' . t('Adds a formatter for rendering a link as Bootstrap button based on specified parameters in the widget.') . '</dd>';
+      $output .= '<dt>' . t('Configuration Form') . '</dt>';
+      $output .= '<dd>' . t('Helps to control available button styles (types) options and settings to override style, size, status and target in the widget for specific link.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}

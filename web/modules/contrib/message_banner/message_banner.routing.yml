@@ -1,0 +1,7 @@
+message_banner.settings:
+  path: '/admin/config/user-interface/message-banner'
+  defaults:
+    _form: '\Drupal\message_banner\Form\MessageBannerSettingsForm'
+    _title: Message banner
+  requirements:
+    _permission: 'manage message banner'

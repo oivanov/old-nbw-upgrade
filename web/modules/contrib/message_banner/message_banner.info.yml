@@ -1,0 +1,12 @@
+name: Message Banner
+description: Display a message banner to site visitors.
+package: User interface
+type: module
+core_version_requirement: ^8.8 || ^9 || ^10
+
+configure: message_banner.settings
+
+# Information added by Drupal.org packaging script on 2023-09-12
+version: '2.0.0'
+project: 'message_banner'
+datestamp: 1694507286

@@ -1,0 +1,5 @@
+message_banner.settings:
+  title: Message banner
+  description: Enable or disable the message banner, and set its contents.
+  parent: system.admin_config_ui
+  route_name: message_banner.settings
