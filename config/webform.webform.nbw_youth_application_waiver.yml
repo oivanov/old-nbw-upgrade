@@ -152,7 +152,6 @@ elements: |-
       '#type': date
       '#title': 'Date of Birth'
       '#required': true
-      '#datepicker': true
     youth_address_label:
       '#type': label
       '#title': 'Youth Address And Name:'
