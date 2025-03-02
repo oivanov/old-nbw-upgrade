@@ -132,35 +132,45 @@ class NbwUsersRegistrationWebformHandler extends UserRegistrationWebformHandler 
 
     if ($this->configuration['create_user']['enabled']) {
 
-          $request = \Drupal::request();
-          $session = $request->getSession();
+      $request = \Drupal::request();
+      $session = $request->getSession();
 
-          $existingUser = user_load_by_mail($user_data['mail']);
-          if ($existingUser) {
-            if ($this->handler_id == 'nbw_guardian_user_registration') {
-              $session->set('guardian_id', $existingUser->id());
-            }
-//            foreach ($user_data as $name => $value) {
-//              $existingUser->set($name, $value);
-//            }
+      // Generate a unique dummy email function
+      $generateDummyEmail = function () {
+        return "new_youth_" . time() . "@neighborhoodbikeworks.org";
+      };
 
-            return;
-          }
-          if($form['#webform_id'] == 'nbw_youth_application_waiver') {
-             if (!is_null($user_data['field_address']) && !isset($user_data['field_address']['country_code'])) {
+      // Check if email exists
+      $existingUser = !empty($user_data['mail']) ? user_load_by_mail($user_data['mail']) : null;
+
+      if ($existingUser) {
+        if ($this->handler_id === 'nbw_guardian_user_registration') {
+          // Store guardian ID in session and return early
+          $session->set('guardian_id', $existingUser->id());
+          return;
+        }
+        // Replace email if the handler is for youth registration
+        if ($this->handler_id === 'nbw_youth_user_registration') {
+          $user_data['mail'] = $generateDummyEmail();
+        }
+      }
+
+      // Ensure email is set for youth registrations if it was empty
+      if ($this->handler_id === 'nbw_youth_user_registration' && empty($user_data['mail'])) {
+        $user_data['mail'] = $generateDummyEmail();
+      }
+
+      if($form['#webform_id'] == 'nbw_youth_application_waiver') {
+            if (!is_null($user_data['field_address']) && !isset($user_data['field_address']['country_code'])) {
                if (isset($user_data['field_address']['country'])) {
                  if ($user_data['field_address']['country'] == 'United States') {
                    $user_data['field_address']['country_code'] = "US";
                  }
                }
              }
+      }
 
 
-          }
-
-/*      if ($this->handler_id == 'nbw_youth_user_registration') {
-        $user_data['field_guardian'] = $session->get('guardian_id');
-      }*/
 
         $account = $this->createUserAccount($user_data);
 
@@ -212,7 +222,9 @@ class NbwUsersRegistrationWebformHandler extends UserRegistrationWebformHandler 
         // Does the registration require admin approval?
         if ($admin_approval) {
           $message = $this->configuration['create_user']['admin_approval_message'];
-          _user_mail_notify('register_pending_approval', $account);
+
+          //_user_mail_notify('register_pending_approval', $account); O.I. - blocking emails for now
+
           // As it's a new account and the user will not be automatically logged
           // in - as admin approval is required - set the submission owner.
           $webform_submission->setOwner($account);
@@ -221,7 +233,9 @@ class NbwUsersRegistrationWebformHandler extends UserRegistrationWebformHandler 
         // Do we need to send an email verification to the user?
         elseif ($email_verification) {
           $message = $this->configuration['create_user']['email_verification_message'];
-          _user_mail_notify('register_no_approval_required', $account);
+
+          //_user_mail_notify('register_no_approval_required', $account); O.I. - blocking emails for now 
+
           // As it's a new account and the user will not be automatically logged
           // in - as email verification is required - set the submission owner.
           $webform_submission->setOwner($account);
@@ -539,6 +553,7 @@ field_use_an_asthma_inhaler_dail   ::   	participant_have_and_use_an_asthma_inha
       'preferred_langcode' => $lang,
       'preferred_admin_langcode' => $lang,
       'roles' => array_keys(array_filter($this->configuration['create_user']['roles'])) ?? [],
+      'status' => 0, // Blocked by default
     ];
     $user_data = array_merge($default_user_data, $user_data);
 
