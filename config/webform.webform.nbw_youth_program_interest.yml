@@ -282,7 +282,7 @@ elements: |-
   nbw_youth_application_waiver:
     '#type': 'webform_entity_print_attachment:pdf'
     '#title': 'PDF Attachment'
-    '#filename': NBW_WAIVER.pdf
+    '#filename': NBW_INTEREST_FORM.pdf
     '#view_mode': table
 css: ".webform-nbw-label {\r\n  color: red\r\n}"
 javascript: ''
@@ -391,7 +391,7 @@ settings:
   confirmation_type: page
   confirmation_url: ''
   confirmation_title: ''
-  confirmation_message: '<p>The Waiver<small><span class="form-item__suffix machine-name-value">has been recorded, and an email was sent to the Guardian Email provided. Ask the admin for furter details.</span></small><br>&nbsp;</p>'
+  confirmation_message: '<p>The Interest Form<small><span class="form-item__suffix machine-name-value">been recorded, and an email was sent to the Guardian Email provided. Ask the admin for further details.</span></small><br>&nbsp;</p>'
   confirmation_attributes: {  }
   confirmation_back: true
   confirmation_back_label: ''
