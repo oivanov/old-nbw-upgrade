@@ -625,6 +625,7 @@ handlers:
       attachments: true
       twig: false
       theme_name: ''
+      langcode: ''
       parameters: {  }
       debug: false
   nbw_guardian_user_registration:

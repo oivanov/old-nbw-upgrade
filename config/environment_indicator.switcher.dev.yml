@@ -6,6 +6,6 @@ machine: dev
 description: null
 name: Dev
 weight: null
-url: 'https://dev-nbwdata.pantheonsite.io/'
+url: 'https://dev-nbwdata.pantheonsite.io'
 fg_color: '#400000'
 bg_color: '#008000'
