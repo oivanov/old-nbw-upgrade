@@ -29,13 +29,13 @@ categories:
 elements: |-
   today_s_date:
     '#type': date
-    '#title': 'Today''s Date'
+    '#title': "Today's Date"
     '#default_value': today
     '#datepicker': true
     '#date_date_format': 'l, F j, Y'
   program_instructor_s_name:
     '#type': textfield
-    '#title': 'Program Instructor''s Name'
+    '#title': "Program Instructor's Name"
   child_s_age:
     '#type': number
     '#title': Age
@@ -108,6 +108,10 @@ elements: |-
     '#type': webform_rating
     '#title': 'I enjoy riding my bike'
     '#required': true
+  i_enjoy_riding_my_bike:
+    '#type': webform_rating
+    '#title': 'I feel confident in my ability to ride my bike in the city'
+    '#required': true
   i_feel_confident_in_my_child_s_ability_to_ride_his_her_bike_in_t:
     '#type': webform_rating
     '#title': 'I ride my bike safely and am careful to obey traffic rules'
@@ -147,6 +151,9 @@ elements: |-
       <p style="line-height:1.2"><span style="font-size:11pt; font-variant:normal; white-space:pre-wrap"><span style="font-family:Calibri,sans-serif"><span style="color:#000000"><span style="font-weight:400"><span style="font-style:normal"><span style="text-decoration:none">INSTRUCTIONS: Answer the statements below with complete sentences. This information is very helpful to us in knowing more about your experience. There are no right or wrong answers Please provide as much information as you would like</span></span></span></span></span></span></p>
       <br />
       &nbsp;
+  my_goal_for_this_class_is:
+    '#type': textarea
+    '#title': 'My Goal for this class is:'
   one_thing_that_i_am_glad_my_child_learned_was_:
     '#type': textarea
     '#title': 'One thing that I am excited to learn is:'
@@ -158,7 +165,7 @@ elements: |-
     '#title': 'Are you aware of any ways to access green spaces by bike? What are they?'
   this_class_would_have_been_better_if_:
     '#type': textarea
-    '#title': 'Have you ever visited one of Philadelphia''s nature centers? If yes which one(s)?'
+    '#title': "Have you ever visited one of Philadelphia's nature centers? If yes which one(s)?"
   processed_text_01:
     '#type': processed_text
     '#text': '<p dir="ltr">SURVEY END</p><p dir="ltr"><strong>THANK YOU!</strong></p>'

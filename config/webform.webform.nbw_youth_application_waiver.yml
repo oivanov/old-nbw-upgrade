@@ -603,7 +603,7 @@ handlers:
         - completed
       to_mail: '[webform_submission:values:email:raw]'
       to_options: {  }
-      bcc_mail: ''
+      bcc_mail: '[webform_role:office_email_group]'
       bcc_options: {  }
       cc_mail: ''
       cc_options: {  }
@@ -626,7 +626,7 @@ handlers:
       twig: false
       theme_name: ''
       parameters: {  }
-      debug: true
+      debug: false
   nbw_guardian_user_registration:
     id: nbw_users_registration
     handler_id: nbw_guardian_user_registration
