@@ -99,3 +99,7 @@
 .idea/
 .vscode/
 web/sites/default/settings.ddev.php
+
+# Database dumps
+*.sql
+*.sql.gz
