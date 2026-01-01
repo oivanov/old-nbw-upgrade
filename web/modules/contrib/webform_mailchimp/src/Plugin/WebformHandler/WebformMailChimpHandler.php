@@ -2,12 +2,14 @@
 
 namespace Drupal\webform_mailchimp\Plugin\WebformHandler;
 
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Serialization\Yaml;
 use Drupal\webform\Plugin\WebformHandlerBase;
 use Drupal\webform\WebformSubmissionInterface;
 use Mailchimp\MailchimpLists;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form submission to MailChimp handler.
@@ -24,6 +26,24 @@ use Mailchimp\MailchimpLists;
 class WebformMailChimpHandler extends WebformHandlerBase {
 
   /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+
+    $instance->moduleHandler = $container->get('module_handler');
+
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getSummary() {
@@ -34,13 +54,13 @@ class WebformMailChimpHandler extends WebformHandlerBase {
     if (!empty($fields[$this->configuration['email']])) {
       $email_summary = $fields[$this->configuration['email']]['#title'];
     }
-    $email_summary = '<strong>' . $this->t('Email') . ': </strong>' . $email_summary;
+    $email_summary = new FormattableMarkup('<strong>@label: </strong>' . $email_summary, ['@label' => $this->t('Email')]);
 
     $list_summary = $this->configuration['list'];
     if (!empty($lists[$this->configuration['list']])) {
       $list_summary = $lists[$this->configuration['list']]->name;
     }
-    $list_summary = '<strong>' . $this->t('List') . ': </strong>' . $list_summary;
+    $list_summary = new FormattableMarkup('<strong>@label: </strong>' . $list_summary, ['@label' => $this->t('List')]);
 
     $markup = "$email_summary<br/>$list_summary";
     return [
@@ -86,7 +106,7 @@ class WebformMailChimpHandler extends WebformHandlerBase {
         'callback' => [$this, 'ajaxMailchimpListHandler'],
         'wrapper' => 'webform-mailchimp-handler-settings',
       ],
-      '#submit' => [[get_class($this), 'maichimpUpdateConfigSubmit']],
+      '#submit' => [[get_class($this), 'mailchimpUpdateConfigSubmit']],
     ];
 
     $form['mailchimp']['list'] = [
@@ -121,13 +141,13 @@ class WebformMailChimpHandler extends WebformHandlerBase {
       '#required' => TRUE,
       '#default_value' => $default_value,
       '#options' => $options,
-      '#empty_option'=> $this->t('- Select an option -'),
+      '#empty_option' => $this->t('- Select an option -'),
       '#description' => $this->t('Select the email element you want to use for subscribing to the mailchimp list specified above. Alternatively, you can also use the Other field for token replacement.'),
     ];
 
     $options = [];
     foreach ($fields as $field_name => $field) {
-      if (in_array($field['#type'],['checkbox', 'webform_toggle'])) {
+      if (in_array($field['#type'], ['checkbox', 'webform_toggle'])) {
         $options[$field_name] = $field['#title'];
       }
     }
@@ -138,7 +158,7 @@ class WebformMailChimpHandler extends WebformHandlerBase {
       '#empty_option' => $this->t('- Select an option -'),
       '#default_value' => $this->configuration['control'],
       '#options' => $options,
-      '#description' => $this->t('DEPRECATED: Use Webform\'s core conditions tab instead.'),
+      '#description' => $this->t("DEPRECATED: Use Webform's core conditions tab instead."),
     ];
 
     $form['mailchimp']['mergevars'] = [
@@ -187,14 +207,12 @@ class WebformMailChimpHandler extends WebformHandlerBase {
     return $form['settings']['mailchimp'];
   }
 
-
   /**
    * Submit callback for the refresh button.
    */
-  public static function maichimpUpdateConfigSubmit(array $form, FormStateInterface $form_state) {
-    // Trigger list and group category refetch by deleting lists cache.
-    $cache = \Drupal::cache('mailchimp');
-    $cache->delete('lists');
+  public static function mailchimpUpdateConfigSubmit(array $form, FormStateInterface $form_state) {
+    // Refetch list and group categories.
+    mailchimp_get_lists([], TRUE);
     $form_state->setRebuild();
   }
 
@@ -212,8 +230,8 @@ class WebformMailChimpHandler extends WebformHandlerBase {
           if (!empty($values['mailchimp'][$name])) {
             $filtered_groups = [];
             foreach ($values['mailchimp'][$name] as $group_id => $interest_group) {
-              if ($group_subcriptions = array_filter($interest_group)) {
-                $filtered_groups[$group_id] = $group_subcriptions;
+              if (is_array($interest_group) && !empty($interest_group)) {
+                $filtered_groups[$group_id] = array_filter($interest_group);
               }
             }
             $this->configuration[$name] = $filtered_groups;
@@ -230,14 +248,14 @@ class WebformMailChimpHandler extends WebformHandlerBase {
    * {@inheritdoc}
    */
   public function postSave(WebformSubmissionInterface $webform_submission, $update = TRUE) {
-    // If update, do nothing
+    // If update, do nothing.
     if ($update) {
       return;
     }
 
     $fields = $webform_submission->toArray(TRUE);
 
-    // If there's a checkbox configured, check for its value
+    // If there's a checkbox configured, check for its value.
     if (!empty($this->configuration['control']) && empty($fields['data'][$this->configuration['control']])) {
       return;
     }
@@ -257,8 +275,8 @@ class WebformMailChimpHandler extends WebformHandlerBase {
     // Allow other modules to alter the merge vars.
     // @see hook_mailchimp_lists_mergevars_alter().
     $entity_type = 'webform_submission';
-    \Drupal::moduleHandler()->alter('mailchimp_lists_mergevars', $mergevars, $webform_submission, $entity_type);
-    \Drupal::moduleHandler()->alter('webform_mailchimp_lists_mergevars', $mergevars, $webform_submission, $this);
+    $this->moduleHandler->alter('mailchimp_lists_mergevars', $mergevars, $webform_submission, $entity_type);
+    $this->moduleHandler->alter('webform_mailchimp_lists_mergevars', $mergevars, $webform_submission, $this);
 
     $handler_link = Link::createFromRoute(
       t('Edit handler'),
@@ -280,7 +298,7 @@ class WebformMailChimpHandler extends WebformHandlerBase {
     if (!empty($configuration['list']) && !empty($email)) {
       $member_data = mailchimp_get_memberinfo($configuration['list'], $email, TRUE);
 
-      // If the user is already subscribed, do not set it back to pending
+      // If the user is already subscribed, do not set it back to pending.
       $double_optin = $configuration['double_optin'];
       if (!empty($member_data->status) && $member_data->status == MailchimpLists::MEMBER_STATUS_SUBSCRIBED) {
         $double_optin = FALSE;
@@ -290,13 +308,13 @@ class WebformMailChimpHandler extends WebformHandlerBase {
     }
     else {
       if (empty($configuration['list'])) {
-        \Drupal::logger('webform_submission')->warning(
+        $this->getLogger('webform_submission')->warning(
           'No mailchimp list was provided to the handler.',
           $context
         );
       }
       if (empty($email)) {
-        \Drupal::logger('webform_submission')->warning(
+        $this->getLogger('webform_submission')->warning(
           'No email address was provided to the handler.',
           $context
         );

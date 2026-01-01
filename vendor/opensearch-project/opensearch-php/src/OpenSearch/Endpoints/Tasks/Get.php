@@ -33,7 +33,7 @@ class Get extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $task_id = $this->task_id ?? null;
+        $task_id = $this->task_id ? rawurlencode($this->task_id) : null;
         if (isset($task_id)) {
             return "/_tasks/$task_id";
         }

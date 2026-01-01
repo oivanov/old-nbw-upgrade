@@ -30,7 +30,7 @@ class GenerateUserToken extends AbstractEndpoint
         if (!isset($this->username) || $this->username === '') {
             throw new RuntimeException('username is required for generate_user_token');
         }
-        $username = $this->username;
+        $username = rawurlencode($this->username);
 
         return "/_plugins/_security/api/internalusers/$username/authtoken";
     }

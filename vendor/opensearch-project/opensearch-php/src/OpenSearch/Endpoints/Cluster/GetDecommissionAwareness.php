@@ -27,7 +27,7 @@ class GetDecommissionAwareness extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $awareness_attribute_name = $this->awareness_attribute_name ?? null;
+        $awareness_attribute_name = $this->awareness_attribute_name ? rawurlencode($this->awareness_attribute_name) : null;
         if (isset($awareness_attribute_name)) {
             return "/_cluster/decommission/awareness/$awareness_attribute_name/_status";
         }

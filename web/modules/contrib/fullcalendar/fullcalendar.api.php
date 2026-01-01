@@ -11,7 +11,6 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\views\Entity\View;
 
 /**
  * Constructs CSS classes for an entity.
@@ -57,53 +56,20 @@ function hook_fullcalendar_droppable(): bool {
 }
 
 /**
- * Allows your module to affect the edit ability of the calendar.
- *
- * If any module implementing this hook returns FALSE, the value will be set to
- * FALSE. Use hook_fullcalendar_editable_alter() to override this if necessary.
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
- *   Object representing the entity.
- * @param \Drupal\views\Entity\View $view
- *   Object representing the view.
- *
- * @return bool
- *   A Boolean value dictating whether of not the calendar is editable.
- */
-function hook_fullcalendar_editable(EntityInterface $entity, View $view): bool {
-  return TRUE;
-}
-
-/**
- * Allows your module to forcibly override the editability of the calendar.
- *
- * @param bool $editable
- *   A Boolean value dictating whether of not the calendar is editable.
- * @param \Drupal\Core\Entity\EntityInterface $entity
- *   Object representing the entity.
- * @param \Drupal\views\Entity\View $view
- *   Object representing the view.
- */
-function hook_fullcalendar_editable_alter(bool &$editable, EntityInterface $entity, View $view): void {
-  $editable = FALSE;
-}
-
-/**
  * Alter the dates after they're loaded, before they're added for rendering.
  *
- * @param \DateTime $date1
- *   The start date object.
- * @param \DateTime $date2
- *   The end date object.
+ * @param string $date1
+ *   The start date string.
+ * @param string $date2
+ *   The end date string.
  * @param array $context
  *   An associative array containing the following key-value pairs:
- *   - instance: The field instance.
  *   - entity: The entity object for this date.
- *   - field: The field info.
+ *   - fields: The field info.
  */
-function hook_fullcalendar_process_dates_alter(\DateTime &$date1, \DateTime &$date2, array $context): void {
+function hook_fullcalendar_process_dates_alter(string &$date1, string &$date2, array $context): void {
   // Always display dates only on one day.
-  if ($date1->format('Y-m-d-H-i-s') !== $date2->format('Y-m-d-H-i-s')) {
+  if ($date1 !== $date2) {
     $date2 = $date1;
   }
 }

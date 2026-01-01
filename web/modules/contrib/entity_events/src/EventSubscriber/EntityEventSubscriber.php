@@ -19,6 +19,7 @@ abstract class EntityEventSubscriber implements EventSubscriberInterface {
     $events[EntityEventType::UPDATE][] = ['onEntityUpdate', 800];
     $events[EntityEventType::PRESAVE][] = ['onEntityPresave', 800];
     $events[EntityEventType::DELETE][] = ['onEntityDelete', 800];
+    $events[EntityEventType::PREDELETE][] = ['onEntityPredelete', 800];
     return $events;
   }
 
@@ -59,6 +60,16 @@ abstract class EntityEventSubscriber implements EventSubscriberInterface {
    *   The event.
    */
   public function onEntityDelete(EntityEvent $event) {
+
+  }
+
+  /**
+   * Method called before the entity is deleted.
+   *
+   * @param \Drupal\entity_events\Event\EntityEvent $event
+   *   The event.
+   */
+  public function onEntityPredelete(EntityEvent $event) {
 
   }
 

@@ -18,7 +18,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "email_theme",
  *   label = @Translation("Theme"),
  *   description = @Translation("Sets the email theme."),
- *   weight = 0,
  * )
  */
 class ThemeEmailAdjuster extends EmailAdjusterBase implements ContainerFactoryPluginInterface {
@@ -86,7 +85,7 @@ class ThemeEmailAdjuster extends EmailAdjusterBase implements ContainerFactoryPl
   /**
    * {@inheritdoc}
    */
-  public function build(EmailInterface $email) {
+  public function init(EmailInterface $email) {
     $theme_name = $this->getEmailTheme();
     $email->setTheme($theme_name);
   }

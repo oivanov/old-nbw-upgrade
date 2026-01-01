@@ -98,7 +98,7 @@ class GatsbyPreview {
    * @param \Drupal\Core\Entity\ContentEntityInterface|null $entity
    * @param string $action
    */
-  public function gatsbyPreparePreviewData(ContentEntityInterface $entity = NULL, string $action = ''): void {
+  public function gatsbyPreparePreviewData(?ContentEntityInterface $entity = NULL, string $action = ''): void {
     $settings = $this->configFactory->get('gatsby.settings');
     $preview_url = $settings->get('preview_callback_url');
 
@@ -120,7 +120,7 @@ class GatsbyPreview {
    * @param \Drupal\Core\Entity\ContentEntityInterface|null $entity
    * @param string $action
    */
-  public function gatsbyPrepareBuildData(ContentEntityInterface $entity = NULL, string $action = ''): void {
+  public function gatsbyPrepareBuildData(?ContentEntityInterface $entity = NULL, string $action = ''): void {
     $settings = $this->configFactory->get('gatsby.settings');
     $incrementalbuild_url = $settings->get('incrementalbuild_url');
 

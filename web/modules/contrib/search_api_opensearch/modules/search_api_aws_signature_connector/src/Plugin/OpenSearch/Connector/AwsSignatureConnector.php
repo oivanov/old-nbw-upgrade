@@ -1,46 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\search_api_aws_signature_connector\Plugin\OpenSearch\Connector;
 
-use Aws\Credentials\CredentialProvider;
-use Aws\Credentials\Credentials;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\search_api_opensearch\Attribute\OpenSearchConnector;
 use Drupal\search_api_opensearch\Plugin\OpenSearch\Connector\StandardConnector;
-use OpenSearch\Client;
-use OpenSearch\ClientBuilder;
 
 /**
  * Provides an OpenSearch connector using AWS Signature.
- *
- * @OpenSearchConnector(
- *   id = "aws_signature",
- *   label = @Translation("AWS Signature"),
- *   description = @Translation("OpenSearch connector with AWS Signature.")
- * )
  */
+#[OpenSearchConnector(
+  id: "aws_signature",
+  label: new TranslatableMarkup("AWS Signature"),
+  description: new TranslatableMarkup("OpenSearch connector with AWS Signature."),
+)]
 class AwsSignatureConnector extends StandardConnector {
 
   /**
    * {@inheritdoc}
    */
-  public function getClient(): Client {
+  public function getClientOptions(): array {
+    $options = parent::getClientOptions() + [
+      'auth_aws' => [
+        'region' => $this->configuration['aws_region'] ?? 'us-east-1',
+      ],
+    ];
 
-    if ($this->configuration['api_key'] && $this->configuration['api_secret']) {
-      $provider = CredentialProvider::fromCredentials(
-        new Credentials($this->configuration['api_key'], $this->configuration['api_secret'])
-      );
+    // Set credentials if provided, otherwise fall back to defaults.
+    if ('' !== $this->configuration['api_key'] && '' !== $this->configuration['api_secret']) {
+      $options['auth_aws']['credentials'] = [
+        'access_key' => $this->configuration['api_key'],
+        'secret_key' => $this->configuration['api_secret'],
+      ];
     }
-    else {
-      // Use the defaultProvider to get all paths in home, env, etc.
-      $provider = CredentialProvider::defaultProvider();
-    }
-
-    // We only support one host.
-    return ClientBuilder::create()
-      ->setHosts([$this->configuration['url']])
-      ->setSigV4Region($this->configuration['aws_region'])
-      ->setSigV4CredentialProvider($provider)
-      ->build();
+    return $options;
   }
 
   /**

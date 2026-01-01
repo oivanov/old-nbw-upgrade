@@ -27,7 +27,7 @@ class DeleteTask extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $task_id = $this->task_id ?? null;
+        $task_id = $this->task_id ? rawurlencode($this->task_id) : null;
         if (isset($task_id)) {
             return "/_plugins/_ml/tasks/$task_id";
         }

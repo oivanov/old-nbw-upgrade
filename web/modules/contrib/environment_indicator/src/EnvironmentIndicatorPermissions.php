@@ -3,11 +3,11 @@
 namespace Drupal\environment_indicator;
 
 use Drupal\Core\Entity\BundlePermissionHandlerTrait;
-use Drupal\environment_indicator\Entity\EnvironmentIndicator;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\environment_indicator\Entity\EnvironmentIndicator;
 
 /**
- * EnvironmentIndicatorPermissions class.
+ * Provides dynamic permissions for Environment Indicators.
  */
 class EnvironmentIndicatorPermissions {
 
@@ -25,9 +25,10 @@ class EnvironmentIndicatorPermissions {
   }
 
   /**
-   * Returns a list of environment_indicator permissions for a given environment_indicator.
+   * Returns a list of permissions for a given environment indicator.
    *
    * @param \Drupal\environment_indicator\Entity\EnvironmentIndicator $environment
+   *   The environment indicator entity.
    *
    * @return array
    *   An associative array of permission names and descriptions.
@@ -38,8 +39,9 @@ class EnvironmentIndicatorPermissions {
 
     return [
       'access environment indicator ' . $environment_id => [
-        'title' => $this->t('See environment indicator for %environment_name', $environment_params)
-      ]
+        'title' => $this->t('See environment indicator for %environment_name', $environment_params),
+      ],
     ];
   }
+
 }

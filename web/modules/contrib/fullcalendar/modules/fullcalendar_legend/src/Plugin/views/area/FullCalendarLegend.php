@@ -73,7 +73,12 @@ class FullCalendarLegend extends AreaPluginBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Builds the options form.
+   *
+   * @param array $form
+   *   The form structure.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::buildOptionsForm($form, $form_state);

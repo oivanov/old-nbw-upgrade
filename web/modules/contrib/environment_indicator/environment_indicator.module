@@ -8,7 +8,6 @@
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Drupal\environment_indicator\ToolbarHandler;
 
 /**
  * Implements hook_help().
@@ -23,7 +22,7 @@ function environment_indicator_help($route_name, RouteMatchInterface $route_matc
     ':settings' => $settings_url,
   ]) . '</p>';
   $version_identifier_info .= '<ul>';
-  $version_identifier_info .= '<li><strong>' . t('Environment Indicator Current Release (Default):') . '</strong> ' . t('Set the "environment_indicator.current_release" state using Drush: <code>drush sset environment_indicator.current_release v1.2.44</code>.') . '</li>';
+  $version_identifier_info .= '<li><strong>' . t('Environment Indicator Current Release (Default):') . '</strong> ' . t('Set the "environment_indicator.current_release" state using Drush: <code>drush state:set environment_indicator.current_release v1.2.44</code>.') . '</li>';
   $version_identifier_info .= '<li><strong>' . t('Deployment Identifier:') . '</strong> ' . t('Typically set in the <code>settings.php</code> file or through your deployment process.') . '</li>';
   $version_identifier_info .= '<li><strong>' . t('Drupal Version:') . '</strong> ' . t('Displays the current Drupal version.') . '</li>';
   $version_identifier_info .= '<li><strong>' . t('None:') . '</strong> ' . t('No version identifier is displayed.') . '</li>';
@@ -46,7 +45,7 @@ function environment_indicator_help($route_name, RouteMatchInterface $route_matc
 
     case 'help.page.environment_indicator':
       $output = '<p>' . t('The Environment Indicator adds a coloured strip to the site informing you which environment you are currently in (Development, Staging, Production, etc.)') . '</p>';
-      $output .= '<p>' . t('The Environment Indicator <a href=":settings">settings page</a> allows you to modify some elements of the indicator\'s behavior and appearance. Since the appearance of the indicator is dependent on your site theme, substantial customisations require modifications to your site\'s theme and CSS files.', [
+      $output .= '<p>' . t('The Environment Indicator <a href=":settings">settings page</a> allows you to modify some elements of the indicator\'s behavior and appearance. Since the appearance of the indicator is dependent on your site theme, substantial customizations require modifications to your site\'s theme and CSS files.', [
         ':settings' => $settings_url,
       ]) . '</p>';
       $output .= '<p>' . $access_permission_text . '</p>';
@@ -76,12 +75,21 @@ function environment_indicator_help($route_name, RouteMatchInterface $route_matc
  * Implements hook_preprocess_HOOK() for page templates.
  */
 function environment_indicator_preprocess_html(&$variables) {
-  if (_environment_indicator_external_integration_is_enabled('toolbar')) {
+  // Check if environment_indicator_toolbar is enabled.
+  $toolbar_integration_module_enabled = \Drupal::moduleHandler()->moduleExists('environment_indicator_toolbar') ?? FALSE;
+  // @todo Remove this check in environment_indicator:5.0.0.
+  // This is a temporary solution to avoid breaking existing sites that use
+  // the environment_indicator_toolbar module.
+  // In the future, we will rely on the environment_indicator_toolbar module
+  // to handle the toolbar integration, and this check will no longer be needed.
+  // @see https://www.drupal.org/i/3484735
+  $toolbar_integration_setting_enabled = !empty(\Drupal::config('environment_indicator.settings')->get('toolbar_integration')['toolbar']) ?? FALSE;
+  if ($toolbar_integration_module_enabled && $toolbar_integration_setting_enabled) {
     return;
   }
   $active_environment = \Drupal::config('environment_indicator.indicator');
-  $title = $active_environment->get('name');
-  if (empty($title) || !\Drupal::currentUser()->hasPermission('access environment indicator')) {
+  $name = $active_environment->get('name');
+  if (empty($name) || !\Drupal::currentUser()->hasPermission('access environment indicator')) {
     return;
   }
   $variables['attributes']['class'][] = 'environment-indicator';
@@ -92,37 +100,56 @@ function environment_indicator_preprocess_html(&$variables) {
  * Implements hook_page_top().
  */
 function environment_indicator_page_top(array &$page_top) {
-  if (_environment_indicator_external_integration_is_enabled('toolbar')) {
+  // Check if environment_indicator_toolbar is enabled.
+  $toolbar_integration_module_enabled = \Drupal::moduleHandler()->moduleExists('environment_indicator_toolbar') ?? FALSE;
+  if ($toolbar_integration_module_enabled) {
+    return;
+  }
+  // @todo Remove this check in environment_indicator:5.0.0.
+  // This is a temporary solution to avoid breaking existing sites that use
+  // the environment_indicator_toolbar module.
+  // In the future, we will rely on the environment_indicator_toolbar module
+  // to handle the toolbar integration, and this check will no longer be needed.
+  // @see https://www.drupal.org/i/3484735
+  // @phpstan-ignore-next-line
+  $toolbar_integration_setting_enabled = _environment_indicator_external_integration_is_enabled('toolbar');
+  if ($toolbar_integration_setting_enabled) {
     return;
   }
   $active_environment = \Drupal::config('environment_indicator.indicator');
-  $title = $active_environment->get('name');
+  $environment_indicator = \Drupal::service('environment_indicator.indicator');
+  $current_user_has_access = \Drupal::currentUser()->hasPermission('access environment indicator');
+  $settings = \Drupal::config('environment_indicator.settings');
+  $name = $active_environment->get('name');
   $page_top['indicator'] = [
     '#type' => 'environment_indicator',
-    '#title' => $title,
+    '#title' => $name,
     '#fg_color' => $active_environment->get('fg_color'),
     '#bg_color' => $active_environment->get('bg_color'),
-    '#description' => \Drupal::state()->get('environment_indicator.current_release'),
-    '#access' => !empty($title) && \Drupal::currentUser()
-      ->hasPermission('access environment indicator'),
+    '#description' => $environment_indicator->getCurrentRelease(),
+    '#access' => !empty($name) && $current_user_has_access,
     '#attached' => [
       'library' => ['environment_indicator/drupal.environment_indicator'],
       'drupalSettings' => [
         'environmentIndicator' => [
-          'name' => $title ? $title : ' ',
+          'name' => $name,
           'fgColor' => $active_environment->get('fg_color'),
           'bgColor' => $active_environment->get('bg_color'),
-          'addFavicon' => \Drupal::config('environment_indicator.settings')
-            ->get('favicon'),
+          'addFavicon' => $settings->get('favicon'),
+          // @phpstan-ignore-next-line
+          'toolbars' => _environment_indicator_external_integration_is_enabled('toolbar'),
         ],
       ],
     ],
   ];
-
+  $favicon = \Drupal::config('environment_indicator.settings')->get('favicon') ?? FALSE;
+  if ($favicon) {
+    $page_top['indicator']['#attached']['library'][] = 'environment_indicator/favicon';
+    $page_top['indicator']['#attached']['drupalSettings']['environmentIndicator']['addFavicon'] = $favicon;
+  }
   // Only add the environment indicator switcher if there are environments to
   // switch to.
-  if ($items = _environment_indicator_switcher_links()) {
-    uasort($items, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
+  if ($items = \Drupal::service('environment_indicator.indicator')->getLinks()) {
     $page_top['indicator']['switcher'] = [
       '#theme' => 'links',
       '#links' => $items,
@@ -138,7 +165,7 @@ function environment_indicator_page_top(array &$page_top) {
     ];
     $page_top['indicator'] += [
       '#cache' => [
-        'tags' => Cache::mergeTags(['config:environment_indicator.settings'], _environment_indicator_switcher_cache_tags()),
+        'tags' => Cache::mergeTags(['config:environment_indicator.settings'], \Drupal::service('environment_indicator.indicator')->getCacheTags()),
       ],
     ];
   }
@@ -214,8 +241,16 @@ function _environment_indicator_parse_style(string $style): array {
 
 /**
  * Implements hook_toolbar().
+ *
+ *  @todo Remove this in environment_indicator:5.0.0.
  */
 function environment_indicator_toolbar() {
+  // Check if environment_indicator_toolbar is enabled.
+  $toolbar_integration_module_enabled = \Drupal::moduleHandler()->moduleExists('environment_indicator_toolbar') ?? FALSE;
+  if ($toolbar_integration_module_enabled) {
+    return [];
+  }
+  // @todo Remove this check in environment_indicator:5.0.0.
   return \Drupal::service('environment_indicator.toolbar_handler')
     ->toolbar();
 }
@@ -225,8 +260,14 @@ function environment_indicator_toolbar() {
  *
  * @return array
  *   A renderable array with the links.
+ *
+ * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+ *   Use \Drupal\environment_indicator\Service\SwitcherManager::getLinks().
+ *
+ * @see https://www.drupal.org/node/3526893
  */
 function _environment_indicator_switcher_links(): array {
+  // @phpstan-ignore-next-line
   return \Drupal::service('environment_indicator.toolbar_handler')
     ->getLinks();
 }
@@ -239,6 +280,14 @@ function _environment_indicator_switcher_links(): array {
  *
  * @return bool
  *   TRUE if integration is enabled. FALSE otherwise.
+ *
+ * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+ *   This functionality is no longer needed because now to add toolbar
+ *   integration, you enable the environment_indicator_toolbar module.
+ *   Then you can replicate this functionality by using the
+ *   core.extension.service to check if the module is enabled.
+ *
+ * @see https://www.drupal.org/project/environment_indicator/issues/3484735
  */
 function _environment_indicator_external_integration_is_enabled(string $integration): bool {
   return \Drupal::service('environment_indicator.toolbar_handler')
@@ -250,8 +299,15 @@ function _environment_indicator_external_integration_is_enabled(string $integrat
  *
  * @return string[]
  *   The cache tags.
+ *
+ * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+ *   Use
+ *   \Drupal\environment_indicator\Service\EnvironmentIndicator::getCacheTags().
+ *
+ * @see https://www.drupal.org/node/3526893
  */
 function _environment_indicator_switcher_cache_tags(): array {
+  // @phpstan-ignore-next-line
   return \Drupal::service('environment_indicator.toolbar_handler')
     ->getCacheTags();
 }

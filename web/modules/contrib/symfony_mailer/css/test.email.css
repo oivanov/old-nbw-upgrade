@@ -18,3 +18,8 @@ h4 > a {
 .text-small {
   font-size: smaller;
 }
+
+.symfony-mailer-logo {
+  width: 2em;
+  height: 2em;
+}

@@ -11,7 +11,7 @@ use Drupal\symfony_mailer\EmailInterface;
 abstract class EmailBuilderBase extends EmailProcessorBase implements EmailBuilderInterface {
 
   /**
-   * The default weight for an email builder.
+   * {@inheritdoc}
    */
   const DEFAULT_WEIGHT = 300;
 

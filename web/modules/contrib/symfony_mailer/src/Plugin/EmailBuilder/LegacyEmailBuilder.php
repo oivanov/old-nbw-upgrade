@@ -8,6 +8,7 @@ use Drupal\symfony_mailer\EmailFactoryInterface;
 use Drupal\symfony_mailer\EmailInterface;
 use Drupal\symfony_mailer\Exception\SkipMailException;
 use Drupal\symfony_mailer\LegacyMailerHelperInterface;
+use Drupal\symfony_mailer\MailerHelperTrait;
 use Drupal\symfony_mailer\MailerInterface;
 use Drupal\symfony_mailer\Processor\EmailBuilderBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,6 +17,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Defines the Legacy Email Builder plug-in that uses a message array.
  */
 class LegacyEmailBuilder extends EmailBuilderBase implements ContainerFactoryPluginInterface {
+
+  use MailerHelperTrait;
 
   /**
    * The legacy mailer helper.
@@ -92,10 +95,24 @@ class LegacyEmailBuilder extends EmailBuilderBase implements ContainerFactoryPlu
   /**
    * {@inheritdoc}
    */
-  public function createParams(EmailInterface $email, array $legacy_message = NULL) {
+  public function createParams(EmailInterface $email, ?array $legacy_message = NULL) {
     assert($legacy_message != NULL);
     $email->setParam('legacy_message', $legacy_message)
       ->setParam('__disable_customize__', TRUE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function init(EmailInterface $email) {
+    parent::init($email);
+
+    // Add in 'To' header which is stored directly in the message.
+    // @see \Drupal\Core\Mail\Plugin\Mail\PhpMail::mail()
+    $message = $email->getParam('legacy_message');
+    if (isset($message['to'])) {
+      $email->setTo($this->helper()->parseAddress($message['to']));
+    }
   }
 
   /**

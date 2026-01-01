@@ -111,3 +111,19 @@ views.style.fullcalendar_view_display:
     classes:
       type: string
       label: 'Classes'
+    fetchGoogleHolidays:
+      type: boolean
+      label: 'Fetch and display public holidays from Google Calendar'
+    googleHolidaysSettings:
+      type: mapping
+      label: 'Google Calendar Holidays Settings'
+      mapping:
+        googleCalendarAPIKey:
+          type: string
+          label: 'Google Calendar API Key'
+        googleCalendarGroup:
+          type: string
+          label: 'Select holidays to display'
+        renderGoogleHolidaysAsBackground:
+          type: boolean
+          label: 'Render the holidays as background'

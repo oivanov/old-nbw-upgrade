@@ -27,7 +27,7 @@ class GetObject extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $object_id = $this->object_id ?? null;
+        $object_id = $this->object_id ? rawurlencode($this->object_id) : null;
         if (isset($object_id)) {
             return "/_plugins/_observability/object/$object_id";
         }

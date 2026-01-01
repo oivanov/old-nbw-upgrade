@@ -47,7 +47,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
+    return new self(
       $container->get('logger.factory')->get('views_autocomplete_filters'),
       $container->get('entity.repository')
     );
@@ -64,8 +64,8 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
    * @param string $view_display
    *   The View display.
    *
-   * @return bool
-   *   TRUE if the user has access to the view display, FALSE otherwise.
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
    */
   public function access($view_name, $view_display) {
     // Determine if the given user has access to the view.
@@ -115,6 +115,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     // Get exposed filter options for our field.
     // Also, check if filter is exposed and autocomplete is enabled for this
     // filter (and if filter exists/exposed at all).
+    /** @var \Drupal\views\Plugin\views\filter\FilterPluginBase[] $filters */
     $filters = $display_handler->getOption('filters');
     if (empty($filters[$filter_name]['exposed']) || empty($filters[$filter_name]['expose']['autocomplete_filter'])) {
       throw new NotFoundHttpException();
@@ -144,7 +145,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     // Determine fields which will be used for output.
     if (empty($expose_options['autocomplete_field']) && !empty($current_filter['name'])) {
       if ($view->getHandler($view->current_display, 'field', $filters[$filter_name]['id'])) {
-        $field_names = [[$filter_name]['id']];
+        $field_names = [$filters[$filter_name]['id']];
         // Force raw data for no autocomplete field defined.
         $expose_options['autocomplete_raw_suggestion'] = 1;
         $expose_options['autocomplete_raw_dropdown'] = 1;
@@ -217,7 +218,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
 
     /** @var \Drupal\views\Plugin\views\style\StylePluginBase $style_plugin */
     $style_plugin = $display_handler->getPlugin('style');
-    /** @var \Drupal\views\Plugin\views\field\FieldHandlerInterface $handler */
+    /** @var \Drupal\views\Plugin\views\field\FieldHandlerInterface $fields_handler */
     $fields_handler = $display_handler->getHandlers('field');
 
     $view->row_index = 0;
@@ -270,7 +271,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
           $raw_field = [['value' => $rendered_field]];
         }
         if (is_array($raw_field)) {
-          foreach ($raw_field as $delta => $item) {
+          foreach ($raw_field as $item) {
             if (isset($item['value']) && strstr(mb_strtolower($item['value']), mb_strtolower($string))) {
               $dropdown = $use_raw_dropdown ? Html::escape($item['value']) : $rendered_field;
               if ($dropdown != '') {

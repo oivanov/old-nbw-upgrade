@@ -54,11 +54,16 @@ class UpdateEmailBuilder extends EmailBuilderBase {
    * {@inheritdoc}
    */
   public function build(EmailInterface $email) {
+    if (empty($email->getTo())) {
+      throw new SkipMailException('No update notification address configured.');
+    }
+
     $config = $this->helper()->config();
     $notify_all = ($config->get('update.settings')->get('notification.threshold') == 'all');
     \Drupal::moduleHandler()->loadInclude('update', 'install');
     $requirements = update_requirements('runtime');
 
+    $messages = [];
     foreach (['core', 'contrib'] as $report_type) {
       $status = $requirements["update_$report_type"];
       if (isset($status['severity'])) {
@@ -76,23 +81,6 @@ class UpdateEmailBuilder extends EmailBuilderBase {
 
     if (Settings::get('allow_authorize_operations', TRUE)) {
       $email->setVariable('update_manager', Url::fromRoute('update.report_update')->toString());
-    }
-  }
-
-  /**
-   * Skip sending the update email when no 'To' header is configured.
-   *
-   * This check has to be done after
-   * {@see \Drupal\symfony_mailer\EmailInterface::PHASE_BUILD} because
-   * otherwise the 'To' header might not be set yet.
-   *
-   * @throws \Drupal\symfony_mailer\Exception\SkipMailException
-   *
-   * @see \Drupal\symfony_mailer\EmailInterface::PHASE_PRE_RENDER
-   */
-  public function preRender(EmailInterface $email): void {
-    if (empty($email->getTo())) {
-      throw new SkipMailException('No update notification address configured.');
     }
   }
 

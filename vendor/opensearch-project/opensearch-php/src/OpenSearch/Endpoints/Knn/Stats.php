@@ -27,8 +27,8 @@ class Stats extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $node_id = $this->node_id ?? null;
-        $stat = $this->stat ?? null;
+        $node_id = $this->node_id ? rawurlencode($this->node_id) : null;
+        $stat = $this->stat ? rawurlencode($this->stat) : null;
         if (isset($node_id) && isset($stat)) {
             return "/_plugins/_knn/$node_id/stats/$stat";
         }
@@ -60,26 +60,26 @@ class Stats extends AbstractEndpoint
 
     public function setNodeId($node_id): static
     {
-        if (isset($node_id) !== true) {
+        if (!isset($node_id)) {
             return $this;
         }
         if (is_array($node_id) === true) {
             $node_id = implode(",", $node_id);
         }
-        $this->node_id = $node_id;
+        $this->node_id = rawurlencode($node_id);
 
         return $this;
     }
 
     public function setStat($stat): static
     {
-        if (isset($stat) !== true) {
+        if (!isset($stat)) {
             return $this;
         }
         if (is_array($stat) === true) {
             $stat = implode(",", $stat);
         }
-        $this->stat = $stat;
+        $this->stat = rawurlencode($stat);
 
         return $this;
     }

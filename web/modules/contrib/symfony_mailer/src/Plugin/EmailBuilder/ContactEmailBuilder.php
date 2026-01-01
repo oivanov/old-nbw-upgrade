@@ -2,8 +2,8 @@
 
 namespace Drupal\symfony_mailer\Plugin\EmailBuilder;
 
-use Drupal\contact\MessageInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\contact\MessageInterface;
 use Drupal\symfony_mailer\EmailFactoryInterface;
 use Drupal\symfony_mailer\EmailInterface;
 
@@ -37,7 +37,7 @@ class ContactEmailBuilder extends ContactEmailBuilderBase {
    * @param \Drupal\Core\Session\AccountInterface $recipient
    *   The recipient.
    */
-  public function createParams(EmailInterface $email, MessageInterface $message = NULL, AccountInterface $sender = NULL, AccountInterface $recipient = NULL) {
+  public function createParams(EmailInterface $email, ?MessageInterface $message = NULL, ?AccountInterface $sender = NULL, ?AccountInterface $recipient = NULL) {
     assert($recipient != NULL);
     $email->setParam('contact_message', $message)
       ->setParam('sender', $sender)
@@ -58,16 +58,22 @@ class ContactEmailBuilder extends ContactEmailBuilderBase {
   /**
    * {@inheritdoc}
    */
+  public function init(EmailInterface $email) {
+    parent::init($email);
+    if ($email->getSubType() == 'mail') {
+      $email->setTo($email->getParam('recipient'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function build(EmailInterface $email) {
     parent::build($email);
     $recipient = $email->getParam('recipient');
 
     $email->setVariable('recipient_name', $recipient->getDisplayName())
       ->setVariable('recipient_edit_url', $recipient->toUrl('edit-form')->toString());
-
-    if ($email->getSubType() == 'mail') {
-      $email->setTo($recipient);
-    }
   }
 
 }

@@ -4,19 +4,15 @@ namespace Drupal\search_api_opensearch\SearchAPI\Query;
 
 use Drupal\search_api\Query\QueryInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Provides a facet result parser.
  */
 class FacetResultParser {
 
-  /**
-   * Creates a new facet result parser.
-   *
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
-   */
   public function __construct(
+    #[Autowire(service: 'logger.channel.search_api_opensearch')]
     protected LoggerInterface $logger,
   ) {
   }

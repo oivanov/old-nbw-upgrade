@@ -28,7 +28,7 @@ class Delete extends AbstractEndpoint
         if (!isset($this->id) || $this->id === '') {
             throw new RuntimeException('id is required for delete');
         }
-        $id = $this->id;
+        $id = rawurlencode($this->id);
 
         return "/_plugins/_asynchronous_search/$id";
     }

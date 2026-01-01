@@ -24,7 +24,7 @@ class Get extends AbstractEndpoint
 {
     public function getURI(): string
     {
-        $id = $this->id ?? null;
+        $id = $this->id ? rawurlencode($this->id) : null;
         if (isset($id)) {
             return "/_search/pipeline/$id";
         }

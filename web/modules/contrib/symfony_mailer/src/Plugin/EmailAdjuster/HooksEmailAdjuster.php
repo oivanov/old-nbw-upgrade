@@ -37,7 +37,7 @@ class HooksEmailAdjuster extends EmailAdjusterBase {
       }
       else {
         // Add processor to invoke hooks later.
-        $email->addProcessor([$this, 'invokeHooks'], $phase, EmailInterface::DEFAULT_WEIGHT, "hook_mailer_$name");
+        $email->addCallback([$this, 'invokeHooks'], $phase, EmailInterface::DEFAULT_WEIGHT, "hook_mailer_$name");
       }
     }
   }

@@ -27,7 +27,7 @@ class GetMessageTraces extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $message_id = $this->message_id ?? null;
+        $message_id = $this->message_id ? rawurlencode($this->message_id) : null;
         if (isset($message_id)) {
             return "/_plugins/_ml/memory/message/$message_id/traces";
         }

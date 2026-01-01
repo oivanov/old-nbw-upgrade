@@ -4,6 +4,7 @@ namespace Drupal\search_api_opensearch\SearchAPI\Query;
 
 use Drupal\search_api\Query\QueryInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Builds facet params.
@@ -13,15 +14,17 @@ class FacetParamBuilder {
   /**
    * The default facet size.
    */
-  protected const DEFAULT_FACET_SIZE = "10";
+  protected const DEFAULT_FACET_SIZE = 10;
 
   /**
-   * Creates a new Facet builder.
+   * The unlimited facet size.
    *
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
+   * By default, OpenSearch does not generate more than 10,000 buckets.
    */
+  protected const UNLIMITED_FACET_SIZE = 10000;
+
   public function __construct(
+    #[Autowire(service: 'logger.channel.search_api_opensearch')]
     protected LoggerInterface $logger,
   ) {
   }
@@ -70,11 +73,20 @@ class FacetParamBuilder {
    */
   protected function buildTermBucketAgg(string $facet_id, array $facet): array {
     $param = [
-      $facet_id => ["terms" => ["field" => $facet['field']]],
+      $facet_id => ['terms' => ['field' => $facet['field']]],
     ];
+
     $size = $facet['limit'] ?? self::DEFAULT_FACET_SIZE;
-    if ($size > 0) {
-      $param[$facet_id]["terms"]["size"] = $size;
+    $size = (int) $size;
+
+    // Facets uses zero in its configuration form to mean 'No limit'.
+    if ($size === 0) {
+      $size = self::UNLIMITED_FACET_SIZE;
+    }
+
+    // Only set size if it is not the default.
+    if ($size !== self::DEFAULT_FACET_SIZE) {
+      $param[$facet_id]['terms']['size'] = $size;
     }
 
     // If operator is OR we need to set to global and nest the agg.

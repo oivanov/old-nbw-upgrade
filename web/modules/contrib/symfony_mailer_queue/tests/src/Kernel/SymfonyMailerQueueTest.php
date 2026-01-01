@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\symfony_mailer_queue\Kernel;
 
 use Drupal\Core\Queue\DelayableQueueInterface;
@@ -53,15 +55,11 @@ class SymfonyMailerQueueTest extends KernelTestBase implements EventSubscriberIn
 
   /**
    * The email factory.
-   *
-   * @var \Drupal\symfony_mailer\EmailFactoryInterface
    */
   protected EmailFactoryInterface $emailFactory;
 
   /**
    * The Symfony mailer queue.
-   *
-   * @var \Drupal\Core\Queue\QueueInterface
    */
   protected QueueInterface $queue;
 

@@ -15,6 +15,11 @@ abstract class EmailProcessorBase extends PluginBase implements EmailProcessorIn
   use EmailProcessorTrait;
 
   /**
+   * The default weight. This must be set by the sub-class.
+   */
+  const DEFAULT_WEIGHT = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public function getWeight(int $phase) {

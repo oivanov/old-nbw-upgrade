@@ -79,7 +79,7 @@ class UserEmailBuilder extends EmailBuilderBase {
    * @param \Drupal\user\UserInterface $user
    *   The user.
    */
-  public function createParams(EmailInterface $email, UserInterface $user = NULL) {
+  public function createParams(EmailInterface $email, ?UserInterface $user = NULL) {
     assert($user != NULL);
     $email->setParam('user', $user);
   }
@@ -94,10 +94,17 @@ class UserEmailBuilder extends EmailBuilderBase {
   /**
    * {@inheritdoc}
    */
-  public function build(EmailInterface $email) {
+  public function init(EmailInterface $email) {
+    parent::init($email);
     if ($email->getSubType() != 'register_pending_approval_admin') {
       $email->setTo($email->getParam('user'));
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function build(EmailInterface $email) {
     $this->tokenOptions(['callback' => 'user_mail_tokens', 'clear' => TRUE]);
   }
 

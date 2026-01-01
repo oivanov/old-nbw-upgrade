@@ -98,7 +98,7 @@ class MailerHelper implements MailerHelperInterface {
   /**
    * {@inheritdoc}
    */
-  public function parseAddress(string $encoded, string $langcode = NULL) {
+  public function parseAddress(string $encoded, ?string $langcode = NULL) {
     foreach (explode(',', $encoded) as $part) {
       // Code copied from \Symfony\Component\Mime\Address::create().
       if (strpos($part, '<')) {
@@ -122,6 +122,7 @@ class MailerHelper implements MailerHelperInterface {
 
     foreach ($addresses as $address) {
       $value = $address->getEmail();
+      $display = '';
       if ($value == $site_mail) {
         $value = '<site>';
       }
@@ -134,7 +135,7 @@ class MailerHelper implements MailerHelperInterface {
 
       $config['addresses'][] = [
         'value' => $value,
-        'display' => $display ?? '',
+        'display' => $display,
       ];
     }
 

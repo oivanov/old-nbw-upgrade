@@ -168,7 +168,7 @@ class SymfonyMailerController extends ControllerBase {
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *   A redirect to the policy edit page.
    */
-  public function createPolicy(string $policy_id, Request $request = NULL) {
+  public function createPolicy(string $policy_id, ?Request $request = NULL) {
     MailerPolicy::create(['id' => $policy_id])->save();
     $options = [];
     $query = $request->query;

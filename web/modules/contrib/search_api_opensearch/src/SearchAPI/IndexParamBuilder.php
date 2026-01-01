@@ -2,12 +2,14 @@
 
 namespace Drupal\search_api_opensearch\SearchAPI;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Item\FieldInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Plugin\search_api\data_type\value\TextValue;
 use Drupal\search_api\Utility\FieldsHelperInterface;
 use Drupal\search_api_opensearch\Event\IndexParamsEvent;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -15,17 +17,11 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class IndexParamBuilder {
 
-  /**
-   * Creates a new IndexParamBuilder.
-   *
-   * @param \Drupal\search_api\Utility\FieldsHelperInterface $fieldsHelper
-   *   The fields helper.
-   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $eventDispatcher
-   *   The event dispatcher.
-   */
   public function __construct(
+    #[Autowire(service: 'search_api.fields_helper')]
     protected FieldsHelperInterface $fieldsHelper,
     protected EventDispatcherInterface $eventDispatcher,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {
   }
 
@@ -53,6 +49,7 @@ class IndexParamBuilder {
         $field_type = $field->getType();
         if (!empty($field->getValues())) {
           $values = $this->buildFieldValues($field, $field_type);
+          $this->moduleHandler->alter('index_param_value', $values, $field);
           $data[$field->getFieldIdentifier()] = $values;
         }
       }
@@ -113,7 +110,7 @@ class IndexParamBuilder {
       }
       $values[] = match ($field_type) {
         'string' => (string) $value,
-        'boolean' => (boolean) $value,
+        'boolean' => (bool) $value,
         default => $value,
       };
     }

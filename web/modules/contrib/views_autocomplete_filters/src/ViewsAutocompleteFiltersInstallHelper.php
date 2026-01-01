@@ -42,8 +42,7 @@ class ViewsAutocompleteFiltersInstallHelper {
   /**
    * Remove the errant views_autocomplete_filters dependency from Views.
    */
-  public function removeDependency() {
-
+  public function removeDependency(): void {
     $view_names = $this->configStorage->listAll('views.view');
     foreach ($view_names as $name) {
       $dependencies = $this->configFactory->get($name)->get('dependencies.module');

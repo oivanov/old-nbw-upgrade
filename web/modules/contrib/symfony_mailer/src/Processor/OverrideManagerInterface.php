@@ -59,7 +59,7 @@ interface OverrideManagerInterface {
    *   - import_warning: Human-readable warning for the import operation.
    *   - action_names: Array of human-readable action names.
    */
-  public function getInfo(string $filterId = NULL);
+  public function getInfo(?string $filterId = NULL);
 
   /**
    * Executes an override action.

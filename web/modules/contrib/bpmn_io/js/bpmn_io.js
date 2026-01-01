@@ -72,15 +72,23 @@
   Drupal.bpmn_io.export = async function () {
     $('.messages-list').empty();
     let result = await Drupal.bpmn_io.modeller.saveXML({ format: true });
-    let request = Drupal.ajax({
-      url: drupalSettings.bpmn_io.save_url,
-      submit: result.xml,
-      progress: {
-        type: 'fullscreen',
-        message: Drupal.t('Saving model...'),
-      },
-    });
-    request.execute();
+    let response = await fetch(drupalSettings.bpmn_io.token_url);
+    if (response.ok) {
+      let token = await response.text();
+      let request = Drupal.ajax({
+        url: drupalSettings.bpmn_io.save_url,
+        submit: result.xml,
+        beforeSend: function (xhr) {
+          xhr.overrideMimeType("application/json;charset=UTF-8");
+          xhr.setRequestHeader("X-CSRF-Token", token);
+        },
+        progress: {
+          type: 'fullscreen',
+          message: Drupal.t('Saving model...'),
+        },
+      });
+      request.execute();
+    }
     Drupal.bpmn_io.prepareMessages();
   };
 

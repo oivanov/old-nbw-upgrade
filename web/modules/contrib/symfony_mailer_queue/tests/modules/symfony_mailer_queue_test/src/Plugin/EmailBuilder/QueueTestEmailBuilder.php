@@ -6,7 +6,7 @@ use Drupal\symfony_mailer\EmailInterface;
 use Drupal\symfony_mailer\Processor\EmailBuilderBase;
 
 /**
- * Defines the Email Builder plug-in for queue test mails.
+ * Defines the email builder plug-in for queue test mails.
  *
  * @EmailBuilder(
  *   id = "symfony_mailer_queue",

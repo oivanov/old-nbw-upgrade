@@ -5,9 +5,10 @@ core_version_requirement: ^10.3 || ^11
 package: Mail
 configure: entity.mailer_policy.collection
 dependencies:
+  - symfony_mailer:mailer_transport
   - drupal:filter
 
-# Information added by Drupal.org packaging script on 2024-08-15
-version: '1.5.0'
+# Information added by Drupal.org packaging script on 2025-06-27
+version: '1.6.2'
 project: 'symfony_mailer'
-datestamp: 1723738389
+datestamp: 1751013033

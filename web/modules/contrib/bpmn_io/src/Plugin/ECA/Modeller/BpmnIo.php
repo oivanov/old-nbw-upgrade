@@ -105,6 +105,7 @@ class BpmnIo extends ModellerBpmnBase {
             'bpmn' => $this->eca->getModel()->getModeldata(),
             'templates' => $this->getTemplates(),
             'save_url' => Url::fromRoute('eca.save', ['modeller_id' => 'bpmn_io'])->toString(),
+            'token_url' => Url::fromRoute('system.csrftoken')->toString(),
             'collection_url' => Url::fromRoute('entity.eca.collection')->toString(),
           ],
         ],

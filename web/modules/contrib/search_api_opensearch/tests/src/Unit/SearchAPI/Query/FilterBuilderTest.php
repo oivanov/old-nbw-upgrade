@@ -77,7 +77,7 @@ class FilterBuilderTest extends UnitTestCase {
   /**
    * Provides test data for term provider.
    */
-  public function filterTermProvider(): array {
+  public static function filterTermProvider(): array {
     return [
       'not equals with null value' => [
         'value' => NULL,

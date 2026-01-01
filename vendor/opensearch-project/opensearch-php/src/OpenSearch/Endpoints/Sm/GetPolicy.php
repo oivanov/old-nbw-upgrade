@@ -27,7 +27,7 @@ class GetPolicy extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $policy_name = $this->policy_name ?? null;
+        $policy_name = $this->policy_name ? rawurlencode($this->policy_name) : null;
         if (isset($policy_name)) {
             return "/_plugins/_sm/policies/$policy_name";
         }

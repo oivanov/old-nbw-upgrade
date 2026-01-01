@@ -28,7 +28,7 @@ class Warmup extends AbstractEndpoint
         if (!isset($this->index) || $this->index === '') {
             throw new RuntimeException('index is required for warmup');
         }
-        $index = $this->index;
+        $index = rawurlencode($this->index);
 
         return "/_plugins/_knn/warmup/$index";
     }

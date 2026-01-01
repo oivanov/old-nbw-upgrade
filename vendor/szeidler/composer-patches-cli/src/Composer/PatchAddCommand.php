@@ -2,6 +2,9 @@
 
 namespace szeidler\ComposerPatchesCLI\Composer;
 
+use Composer\DependencyResolver\Request;
+use Composer\Installer;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -9,9 +12,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonManipulator;
-use Composer\Installer;
-use Composer\Plugin\PluginInterface;
-use Composer\DependencyResolver\Request;
 
 class PatchAddCommand extends PatchBaseCommand {
 
@@ -30,7 +30,7 @@ class PatchAddCommand extends PatchBaseCommand {
    */
   const PATCH_DUPE_EXISTS = 3;
 
-  protected function configure() {
+  protected function configure(): void {
     $this->setName('patch-add')
       ->setDescription('Adds a patch to a composer patch file.')
       ->setDefinition([
@@ -44,7 +44,7 @@ class PatchAddCommand extends PatchBaseCommand {
     parent::configure();
   }
 
-  protected function interact(InputInterface $input, OutputInterface $output) {
+  protected function interact(InputInterface $input, OutputInterface $output): void {
     $dialog = $this->getHelperSet()->get('question');
     if (!$input->getArgument('package')) {
       $question = new Question('Specify the package name to be patched: ');
@@ -64,7 +64,7 @@ class PatchAddCommand extends PatchBaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $extra = $extra = $this->getComposer()->getPackage()->getExtra();
+    $extra = $extra = $this->requireComposer()->getPackage()->getExtra();
     $package = $input->getArgument('package');
     $description = $input->getArgument('description');
     $url = $input->getArgument('url');
@@ -78,9 +78,19 @@ class PatchAddCommand extends PatchBaseCommand {
     if ($this->getPatchType() === self::PATCHTYPE_ROOT) {
       $manipulator_filename = 'composer.json';
       $json_node = 'extra';
+      $json_name = 'composer-patches.patches';
+    }
+    elseif ($this->getPatchType() === self::PATCHTYPE_ROOT_CP1) {
+      $manipulator_filename = 'composer.json';
+      $json_node = 'extra';
       $json_name = 'patches';
     }
     elseif ($this->getPatchType() === self::PATCHTYPE_FILE) {
+      $manipulator_filename = $extra['composer-patches']['patches-file'];
+      $json_node = null;
+      $json_name = 'patches';
+    }
+    elseif ($this->getPatchType() === self::PATCHTYPE_FILE_CP1) {
       $manipulator_filename = $extra['patches-file'];
       $json_node = null;
       $json_name = 'patches';
@@ -131,46 +141,20 @@ class PatchAddCommand extends PatchBaseCommand {
 
     // Store the manipulated JSON file.
     if (!file_put_contents($manipulator_filename, $manipulator->getContents())) {
-      throw new \Exception($extra['patches-file'] . ' file could not be saved. Please check the permissions.');
+      throw new \Exception($manipulator_filename . ' file could not be saved. Please check the permissions.');
     }
     $output->writeln('The patch was successfully added.');
 
     if (!$input->getOption('no-update')) {
-      // Trigger install command after adding a patch.
-      $install = Installer::create($this->getIO(), $this->getComposer());
-
-      // We run an update, because the patch will otherwise not end up in the
-      // composer.lock. Beware: This could update the package unwanted.
-      // Support Composer 1 and Composer 2 methods.
-      switch (PluginInterface::PLUGIN_API_VERSION) {
-        case '1.1.0':
-          $install->setUpdate(TRUE)
-            // Forward the option
-            ->setVerbose($input->getOption('verbose'))
-            // Only update the current package
-            ->setUpdateWhitelist([$package])
-            // Don't update the dependencies of the patched package.
-            ->setWhitelistTransitiveDependencies(FALSE)
-            ->setWhitelistAllDependencies(FALSE)
-            // Patches are always considered to be applied in "dev mode".
-            // This is also required to prevent composer from removing all installed
-            // dev dependencies.
-            ->setDevMode($updateDevMode)
-            ->run();
-          break;
-        default:
-          $install->setUpdate(TRUE)
-            // Forward the option
-            ->setVerbose($input->getOption('verbose'))
-            // Only update the current package
-            ->setUpdateAllowList([$package])
-            // Don't update the dependencies of the patched package.
-            ->setUpdateAllowTransitiveDependencies(Request::UPDATE_LISTED_WITH_TRANSITIVE_DEPS_NO_ROOT_REQUIRE)
-            // Patches are always considered to be applied in "dev mode".
-            // This is also required to prevent composer from removing all installed
-            // dev dependencies.
-            ->setDevMode($updateDevMode)
-            ->run();
+      if ($this->isComposerPatches1()) {
+        // Trigger install command after adding a patch.
+        $this->runReinstall($package, $updateDevMode);
+      }
+      else {
+        $output->writeln('<info>Relocking patches...</info>');
+        $this->runPatchesRelock();
+        $output->writeln('<info>Repatching dependencies...</info>');
+        $this->runRepatch();
       }
     }
 

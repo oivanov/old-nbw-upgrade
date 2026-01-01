@@ -80,7 +80,7 @@ class OpensearchConnectorBackendTest extends BrowserTestBase {
 
     // Assert error produced on "search_api.overview" route is logged.
     $this->drupalGet('/admin/reports/dblog');
-    $assert_session->pageTextContains('OpenSearch\Common\Exceptions\NoNodesAvailableException');
+    $assert_session->pageTextContains('ConnectException');
   }
 
 }

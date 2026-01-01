@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Utility\Utility as SearchApiUtility;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Provides a param builder for 'More Like This' queries.
@@ -19,16 +20,9 @@ class MoreLikeThisParamBuilder {
    */
   protected array $requiredKeys = ['id', 'fields'];
 
-  /**
-   * Constructs a More Like This parameter builder.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
-   */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
+    #[Autowire(service: 'logger.channel.search_api_opensearch')]
     protected LoggerInterface $logger,
   ) {
   }

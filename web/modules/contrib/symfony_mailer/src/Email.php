@@ -4,6 +4,7 @@ namespace Drupal\symfony_mailer;
 
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Render\PlainTextOutput;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -234,7 +235,15 @@ class Email implements InternalEmailInterface {
   /**
    * {@inheritdoc}
    */
-  public function addProcessor(callable $function, int $phase = self::PHASE_BUILD, int $weight = self::DEFAULT_WEIGHT, string $id = NULL) {
+  public function addProcessor(callable $function, int $phase = self::PHASE_BUILD, int $weight = self::DEFAULT_WEIGHT, ?string $id = NULL) {
+    @trigger_error('Email::addProcessor() is deprecated in symfony_mailer:1.6.0 and is removed from symfony_mailer:2.0.0. Instead you should use Email::addCallback(). See https://www.drupal.org/node/3501754', E_USER_DEPRECATED);
+    return $this->addCallback($function, $phase, $weight, $id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addCallback(callable $function, int $phase = self::PHASE_BUILD, int $weight = self::DEFAULT_WEIGHT, ?string $id = NULL) {
     $this->valid(self::PHASE_INIT, self::PHASE_INIT);
     $this->processors[$phase][] = [
       'function' => $function,
@@ -416,7 +425,10 @@ class Email implements InternalEmailInterface {
    * {@inheritdoc}
    */
   public function setTheme(string $theme_name) {
-    $this->valid(self::PHASE_BUILD);
+    $this->valid(self::PHASE_BUILD, self::PHASE_INIT);
+    if ($this->phase == self::PHASE_BUILD) {
+      @trigger_error('Calling \Drupal\symfony_mailer\Email::setTheme() in the build phase is deprecated in symfony_mailer:1.6.0 and will fail in symfony_mailer:2.0.0. Call it in the initialisation phase instead. See https://www.drupal.org/node/3501754', E_USER_DEPRECATED);
+    }
     $this->theme = $theme_name;
     return $this;
   }
@@ -561,6 +573,7 @@ class Email implements InternalEmailInterface {
       $this->inner->subject($this->subject);
     }
 
+    // Addresses.
     $this->inner->sender($this->sender->getSymfony());
     $headers = $this->getHeaders();
     foreach ($this->addresses as $name => $addresses) {
@@ -572,6 +585,33 @@ class Email implements InternalEmailInterface {
         // Convert headers to camel case.
         $headers->addMailboxListHeader(ucwords($name, '-'), $value);
       }
+    }
+
+    // Attachments.
+    foreach ($this->attachments as $attachment) {
+      if ($attachment->hasAccess()) {
+        $this->inner->addPart($attachment);
+        if (($attachment->getMediaType() == 'image') && ($attachment->getUri() != NULL)) {
+          $replace_uri = TRUE;
+        }
+      }
+    }
+
+    if (isset($replace_uri) && $body = $this->getHtmlBody()) {
+      $dom = Html::load($body);
+
+      foreach ($dom->getElementsByTagName('img') as $img) {
+        $uri = $img->getAttribute('src');
+
+        if ($attach = $this->attachments[$uri] ?? NULL) {
+          $img->setAttribute('src', 'cid:' . $attach->getContentId());
+        }
+      }
+
+      $body = Html::serialize($dom);
+      $this->phase = self::PHASE_POST_RENDER;
+      $this->setHtmlBody($body);
+      $this->phase = self::PHASE_POST_SEND;
     }
 
     return $this->inner;

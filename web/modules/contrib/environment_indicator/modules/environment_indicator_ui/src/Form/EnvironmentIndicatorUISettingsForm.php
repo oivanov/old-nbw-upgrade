@@ -2,8 +2,8 @@
 
 namespace Drupal\environment_indicator_ui\Form;
 
-use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**

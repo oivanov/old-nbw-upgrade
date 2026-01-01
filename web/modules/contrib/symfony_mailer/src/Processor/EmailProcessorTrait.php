@@ -14,7 +14,7 @@ trait EmailProcessorTrait {
    */
   public function init(EmailInterface $email) {
     foreach (self::FUNCTION_NAMES as $phase => $function) {
-      $email->addProcessor([$this, $function], $phase, $this->getWeight($phase), $this->getId());
+      $email->addCallback([$this, $function], $phase, $this->getWeight($phase), $this->getId());
     }
   }
 

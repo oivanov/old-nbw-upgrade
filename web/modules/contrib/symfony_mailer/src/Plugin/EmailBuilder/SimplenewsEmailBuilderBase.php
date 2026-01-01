@@ -19,7 +19,8 @@ class SimplenewsEmailBuilderBase extends EmailBuilderBase {
   /**
    * {@inheritdoc}
    */
-  public function build(EmailInterface $email) {
+  public function init(EmailInterface $email) {
+    parent::init($email);
     // @todo Add a method SubscriberInterface::getAddress().
     $subscriber = $email->getParam('simplenews_subscriber');
     $address = new Address($subscriber->getMail(), NULL, $subscriber->getLangcode(), $subscriber->getUser());

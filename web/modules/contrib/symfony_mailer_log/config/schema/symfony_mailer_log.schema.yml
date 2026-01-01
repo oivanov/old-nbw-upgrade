@@ -1,9 +1,13 @@
+symfony_mailer.email_adjuster_plugin.symfony_mailer_log:
+  type: mapping
+  label: 'Symfony Mailer log'
+
 symfony_mailer_log.settings:
   type: config_object
   label: 'Symfony Mailer log settings'
   mapping:
     log_expiry:
-      type: config_object
+      type: mapping
       label: 'Configuration regarding log expiry'
       mapping:
         max_age:

@@ -64,7 +64,7 @@ class TextFormat extends WebformElementBase {
   /**
    * {@inheritdoc}
    */
-  public function prepare(array &$element, WebformSubmissionInterface $webform_submission = NULL) {
+  public function prepare(array &$element, ?WebformSubmissionInterface $webform_submission = NULL) {
     parent::prepare($element, $webform_submission);
     $this->setElementDefaultCallback($element, 'process');
 
@@ -392,17 +392,6 @@ class TextFormat extends WebformElementBase {
 
     $uuids = _webform_parse_file_uuids($value['value']);
     _webform_delete_file_usage($uuids, $webform_submission->getEntityTypeId(), $webform_submission->id(), 0);
-  }
-
-  /**
-   * Check if composite element exists.
-   *
-   * @return bool
-   *   TRUE if composite element exists.
-   */
-  public function hasCompositeElement(array $element, $key) {
-    $elements = $this->getCompositeElements();
-    return (isset($elements[$key])) ? TRUE : FALSE;
   }
 
 }

@@ -2,10 +2,10 @@
 
 namespace Drupal\symfony_mailer\Plugin\EmailBuilder;
 
-use Drupal\contact\Entity\ContactForm;
-use Drupal\contact\MessageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\contact\Entity\ContactForm;
+use Drupal\contact\MessageInterface;
 use Drupal\symfony_mailer\EmailFactoryInterface;
 use Drupal\symfony_mailer\EmailInterface;
 use Drupal\symfony_mailer\Entity\MailerPolicy;
@@ -53,7 +53,7 @@ class ContactPageEmailBuilder extends ContactEmailBuilderBase {
    * @param \Drupal\Core\Session\AccountInterface $sender
    *   The sender.
    */
-  public function createParams(EmailInterface $email, MessageInterface $message = NULL, AccountInterface $sender = NULL) {
+  public function createParams(EmailInterface $email, ?MessageInterface $message = NULL, ?AccountInterface $sender = NULL) {
     assert($sender != NULL);
     $email->setParam('contact_message', $message)
       ->setParam('sender', $sender);

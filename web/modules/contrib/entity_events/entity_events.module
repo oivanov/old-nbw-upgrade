@@ -55,6 +55,18 @@ function entity_events_entity_delete(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_entity_predelete().
+ *
+ * {@inheritdoc}
+ */
+function entity_events_entity_predelete(EntityInterface $entity) {
+  $event_type = EntityEventType::PREDELETE;
+  $event = new EntityEvent($event_type, $entity);
+  _entity_events_dispatch($event_type, $event);
+}
+
+
+/**
  * Helper method to dispatch an event.
  *
  * @param string $event_type

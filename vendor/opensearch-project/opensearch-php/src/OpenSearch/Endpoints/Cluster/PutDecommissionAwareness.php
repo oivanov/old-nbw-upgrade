@@ -28,8 +28,8 @@ class PutDecommissionAwareness extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $awareness_attribute_name = $this->awareness_attribute_name ?? null;
-        $awareness_attribute_value = $this->awareness_attribute_value ?? null;
+        $awareness_attribute_name = $this->awareness_attribute_name ? rawurlencode($this->awareness_attribute_name) : null;
+        $awareness_attribute_value = $this->awareness_attribute_value ? rawurlencode($this->awareness_attribute_value) : null;
         if (isset($awareness_attribute_name) && isset($awareness_attribute_value)) {
             return "/_cluster/decommission/awareness/$awareness_attribute_name/$awareness_attribute_value";
         }

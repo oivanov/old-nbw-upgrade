@@ -55,7 +55,7 @@ class Address implements AddressInterface {
    * @param \Drupal\Core\Session\AccountInterface $account
    *   (Optional) The account.
    */
-  public function __construct(string $email, string $display_name = NULL, string $langcode = NULL, AccountInterface $account = NULL) {
+  public function __construct(string $email, ?string $display_name = NULL, ?string $langcode = NULL, ?AccountInterface $account = NULL) {
     $this->email = $email;
     $this->displayName = $display_name;
     $this->langcode = $langcode;

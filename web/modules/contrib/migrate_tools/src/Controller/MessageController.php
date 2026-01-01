@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\migrate_tools\Controller;
 
@@ -19,29 +19,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Returns responses for migrate_tools message routes.
+ *
+ * @phpstan-consistent-constructor
  */
 class MessageController extends ControllerBase {
 
-  protected Connection $database;
-  protected MigrationPluginManagerInterface $migrationPluginManager;
-
-  /**
-   * Constructs a MessageController object.
-   *
-   * @param \Drupal\Core\Database\Connection $database
-   *   A database connection.
-   * @param \Drupal\migrate\Plugin\MigrationPluginManagerInterface $migration_plugin_manager
-   *   The migration plugin manager.
-   */
-  public function __construct(Connection $database, MigrationPluginManagerInterface $migration_plugin_manager) {
-    $this->database = $database;
-    $this->migrationPluginManager = $migration_plugin_manager;
-  }
+  public function __construct(
+    protected Connection $database,
+    protected MigrationPluginManagerInterface $migrationPluginManager,
+  ) {}
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container): self {
+  public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('database'),
       $container->get('plugin.manager.migration')
@@ -82,7 +73,7 @@ class MessageController extends ControllerBase {
     $rows = [];
     $classes = static::getLogLevelClassMap();
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration_plugin */
-    $migration_plugin = $this->migrationPluginManager->createInstance($migration->id(), $migration->toArray());
+    $migration_plugin = $this->migrationPluginManager->createInstance($migration->id());
     $source_id_field_names = array_keys($migration_plugin->getSourcePlugin()->getIds());
     $column_number = 1;
     foreach ($source_id_field_names as $source_id_field_name) {

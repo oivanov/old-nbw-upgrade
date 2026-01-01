@@ -33,8 +33,8 @@ class Index extends AbstractEndpoint
         if (!isset($this->index) || $this->index === '') {
             throw new RuntimeException('index is required for index');
         }
-        $index = $this->index;
-        $id = $this->id ?? null;
+        $index = rawurlencode($this->index);
+        $id = $this->id ? rawurlencode($this->id) : null;
         if (isset($id)) {
             return "/$index/_doc/$id";
         }

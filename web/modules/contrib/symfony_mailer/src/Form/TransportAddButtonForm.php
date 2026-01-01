@@ -49,6 +49,7 @@ class TransportAddButtonForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $options = [];
     foreach ($this->manager->getDefinitions() as $id => $definition) {
       $options[$id] = $definition['label'];
     }

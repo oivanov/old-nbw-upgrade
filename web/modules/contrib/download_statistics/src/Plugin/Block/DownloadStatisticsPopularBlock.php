@@ -111,7 +111,7 @@ class DownloadStatisticsPopularBlock extends BlockBase implements ContainerFacto
     if (\Drupal::config('download_statistics.settings')->get('count_file_downloads')) {
       return AccessResult::allowedIfHasPermission($account, 'view file download statistics');
     }
-    return FALSE;
+    return AccessResult::forbidden();
   }
 
   /**

@@ -107,6 +107,36 @@ trait MailerTestTrait {
   }
 
   /**
+   * Checks for the specified attachment on the most recently sent email.
+   *
+   * @param ?string $uri
+   *   The URI.
+   * @param ?string $name
+   *   The name.
+   * @param ?string $mimeType
+   *   The MIME type.
+   * @param bool $access
+   *   The access.
+   * @param bool $embed
+   *   If TRUE, then assert that this attachment is embedded.
+   *
+   * @return $this
+   */
+  public function assertAttachment(?string $uri = NULL, ?string $name = NULL, ?string $mimeType = NULL, bool $access = TRUE, bool $embed = FALSE): static {
+    $attachment = current(array_filter($this->email->getAttachments(), fn($a) => (($a->getUri() == $uri) && ($a->getName() == $name))));
+    $this->assertNotFalse($attachment);
+    if ($mimeType) {
+      $this->assertEquals($mimeType, $attachment->getContentType());
+    }
+    $this->assertEquals($access, $attachment->hasAccess());
+    if ($embed) {
+      $this->assertBodyContains('src="cid:' . $attachment->getContentId());
+    }
+
+    return $this;
+  }
+
+  /**
    * Checks 'to' address of the most recently sent email.
    *
    * @param string $email

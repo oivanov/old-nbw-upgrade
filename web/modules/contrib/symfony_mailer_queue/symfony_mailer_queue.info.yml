@@ -2,12 +2,11 @@ name: Symfony Mailer Queue
 type: module
 description: Implements a queue for Symfony mailer, handling both sending emails and configurable retries for failures.
 package: Mail
-configure: symfony_mailer_queue.settings
-core_version_requirement: ^10.1 || ^11
+core_version_requirement: ^10.3 || ^11
 dependencies:
   - symfony_mailer:symfony_mailer
 
-# Information added by Drupal.org packaging script on 2024-08-25
-version: '1.1.0'
+# Information added by Drupal.org packaging script on 2025-07-02
+version: '1.2.0'
 project: 'symfony_mailer_queue'
-datestamp: 1724602629
+datestamp: 1751424127

@@ -7,7 +7,7 @@ type: module
 dependencies:
   - drupal:symfony_mailer
 
-# Information added by Drupal.org packaging script on 2024-04-22
-version: '1.2.1'
+# Information added by Drupal.org packaging script on 2025-06-05
+version: '1.2.2'
 project: 'symfony_mailer_log'
-datestamp: 1713775853
+datestamp: 1749115761

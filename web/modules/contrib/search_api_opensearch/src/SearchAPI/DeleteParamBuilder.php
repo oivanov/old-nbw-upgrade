@@ -10,12 +10,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class DeleteParamBuilder {
 
-  /**
-   * Creates a new DeleteParamsBuilder.
-   *
-   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $eventDispatcher
-   *   The event dispatcher.
-   */
   public function __construct(
     protected EventDispatcherInterface $eventDispatcher,
   ) {

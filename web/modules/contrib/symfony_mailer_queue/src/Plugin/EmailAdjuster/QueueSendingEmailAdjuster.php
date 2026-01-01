@@ -3,6 +3,7 @@
 namespace Drupal\symfony_mailer_queue\Plugin\EmailAdjuster;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\symfony_mailer\EmailInterface;
@@ -26,9 +27,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class QueueSendingEmailAdjuster extends EmailAdjusterBase implements ContainerFactoryPluginInterface {
 
   /**
+   * The language manager.
+   */
+  protected LanguageManagerInterface $languageManager;
+
+  /**
    * The queue factory.
-   *
-   * @var \Drupal\Core\Queue\QueueFactory
    */
   protected QueueFactory $queueFactory;
 
@@ -37,6 +41,7 @@ class QueueSendingEmailAdjuster extends EmailAdjusterBase implements ContainerFa
    */
   public static function create(ContainerInterface $container, ...$defaults) {
     $instance = new static(...$defaults);
+    $instance->languageManager = $container->get('language_manager');
     $instance->queueFactory = $container->get('queue');
     return $instance;
   }
@@ -45,18 +50,41 @@ class QueueSendingEmailAdjuster extends EmailAdjusterBase implements ContainerFa
    * {@inheritdoc}
    */
   public function build(EmailInterface $email): void {
+
     if (!$email instanceof QueueableEmailInterface) {
       throw new \LogicException('Attempted to queue a non-queueable email.');
     }
+
     if (!$email->isInQueue()) {
+
       $queue = $this->queueFactory->get(SymfonyMailerQueueWorker::QUEUE_NAME, TRUE);
+
+      // The email will be sent by the queue worker, which typically runs in an
+      // environment where the default site language is used. To ensure the
+      // email is delivered in the correct language, we explicitly pass the
+      // current language here.
+      $current_langcode = $this->languageManager->getCurrentLanguage()->getId();
+
       $item = new SymfonyMailerQueueItem(
         $email->getType(),
         $email->getSubType(),
-        $email->getParams(),
+        $email->getOriginalParams(),
+        $email->getVariables(),
+        $email->getInner(),
+        $email->getAddresses(),
+        $email->getSender(),
+        $email->getSubject(),
+        $email->getSubjectReplace(),
+        $email->getBody(),
+        $email->getTheme(),
+        $email->getTransportDsn(),
+        $email->getEntity(),
+        $current_langcode,
         $this->configuration,
       );
+
       $queue->createItem($item);
+
       throw new SkipMailException('The email was queued for sending');
     }
   }

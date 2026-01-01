@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\search_api_opensearch\Unit\SearchAPI\Query;
 
 use Drupal\Tests\UnitTestCase;

@@ -41,7 +41,7 @@ class SimplenewsEmailBuilder extends SimplenewsEmailBuilderBase {
    * @param \Drupal\simplenews\SubscriberInterface $subscriber
    *   The subscriber.
    */
-  public function createParams(EmailInterface $email, SubscriberInterface $subscriber = NULL) {
+  public function createParams(EmailInterface $email, ?SubscriberInterface $subscriber = NULL) {
     assert($subscriber != NULL);
     $email->setParam('simplenews_subscriber', $subscriber);
   }

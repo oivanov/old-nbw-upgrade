@@ -111,7 +111,7 @@ abstract class WrapperEntityBase extends ConfigEntityBase implements EntityWithP
   /**
    * {@inheritdoc}
    */
-  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation, AccountInterface|null $account = NULL, $return_as_object = FALSE) {
     if ($operation == "update" || $operation == "delete") {
       $info = $this->getPluginDefinition();
       if (!empty($info['locked'])) {

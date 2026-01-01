@@ -22,9 +22,9 @@ function hook_mailer_PHASE(EmailInterface $email) {
   (new CustomEmailProcessor())->init($email);
   $config = ['message' => 'Unpopular user skipped'];
   Drupal::service('plugin.manager.email_adjuster')->createInstance('email_skip_sending', $config)->init($email);
+  $email->setTo('user@example.com');
 
   // hook_mailer_build():
-  $email->setTo('user@example.com');
   $body = $email->getBody();
   $body['extra'] = ['#markup' => 'Extra text'];
   $email->setBody($body);

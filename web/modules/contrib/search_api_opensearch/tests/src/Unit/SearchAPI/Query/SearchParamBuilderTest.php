@@ -99,7 +99,7 @@ class SearchParamBuilderTest extends UnitTestCase {
    * @return array
    *   The data.
    */
-  public function buildSearchStringDataProvider(): array {
+  public static function buildSearchStringDataProvider(): array {
     // @codingStandardsIgnoreStart
     return [
       'normal keywords' => [

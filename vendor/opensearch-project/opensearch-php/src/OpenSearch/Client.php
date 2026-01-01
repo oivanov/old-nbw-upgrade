@@ -31,14 +31,18 @@ use OpenSearch\Namespaces\ClusterNamespace;
 use OpenSearch\Namespaces\DanglingIndicesNamespace;
 use OpenSearch\Namespaces\DataFrameTransformDeprecatedNamespace;
 use OpenSearch\Namespaces\FlowFrameworkNamespace;
+use OpenSearch\Namespaces\GeospatialNamespace;
 use OpenSearch\Namespaces\IndicesNamespace;
 use OpenSearch\Namespaces\IngestNamespace;
+use OpenSearch\Namespaces\IngestionNamespace;
 use OpenSearch\Namespaces\InsightsNamespace;
 use OpenSearch\Namespaces\IsmNamespace;
 use OpenSearch\Namespaces\KnnNamespace;
 use OpenSearch\Namespaces\ListNamespace;
+use OpenSearch\Namespaces\LtrNamespace;
 use OpenSearch\Namespaces\MlNamespace;
 use OpenSearch\Namespaces\MonitoringNamespace;
+use OpenSearch\Namespaces\NeuralNamespace;
 use OpenSearch\Namespaces\NodesNamespace;
 use OpenSearch\Namespaces\NotificationsNamespace;
 use OpenSearch\Namespaces\ObservabilityNamespace;
@@ -48,14 +52,17 @@ use OpenSearch\Namespaces\RemoteStoreNamespace;
 use OpenSearch\Namespaces\ReplicationNamespace;
 use OpenSearch\Namespaces\RollupsNamespace;
 use OpenSearch\Namespaces\SearchPipelineNamespace;
+use OpenSearch\Namespaces\SearchRelevanceNamespace;
 use OpenSearch\Namespaces\SearchableSnapshotsNamespace;
 use OpenSearch\Namespaces\SecurityNamespace;
+use OpenSearch\Namespaces\SecurityAnalyticsNamespace;
 use OpenSearch\Namespaces\SmNamespace;
 use OpenSearch\Namespaces\SnapshotNamespace;
 use OpenSearch\Namespaces\SqlNamespace;
 use OpenSearch\Namespaces\SslNamespace;
 use OpenSearch\Namespaces\TasksNamespace;
 use OpenSearch\Namespaces\TransformsNamespace;
+use OpenSearch\Namespaces\UbiNamespace;
 use OpenSearch\Namespaces\WlmNamespace;
 use OpenSearch\Endpoints\Bulk;
 use OpenSearch\Endpoints\BulkStream;
@@ -178,6 +185,11 @@ class Client
     protected $flowFramework;
 
     /**
+     * @var GeospatialNamespace
+     */
+    protected $geospatial;
+
+    /**
      * @var IndicesNamespace
      */
     protected $indices;
@@ -186,6 +198,11 @@ class Client
      * @var IngestNamespace
      */
     protected $ingest;
+
+    /**
+     * @var IngestionNamespace
+     */
+    protected $ingestion;
 
     /**
      * @var InsightsNamespace
@@ -208,6 +225,11 @@ class Client
     protected $list;
 
     /**
+     * @var LtrNamespace
+     */
+    protected $ltr;
+
+    /**
      * @var MlNamespace
      */
     protected $ml;
@@ -218,6 +240,11 @@ class Client
      * @deprecated in 2.4.2 and will be removed in 3.0.0.
      */
     protected $monitoring;
+
+    /**
+     * @var NeuralNamespace
+     */
+    protected $neural;
 
     /**
      * @var NodesNamespace
@@ -265,6 +292,11 @@ class Client
     protected $searchPipeline;
 
     /**
+     * @var SearchRelevanceNamespace
+     */
+    protected $searchRelevance;
+
+    /**
      * @var SearchableSnapshotsNamespace
      *
      * @deprecated in 2.4.2 and will be removed in 3.0.0.
@@ -275,6 +307,11 @@ class Client
      * @var SecurityNamespace
      */
     protected $security;
+
+    /**
+     * @var SecurityAnalyticsNamespace
+     */
+    protected $securityAnalytics;
 
     /**
      * @var SmNamespace
@@ -309,6 +346,11 @@ class Client
     protected $transforms;
 
     /**
+     * @var UbiNamespace
+     */
+    protected $ubi;
+
+    /**
      * @var WlmNamespace
      */
     protected $wlm;
@@ -317,14 +359,14 @@ class Client
      * Client constructor
      *
      * @param TransportInterface|Transport $transport
-     * @param callable|EndpointFactoryInterface $endpointFactory
+     * @param callable|EndpointFactoryInterface|null $endpointFactory
      * @param NamespaceBuilderInterface[] $registeredNamespaces
      *
      * @phpstan-ignore parameter.deprecatedClass
      */
     public function __construct(
         TransportInterface|Transport $transport,
-        callable|EndpointFactoryInterface $endpointFactory,
+        callable|EndpointFactoryInterface|null $endpointFactory = null,
         array $registeredNamespaces = [],
     ) {
         if (!$transport instanceof TransportInterface) {
@@ -336,17 +378,22 @@ class Client
         } else {
             $this->httpTransport = $transport;
         }
+
         if (is_callable($endpointFactory)) {
             @trigger_error('Passing a callable as the $endpointFactory param in ' . __METHOD__ . ' is deprecated in 2.4.0 and will be removed in 3.0.0. Pass an instance of \OpenSearch\EndpointFactoryInterface instead.', E_USER_DEPRECATED);
             $endpoints = $endpointFactory;
             // @phpstan-ignore new.deprecated
             $endpointFactory = new LegacyEndpointFactory($endpointFactory);
         } else {
+            if ($endpointFactory === null) {
+                $endpointFactory = new EndpointFactory();
+            }
             $endpoints = function ($c) use ($endpointFactory) {
                 @trigger_error('The $endpoints property is deprecated in 2.4.0 and will be removed in 3.0.0.', E_USER_DEPRECATED);
                 return $endpointFactory->getEndpoint('OpenSearch\\Endpoints\\' . $c);
             };
         }
+
         // @phpstan-ignore property.deprecated
         $this->endpoints = $endpoints;
         $this->endpointFactory = $endpointFactory;
@@ -359,15 +406,19 @@ class Client
         // @phpstan-ignore new.deprecated, property.deprecated
         $this->dataFrameTransformDeprecated = new DataFrameTransformDeprecatedNamespace($transport, $this->endpointFactory);
         $this->flowFramework = new FlowFrameworkNamespace($transport, $this->endpointFactory);
+        $this->geospatial = new GeospatialNamespace($transport, $this->endpointFactory);
         $this->indices = new IndicesNamespace($transport, $this->endpointFactory);
         $this->ingest = new IngestNamespace($transport, $this->endpointFactory);
+        $this->ingestion = new IngestionNamespace($transport, $this->endpointFactory);
         $this->insights = new InsightsNamespace($transport, $this->endpointFactory);
         $this->ism = new IsmNamespace($transport, $this->endpointFactory);
         $this->knn = new KnnNamespace($transport, $this->endpointFactory);
         $this->list = new ListNamespace($transport, $this->endpointFactory);
+        $this->ltr = new LtrNamespace($transport, $this->endpointFactory);
         $this->ml = new MlNamespace($transport, $this->endpointFactory);
         // @phpstan-ignore new.deprecated, property.deprecated
         $this->monitoring = new MonitoringNamespace($transport, $this->endpointFactory);
+        $this->neural = new NeuralNamespace($transport, $this->endpointFactory);
         $this->nodes = new NodesNamespace($transport, $this->endpointFactory);
         $this->notifications = new NotificationsNamespace($transport, $this->endpointFactory);
         $this->observability = new ObservabilityNamespace($transport, $this->endpointFactory);
@@ -377,9 +428,11 @@ class Client
         $this->replication = new ReplicationNamespace($transport, $this->endpointFactory);
         $this->rollups = new RollupsNamespace($transport, $this->endpointFactory);
         $this->searchPipeline = new SearchPipelineNamespace($transport, $this->endpointFactory);
+        $this->searchRelevance = new SearchRelevanceNamespace($transport, $this->endpointFactory);
         // @phpstan-ignore new.deprecated, property.deprecated
         $this->searchableSnapshots = new SearchableSnapshotsNamespace($transport, $this->endpointFactory);
         $this->security = new SecurityNamespace($transport, $this->endpointFactory);
+        $this->securityAnalytics = new SecurityAnalyticsNamespace($transport, $this->endpointFactory);
         $this->sm = new SmNamespace($transport, $this->endpointFactory);
         $this->snapshot = new SnapshotNamespace($transport, $this->endpointFactory);
         $this->sql = new SqlNamespace($transport, $this->endpointFactory);
@@ -387,6 +440,7 @@ class Client
         $this->ssl = new SslNamespace($transport, $this->endpointFactory);
         $this->tasks = new TasksNamespace($transport, $this->endpointFactory);
         $this->transforms = new TransformsNamespace($transport, $this->endpointFactory);
+        $this->ubi = new UbiNamespace($transport, $this->endpointFactory);
         $this->wlm = new WlmNamespace($transport, $this->endpointFactory);
 
         $this->registeredNamespaces = $registeredNamespaces;
@@ -402,14 +456,14 @@ class Client
      * $params['pipeline']               = (string) ID of the pipeline to use to preprocess incoming documents.If the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.If a final pipeline is configured it will always run, regardless of the value of this parameter.
      * $params['refresh']                = (any) If `true`, OpenSearch refreshes the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` do nothing with refreshes.Valid values: `true`, `false`, `wait_for`.
      * $params['require_alias']          = (boolean) If `true`, the request's actions must target an index alias. (Default = false)
-     * $params['routing']                = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                = (string) A custom value used to route operations to a specific shard.
      * $params['timeout']                = (string) Period each action waits for the following operations: automatic index creation, dynamic mapping updates, waiting for active shards.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operation.Set to all or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                   = (array) The operation definition and data (action-data pairs), separated by newlines (Required)
      *
      * @param array $params Associative array of parameters
@@ -440,14 +494,14 @@ class Client
      * $params['pipeline']               = (string) ID of the pipeline to use to preprocess incoming documents.If the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.If a final pipeline is configured it will always run, regardless of the value of this parameter.
      * $params['refresh']                = (any) If `true`, OpenSearch refreshes the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` do nothing with refreshes.Valid values: `true`, `false`, `wait_for`.
      * $params['require_alias']          = (boolean) If `true`, the request's actions must target an index alias. (Default = false)
-     * $params['routing']                = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                = (any) A custom value used to route operations to a specific shard.
      * $params['timeout']                = (string) Period each action waits for the following operations: automatic index creation, dynamic mapping updates, waiting for active shards.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operation.Set to all or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                   = (array) The operation definition and data (action-data pairs), separated by newlines (Required)
      *
      * @param array $params Associative array of parameters
@@ -469,13 +523,13 @@ class Client
     /**
      * Explicitly clears the search context for a scroll.
      *
-     * $params['scroll_id']   = DEPRECATED (array) Comma-separated list of scroll IDs to clear. To clear all scroll IDs, use `_all`.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['scroll_id']   = DEPRECATED (array) A comma-separated list of scroll IDs to clear. To clear all scroll IDs, use `_all`.
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
-     * $params['body']        = (array) Comma-separated list of scroll IDs to clear if none was specified using the `scroll_id` parameter
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
+     * $params['body']        = (array) A comma-separated list of scroll IDs to clear if none was specified using the `scroll_id` parameter
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -496,7 +550,7 @@ class Client
     /**
      * Returns number of documents matching a query.
      *
-     * $params['index']              = (array) Comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams and indexes, omit this parameter or use `*` or `_all`.
+     * $params['index']              = (array) A comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams and indexes, omit this parameter or use `*` or `_all`.
      * $params['allow_no_indices']   = (boolean) If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indexes.This behavior applies even if the request targets other open indexes.
      * $params['analyze_wildcard']   = (boolean) If `true`, wildcard and prefix queries are analyzed.This parameter can only be used when the `q` query string parameter is specified. (Default = false)
      * $params['analyzer']           = (string) Analyzer to use for the query string.This parameter can only be used when the `q` query string parameter is specified.
@@ -509,13 +563,13 @@ class Client
      * $params['min_score']          = (number) Sets the minimum `_score` value that documents must have to be included in the result.
      * $params['preference']         = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
      * $params['q']                  = (string) Query in the Lucene query string syntax.
-     * $params['routing']            = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']            = (any) A custom value used to route operations to a specific shard.
      * $params['terminate_after']    = (integer) Maximum number of documents to collect for each shard.If a query reaches this limit, OpenSearch terminates the query early.OpenSearch collects documents before sorting.
-     * $params['pretty']             = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']              = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']             = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']              = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']        = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']             = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']        = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']        = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']               = (array) Query to restrict the results specified with the Query DSL (optional)
      *
      * @param array $params Associative array of parameters
@@ -537,17 +591,17 @@ class Client
     /**
      * Creates point in time context.
      *
-     * $params['index']                      = (array) Comma-separated list of indexes; use `_all` or empty string to perform the operation on all indexes. (Required)
+     * $params['index']                      = (array) A comma-separated list of indexes; use `_all` or empty string to perform the operation on all indexes. (Required)
      * $params['allow_partial_pit_creation'] = (boolean) Allow if point in time can be created with partial failures.
      * $params['expand_wildcards']           = (any) Whether to expand wildcard expression to concrete indexes that are open, closed or both.
      * $params['keep_alive']                 = (string) Specify the keep alive for point in time.
      * $params['preference']                 = (string) Specify the node or shard the operation should be performed on. (Default = random)
-     * $params['routing']                    = (any) Comma-separated list of specific routing values.
-     * $params['pretty']                     = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                      = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['routing']                    = (any) A comma-separated list of specific routing values.
+     * $params['pretty']                     = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                      = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']                = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                     = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']                = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']                = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -566,21 +620,21 @@ class Client
     /**
      * Removes a document from the index.
      *
-     * $params['id']                     = (string) Unique identifier for the document. (Required)
+     * $params['id']                     = (string) The unique identifier for the document. (Required)
      * $params['index']                  = (string) Name of the target index. (Required)
      * $params['if_primary_term']        = (integer) Only perform the operation if the document has this primary term.
      * $params['if_seq_no']              = (integer) Only perform the operation if the document has this sequence number.
      * $params['refresh']                = (any) If `true`, OpenSearch refreshes the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` do nothing with refreshes.Valid values: `true`, `false`, `wait_for`.
-     * $params['routing']                = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                = (any) A custom value used to route operations to a specific shard.
      * $params['timeout']                = (string) Period to wait for active shards.
      * $params['version']                = (integer) Explicit version number for concurrency control.The specified version must match the current version of the document for the request to succeed.
-     * $params['version_type']           = (enum) Specific version type: `external`, `external_gte`. (Options = external,external_gte,force,internal)
+     * $params['version_type']           = (any) The specific version type: `external`, `external_gte`.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operation.Set to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -601,11 +655,11 @@ class Client
     /**
      * Deletes all active point in time searches.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -621,14 +675,14 @@ class Client
     /**
      * Deletes documents matching the provided query.
      *
-     * $params['index']                  = (array) Comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams or indexes, omit this parameter or use `*` or `_all`. (Required)
+     * $params['index']                  = (array) A comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams or indexes, omit this parameter or use `*` or `_all`. (Required)
      * $params['_source']                = (any) Set to `true` or `false` to return the `_source` field or not, or a list of fields to return.
      * $params['_source_excludes']       = (array) List of fields to exclude from the returned `_source` field.
      * $params['_source_includes']       = (array) List of fields to extract and return from the `_source` field.
      * $params['allow_no_indices']       = (boolean) If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indexes.This behavior applies even if the request targets other open indexes.For example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.
      * $params['analyze_wildcard']       = (boolean) If `true`, wildcard and prefix queries are analyzed. (Default = false)
      * $params['analyzer']               = (string) Analyzer to use for the query string.
-     * $params['conflicts']              = (enum) What to do if delete by query hits version conflicts: `abort` or `proceed`. (Options = abort,proceed)
+     * $params['conflicts']              = (any) What to do if delete by query hits version conflicts: `abort` or `proceed`.
      * $params['default_operator']       = (enum) The default operator for query string query: `AND` or `OR`. (Options = and,AND,or,OR)
      * $params['df']                     = (string) Field to use as default where no field prefix is given in the query string.
      * $params['expand_wildcards']       = (any) Type of index that wildcard patterns can match.If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams.Supports comma-separated values, such as `open,hidden`. Valid values are: `all`, `open`, `closed`, `hidden`, `none`.
@@ -641,7 +695,7 @@ class Client
      * $params['refresh']                = (any) If `true`, OpenSearch refreshes all shards involved in the delete by query after the request completes.
      * $params['request_cache']          = (boolean) If `true`, the request cache is used for this request.Defaults to the index-level setting.
      * $params['requests_per_second']    = (number) The throttle for this request in sub-requests per second. (Default = 0)
-     * $params['routing']                = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                = (any) A custom value used to route operations to a specific shard.
      * $params['scroll']                 = (string) Period to retain the search context for scrolling.
      * $params['scroll_size']            = (integer) Size of the scroll request that powers the operation. (Default = 100)
      * $params['search_timeout']         = (string) Explicit timeout for each search request.Defaults to no timeout.
@@ -655,11 +709,11 @@ class Client
      * $params['version']                = (boolean) If `true`, returns the document version as part of a hit.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operation.Set to all or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
      * $params['wait_for_completion']    = (boolean) If `true`, the request blocks until the operation is complete. (Default = true)
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                   = (array) The search definition using the Query DSL (Required)
      *
      * @param array $params Associative array of parameters
@@ -683,11 +737,11 @@ class Client
      *
      * $params['task_id']             = (string) The ID for the task. (Required)
      * $params['requests_per_second'] = (number) The throttle for this request in sub-requests per second.
-     * $params['pretty']              = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']               = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']              = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']               = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']         = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']              = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']         = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']         = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -706,11 +760,11 @@ class Client
     /**
      * Deletes one or more point in time searches based on the IDs passed.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']        = (array) The point-in-time ids to be deleted
      *
      * @param array $params Associative array of parameters
@@ -734,11 +788,11 @@ class Client
      * $params['cluster_manager_timeout'] = (string) Operation timeout for connection to cluster-manager node.
      * $params['master_timeout']          = (string) Period to wait for a connection to the cluster-manager node.If no response is received before the timeout expires, the request fails and returns an error.
      * $params['timeout']                 = (string) Period to wait for a response.If no response is received before the timeout expires, the request fails and returns an error.
-     * $params['pretty']                  = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                   = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                  = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                   = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']             = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                  = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']             = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']             = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -758,22 +812,22 @@ class Client
      * Returns information about whether a document exists in an index.
      *
      * $params['id']               = (string) Identifier of the document. (Required)
-     * $params['index']            = (string) Comma-separated list of data streams, indexes, and aliases. Supports wildcards (`*`). (Required)
+     * $params['index']            = (string) A comma-separated list of data streams, indexes, and aliases. Supports wildcards (`*`). (Required)
      * $params['_source']          = (any) `true` or `false` to return the `_source` field or not, or a list of fields to return.
      * $params['_source_excludes'] = (any) A comma-separated list of source fields to exclude in the response.
      * $params['_source_includes'] = (any) A comma-separated list of source fields to include in the response.
      * $params['preference']       = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
-     * $params['realtime']         = (boolean) If `true`, the request is real-time as opposed to near-real-time.
+     * $params['realtime']         = (boolean) If `true`, the request is real time as opposed to near real time.
      * $params['refresh']          = (any) If `true`, OpenSearch refreshes all shards involved in the delete by query after the request completes.
      * $params['routing']          = (any) Target the specified primary shard.
      * $params['stored_fields']    = (any) List of stored fields to return as part of a hit.If no fields are specified, no stored fields are included in the response.If this field is specified, the `_source` parameter defaults to false.
      * $params['version']          = (integer) Explicit version number for concurrency control.The specified version must match the current version of the document for the request to succeed.
-     * $params['version_type']     = (enum) Specific version type: `external`, `external_gte`. (Options = external,external_gte,force,internal)
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['version_type']     = (any) The specific version type: `external`, `external_gte`.
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return bool
@@ -783,7 +837,8 @@ class Client
         $id = $this->extractArgument($params, 'id');
         $index = $this->extractArgument($params, 'index');
 
-        // manually make this verbose so we can check status code
+        // Legacy option to manually make this verbose so we can check status code.
+        // @todo remove in 3.0.0
         $params['client']['verbose'] = true;
 
         $endpoint = $this->endpointFactory->getEndpoint(Exists::class);
@@ -798,21 +853,21 @@ class Client
      * Returns information about whether a document source exists in an index.
      *
      * $params['id']               = (string) Identifier of the document. (Required)
-     * $params['index']            = (string) Comma-separated list of data streams, indexes, and aliases. Supports wildcards (`*`). (Required)
+     * $params['index']            = (string) A comma-separated list of data streams, indexes, and aliases. Supports wildcards (`*`). (Required)
      * $params['_source']          = (any) `true` or `false` to return the `_source` field or not, or a list of fields to return.
      * $params['_source_excludes'] = (any) A comma-separated list of source fields to exclude in the response.
      * $params['_source_includes'] = (any) A comma-separated list of source fields to include in the response.
      * $params['preference']       = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
-     * $params['realtime']         = (boolean) If `true`, the request is real-time as opposed to near-real-time.
+     * $params['realtime']         = (boolean) If `true`, the request is real time as opposed to near real time.
      * $params['refresh']          = (any) If `true`, OpenSearch refreshes all shards involved in the delete by query after the request completes.
      * $params['routing']          = (any) Target the specified primary shard.
      * $params['version']          = (integer) Explicit version number for concurrency control.The specified version must match the current version of the document for the request to succeed.
-     * $params['version_type']     = (enum) Specific version type: `external`, `external_gte`. (Options = external,external_gte,force,internal)
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['version_type']     = (any) The specific version type: `external`, `external_gte`.
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return bool
@@ -822,7 +877,8 @@ class Client
         $id = $this->extractArgument($params, 'id');
         $index = $this->extractArgument($params, 'index');
 
-        // manually make this verbose so we can check status code
+        // Legacy option to manually make this verbose so we can check status code.
+        // @todo remove in 3.0.0
         $params['client']['verbose'] = true;
 
         $endpoint = $this->endpointFactory->getEndpoint(ExistsSource::class);
@@ -834,7 +890,7 @@ class Client
     }
 
     /**
-     * Returns information about why a specific matches (or doesn't match) a query.
+     * Returns information about why a specific document matches (or doesn't match) a query.
      *
      * $params['id']               = (string) Defines the document ID. (Required)
      * $params['index']            = (string) Index names used to limit the request. Only a single index name can be provided to this parameter. (Required)
@@ -848,13 +904,13 @@ class Client
      * $params['lenient']          = (boolean) If `true`, format-based query failures (such as providing text to a numeric field) in the query string will be ignored.
      * $params['preference']       = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
      * $params['q']                = (string) Query in the Lucene query string syntax.
-     * $params['routing']          = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']          = (any) A custom value used to route operations to a specific shard.
      * $params['stored_fields']    = (any) A comma-separated list of stored fields to return in the response.
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']             = (array) The query definition using the Query DSL
      *
      * @param array $params Associative array of parameters
@@ -878,17 +934,17 @@ class Client
     /**
      * Returns the information about the capabilities of fields among multiple indexes.
      *
-     * $params['index']              = (array) Comma-separated list of data streams, indexes, and aliases used to limit the request. Supports wildcards (*). To target all data streams and indexes, omit this parameter or use * or `_all`.
+     * $params['index']              = (array) A comma-separated list of data streams, indexes, and aliases used to limit the request. Supports wildcards (*). To target all data streams and indexes, omit this parameter or use * or `_all`.
      * $params['allow_no_indices']   = (boolean) If `false`, the request returns an error if any wildcard expression, index alias,or `_all` value targets only missing or closed indexes. This behavior applies even if the request targets other open indexes. For example, a requesttargeting `foo*,bar*` returns an error if an index starts with foo but no index starts with bar.
-     * $params['expand_wildcards']   = (any) Type of index that wildcard patterns can match. If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams. Supports comma-separated values, such as `open,hidden`.
-     * $params['fields']             = (any) Comma-separated list of fields to retrieve capabilities for. Wildcard (`*`) expressions are supported.
+     * $params['expand_wildcards']   = (any) The type of index that wildcard patterns can match. If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams. Supports comma-separated values, such as `open,hidden`.
+     * $params['fields']             = (any) A comma-separated list of fields to retrieve capabilities for. Wildcard (`*`) expressions are supported.
      * $params['ignore_unavailable'] = (boolean) If `true`, missing or closed indexes are not included in the response.
      * $params['include_unmapped']   = (boolean) If `true`, unmapped fields are included in the response. (Default = false)
-     * $params['pretty']             = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']              = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']             = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']              = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']        = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']             = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']        = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']        = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']               = (array) An index filter specified with the Query DSL
      *
      * @param array $params Associative array of parameters
@@ -910,23 +966,23 @@ class Client
     /**
      * Returns a document.
      *
-     * $params['id']               = (string) Unique identifier of the document. (Required)
-     * $params['index']            = (string) Name of the index that contains the document. (Required)
+     * $params['id']               = (string) The unique identifier of the document. (Required)
+     * $params['index']            = (string) The name of the index containing the document. (Required)
      * $params['_source']          = (any) Set to `true` or `false` to return the `_source` field or not, or a list of fields to return.
      * $params['_source_excludes'] = (any) A comma-separated list of source fields to exclude in the response.
      * $params['_source_includes'] = (any) A comma-separated list of source fields to include in the response.
      * $params['preference']       = (string) Specifies the node or shard the operation should be performed on. Random by default. (Default = random)
-     * $params['realtime']         = (boolean) If `true`, the request is real-time as opposed to near-real-time.
+     * $params['realtime']         = (boolean) If `true`, the request is real time as opposed to near real time.
      * $params['refresh']          = (any) If `true`, OpenSearch refreshes the affected shards to make this operation visible to search. If `false`, do nothing with refreshes.
      * $params['routing']          = (any) Target the specified primary shard.
      * $params['stored_fields']    = (any) List of stored fields to return as part of a hit.If no fields are specified, no stored fields are included in the response.If this field is specified, the `_source` parameter defaults to false.
      * $params['version']          = (integer) Explicit version number for concurrency control. The specified version must match the current version of the document for the request to succeed.
-     * $params['version_type']     = (enum) Specific version type: `internal`, `external`, `external_gte`. (Options = external,external_gte,force,internal)
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['version_type']     = (any) The specific version type: `internal`, `external`, `external_gte`.
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -947,11 +1003,11 @@ class Client
     /**
      * Lists all active point in time searches.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -970,11 +1026,11 @@ class Client
      * $params['id']                      = (string) Identifier for the stored script or search template. (Required)
      * $params['cluster_manager_timeout'] = (string) Operation timeout for connection to cluster-manager node.
      * $params['master_timeout']          = (string) Specify timeout for connection to master
-     * $params['pretty']                  = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                   = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                  = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                   = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']             = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                  = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']             = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']             = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -993,11 +1049,11 @@ class Client
     /**
      * Returns all script contexts.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1013,11 +1069,11 @@ class Client
     /**
      * Returns available script types, languages and contexts.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1033,22 +1089,22 @@ class Client
     /**
      * Returns the source of a document.
      *
-     * $params['id']               = (string) Unique identifier of the document. (Required)
-     * $params['index']            = (string) Name of the index that contains the document. (Required)
+     * $params['id']               = (string) The unique identifier of the document. (Required)
+     * $params['index']            = (string) The name of the index containing the document. (Required)
      * $params['_source']          = (any) Set to `true` or `false` to return the `_source` field or not, or a list of fields to return.
      * $params['_source_excludes'] = (any) A comma-separated list of source fields to exclude in the response.
      * $params['_source_includes'] = (any) A comma-separated list of source fields to include in the response.
      * $params['preference']       = (string) Specifies the node or shard the operation should be performed on. Random by default. (Default = random)
-     * $params['realtime']         = (boolean) Boolean) If `true`, the request is real-time as opposed to near-real-time.
+     * $params['realtime']         = (boolean) Boolean) If `true`, the request is real time as opposed to near real time.
      * $params['refresh']          = (any) If `true`, OpenSearch refreshes the affected shards to make this operation visible to search. If `false`, do nothing with refreshes.
      * $params['routing']          = (any) Target the specified primary shard.
      * $params['version']          = (integer) Explicit version number for concurrency control. The specified version must match the current version of the document for the request to succeed.
-     * $params['version_type']     = (enum) Specific version type. One of `internal`, `external`, `external_gte`. (Options = external,external_gte,force,internal)
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['version_type']     = (any) The specific version type. One of `internal`, `external`, `external_gte`.
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1070,23 +1126,23 @@ class Client
      * Creates or updates a document in an index.
      *
      * $params['index']                  = (string) Name of the data stream or index to target. (Required)
-     * $params['id']                     = (string) Unique identifier for the document.
+     * $params['id']                     = (string) The unique identifier for the document.
      * $params['if_primary_term']        = (integer) Only perform the operation if the document has this primary term.
      * $params['if_seq_no']              = (integer) Only perform the operation if the document has this sequence number.
-     * $params['op_type']                = (enum) Set to create to only index the document if it does not already exist (put if absent).If a document with the specified `_id` already exists, the indexing operation will fail.Same as using the `<index>/_create` endpoint.Valid values: `index`, `create`.If document id is specified, it defaults to `index`.Otherwise, it defaults to `create`. (Options = create,index)
+     * $params['op_type']                = (any) Set to create to only index the document if it does not already exist (put if absent).If a document with the specified `_id` already exists, the indexing operation will fail.Same as using the `<index>/_create` endpoint.Valid values: `index`, `create`.If document id is specified, it defaults to `index`.Otherwise, it defaults to `create`.
      * $params['pipeline']               = (string) ID of the pipeline to use to preprocess incoming documents.If the index has a default ingest pipeline specified, then setting the value to `_none` disables the default ingest pipeline for this request.If a final pipeline is configured it will always run, regardless of the value of this parameter.
      * $params['refresh']                = (any) If `true`, OpenSearch refreshes the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` do nothing with refreshes.Valid values: `true`, `false`, `wait_for`.
      * $params['require_alias']          = (boolean) If `true`, the destination must be an index alias. (Default = false)
-     * $params['routing']                = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                = (any) A custom value used to route operations to a specific shard.
      * $params['timeout']                = (string) Period the request waits for the following operations: automatic index creation, dynamic mapping updates, waiting for active shards.
      * $params['version']                = (integer) Explicit version number for concurrency control.The specified version must match the current version of the document for the request to succeed.
-     * $params['version_type']           = (enum) Specific version type: `external`, `external_gte`. (Options = external,external_gte,force,internal)
+     * $params['version_type']           = (any) The specific version type: `external`, `external_gte`.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operation.Set to all or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                   = (array) The document (Required)
      *
      * @param array $params Associative array of parameters
@@ -1110,11 +1166,11 @@ class Client
     /**
      * Returns basic information about the cluster.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1130,20 +1186,20 @@ class Client
     /**
      * Allows to get multiple documents in one request.
      *
-     * $params['index']            = (string) Name of the index to retrieve documents from when `ids` are specified, or when a document in the `docs` array does not specify an index.
+     * $params['index']            = (string) The name of the index to retrieve documents from when `ids` are specified, or when a document in the `docs` array does not specify an index.
      * $params['_source']          = (any) Set to `true` or `false` to return the `_source` field or not, or a list of fields to return.
      * $params['_source_excludes'] = (any) A comma-separated list of source fields to exclude from the response.You can also use this parameter to exclude fields from the subset specified in `_source_includes` query parameter.
      * $params['_source_includes'] = (any) A comma-separated list of source fields to include in the response.If this parameter is specified, only these source fields are returned. You can exclude fields from this subset using the `_source_excludes` query parameter.If the `_source` parameter is `false`, this parameter is ignored.
      * $params['preference']       = (string) Specifies the node or shard the operation should be performed on. Random by default. (Default = random)
-     * $params['realtime']         = (boolean) If `true`, the request is real-time as opposed to near-real-time.
+     * $params['realtime']         = (boolean) If `true`, the request is real time as opposed to near real time.
      * $params['refresh']          = (any) If `true`, the request refreshes relevant shards before retrieving documents.
-     * $params['routing']          = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']          = (any) A custom value used to route operations to a specific shard.
      * $params['stored_fields']    = (any) If `true`, retrieves the document fields stored in the index rather than the document `_source`.
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']             = (array) Document identifiers; can be either `docs` (containing full document information) or `ids` (when index is provided in the URL. (Required)
      *
      * @param array $params Associative array of parameters
@@ -1165,7 +1221,7 @@ class Client
     /**
      * Allows to execute several search operations in one request.
      *
-     * $params['index']                         = (array) Comma-separated list of data streams, indexes, and index aliases to search.
+     * $params['index']                         = (array) A comma-separated list of data streams, indexes, and index aliases to search.
      * $params['ccs_minimize_roundtrips']       = (boolean) If `true`, network round-trips between the coordinating node and remote clusters are minimized for cross-cluster search requests. (Default = true)
      * $params['max_concurrent_searches']       = (integer) Maximum number of concurrent searches the multi search API can execute.
      * $params['max_concurrent_shard_requests'] = (integer) Maximum number of concurrent shard requests that each sub-search request executes per node. (Default = 5)
@@ -1173,11 +1229,11 @@ class Client
      * $params['rest_total_hits_as_int']        = (boolean) If `true`, `hits.total` are returned as an integer in the response. Defaults to false, which returns an object. (Default = false)
      * $params['search_type']                   = (any) Indicates whether global term and document frequencies should be used when scoring returned documents.
      * $params['typed_keys']                    = (boolean) Specifies whether aggregation and suggester names should be prefixed by their respective types in the response.
-     * $params['pretty']                        = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                         = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                        = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                         = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']                   = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                        = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']                   = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']                   = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                          = (array) The request definitions (metadata-search request definition pairs), separated by newlines (Required)
      *
      * @param array $params Associative array of parameters
@@ -1199,17 +1255,17 @@ class Client
     /**
      * Allows to execute several search template operations in one request.
      *
-     * $params['index']                   = (array) Comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams and indexes, omit this parameter or use `*`.
+     * $params['index']                   = (array) A comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams and indexes, omit this parameter or use `*`.
      * $params['ccs_minimize_roundtrips'] = (boolean) If `true`, network round-trips are minimized for cross-cluster search requests. (Default = true)
      * $params['max_concurrent_searches'] = (integer) Maximum number of concurrent searches the API can run.
      * $params['rest_total_hits_as_int']  = (boolean) If `true`, the response returns `hits.total` as an integer.If `false`, it returns `hits.total` as an object. (Default = false)
      * $params['search_type']             = (any) The type of the search operation.Available options: `query_then_fetch`, `dfs_query_then_fetch`.
      * $params['typed_keys']              = (boolean) If `true`, the response prefixes aggregation and suggester names with their respective types.
-     * $params['pretty']                  = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                   = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                  = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                   = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']             = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                  = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']             = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']             = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                    = (array) The request definitions (metadata-search request definition pairs), separated by newlines (Required)
      *
      * @param array $params Associative array of parameters
@@ -1231,24 +1287,24 @@ class Client
     /**
      * Returns multiple termvectors in one request.
      *
-     * $params['index']            = (string) Name of the index that contains the documents.
+     * $params['index']            = (string) The name of the index that contains the document.
      * $params['field_statistics'] = (boolean) If `true`, the response includes the document count, sum of document frequencies, and sum of total term frequencies. (Default = true)
-     * $params['fields']           = (any) Comma-separated list or wildcard expressions of fields to include in the statistics.Used as the default list unless a specific field list is provided in the `completion_fields` or `fielddata_fields` parameters.
-     * $params['ids']              = (array) A comma-separated list of documents ids. You must define ids as parameter or set "ids" or "docs" in the request body
+     * $params['fields']           = (any)
+     * $params['ids']              = (array) A comma-separated list of documents IDs. You must provide either the `docs` field in the request body or specify `ids` as a query parameter or in the request body.
      * $params['offsets']          = (boolean) If `true`, the response includes term offsets. (Default = true)
      * $params['payloads']         = (boolean) If `true`, the response includes term payloads. (Default = true)
      * $params['positions']        = (boolean) If `true`, the response includes term positions. (Default = true)
-     * $params['preference']       = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
-     * $params['realtime']         = (boolean) If `true`, the request is real-time as opposed to near-real-time. (Default = true)
-     * $params['routing']          = (any) Custom value used to route operations to a specific shard.
+     * $params['preference']       = (string) Specifies the node or shard on which the operation should be performed. See [preference query parameter]({{site.url}}{{site.baseurl}}/api-reference/search-apis/search/#the-preference-query-parameter) for a list of available options. By default the requests are routed randomly to available shard copies (primary or replica), with no guarantee of consistency across repeated queries.
+     * $params['realtime']         = (boolean) If `true`, the request is real time as opposed to near real time. (Default = true)
+     * $params['routing']          = (any) A custom value used to route operations to a specific shard.
      * $params['term_statistics']  = (boolean) If `true`, the response includes term frequency and document frequency. (Default = false)
      * $params['version']          = (integer) If `true`, returns the document version as part of a hit.
-     * $params['version_type']     = (enum) Specific version type. (Options = external,external_gte,force,internal)
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['version_type']     = (any) The specific version type.
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']             = (array) Define ids, documents, parameters or a list of parameters per document here. You must at least provide a list of document ids. See documentation.
      *
      * @param array $params Associative array of parameters
@@ -1270,18 +1326,19 @@ class Client
     /**
      * Returns whether the cluster is running.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return bool
      */
     public function ping(array $params = []): bool
     {
-        // manually make this verbose so we can check status code
+        // Legacy option to manually make this verbose so we can check status code.
+        // @todo remove in 3.0.0
         $params['client']['verbose'] = true;
 
         $endpoint = $this->endpointFactory->getEndpoint(Ping::class);
@@ -1298,11 +1355,11 @@ class Client
      * $params['cluster_manager_timeout'] = (string) Operation timeout for connection to cluster-manager node.
      * $params['master_timeout']          = (string) Period to wait for a connection to the cluster-manager node.If no response is received before the timeout expires, the request fails and returns an error.
      * $params['timeout']                 = (string) Period to wait for a response.If no response is received before the timeout expires, the request fails and returns an error.
-     * $params['pretty']                  = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                   = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                  = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                   = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']             = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                  = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']             = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']             = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                    = (array) The document (Required)
      *
      * @param array $params Associative array of parameters
@@ -1326,16 +1383,16 @@ class Client
     /**
      * Allows to evaluate the quality of ranked search results over a set of typical search queries.
      *
-     * $params['index']              = (array) Comma-separated list of data streams, indexes, and index aliases used to limit the request. Wildcard (`*`) expressions are supported. To target all data streams and indexes in a cluster, omit this parameter or use `_all` or `*`.
+     * $params['index']              = (array) A comma-separated list of data streams, indexes, and index aliases used to limit the request. Wildcard (`*`) expressions are supported. To target all data streams and indexes in a cluster, omit this parameter or use `_all` or `*`.
      * $params['allow_no_indices']   = (boolean) If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indexes. This behavior applies even if the request targets other open indexes. For example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.
      * $params['expand_wildcards']   = (any) Whether to expand wildcard expression to concrete indexes that are open, closed or both.
      * $params['ignore_unavailable'] = (boolean) If `true`, missing or closed indexes are not included in the response.
      * $params['search_type']        = (any) Search operation type
-     * $params['pretty']             = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']              = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']             = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']              = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']        = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']             = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']        = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']        = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']               = (array) The ranking evaluation search definition, including search requests, document ratings and ranking metric definition. (Required)
      *
      * @param array $params Associative array of parameters
@@ -1366,11 +1423,11 @@ class Client
      * $params['timeout']                = (string) Period each indexing waits for automatic index creation, dynamic mapping updates, and waiting for active shards.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operation.Set to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
      * $params['wait_for_completion']    = (boolean) If `true`, the request blocks until the operation is complete. (Default = true)
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                   = (array) The search definition using the Query DSL and the prototype for the index request. (Required)
      *
      * @param array $params Associative array of parameters
@@ -1392,11 +1449,11 @@ class Client
      *
      * $params['task_id']             = (string) Identifier for the task. (Required)
      * $params['requests_per_second'] = (number) The throttle for this request in sub-requests per second.
-     * $params['pretty']              = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']               = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']              = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']               = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']         = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']              = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']         = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']         = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1416,11 +1473,11 @@ class Client
      * Allows to use the Mustache language to pre-render a search definition.
      *
      * $params['id']          = (string) ID of the search template to render. If no `source` is specified, this or the `id` request body parameter is required.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']        = (array) The search definition template and its parameters.
      *
      * @param array $params Associative array of parameters
@@ -1442,11 +1499,11 @@ class Client
     /**
      * Allows an arbitrary script to be executed and a result to be returned.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']        = (array) The script to execute
      *
      * @param array $params Associative array of parameters
@@ -1469,11 +1526,11 @@ class Client
      * $params['scroll_id']              = DEPRECATED (string) The scroll ID
      * $params['rest_total_hits_as_int'] = (boolean) If `true`, the API response's `hit.total` property is returned as an integer. If `false`, the API response's `hit.total` property is returned as an object. (Default = false)
      * $params['scroll']                 = (string) Period to retain the search context for scrolling.
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1494,7 +1551,7 @@ class Client
     /**
      * Returns results matching a query.
      *
-     * $params['index']                         = (array) Comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams and indexes, omit this parameter or use `*` or `_all`.
+     * $params['index']                         = (array) A comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams and indexes, omit this parameter or use `*` or `_all`.
      * $params['_source']                       = (any) Indicates which source fields are returned for matching documents.These fields are returned in the `hits._source` property of the search response.Valid values are:`true` to return the entire document source;`false` to not return the document source;`<string>` to return the source fields that are specified as a comma-separated list (supports wildcard (`*`) patterns).
      * $params['_source_excludes']              = (any) A comma-separated list of source fields to exclude from the response.You can also use this parameter to exclude fields from the subset specified in `_source_includes` query parameter.If the `_source` parameter is `false`, this parameter is ignored.
      * $params['_source_includes']              = (any) A comma-separated list of source fields to include in the response.If this parameter is specified, only these source fields are returned.You can exclude fields from this subset using the `_source_excludes` query parameter.If the `_source` parameter is `false`, this parameter is ignored.
@@ -1522,7 +1579,7 @@ class Client
      * $params['q']                             = (string) Query in the Lucene query string syntax using query parameter search.Query parameter searches do not support the full OpenSearch Query DSL but are handy for testing.
      * $params['request_cache']                 = (boolean) If `true`, the caching of search results is enabled for requests where `size` is `0`.Defaults to index level settings.
      * $params['rest_total_hits_as_int']        = (boolean) Indicates whether `hits.total` should be rendered as an integer or an object in the rest search response. (Default = false)
-     * $params['routing']                       = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                       = (any) A custom value used to route operations to a specific shard.
      * $params['scroll']                        = (string) Period to retain the search context for scrolling. See Scroll search results.By default, this value cannot exceed `1d` (24 hours).You can change this limit using the `search.max_keep_alive` cluster-level setting.
      * $params['search_pipeline']               = (string) Customizable sequence of processing stages applied to search queries.
      * $params['search_type']                   = (any) How distributed term frequencies are calculated for relevance scoring.
@@ -1540,12 +1597,13 @@ class Client
      * $params['track_scores']                  = (boolean) If `true`, calculate and return document scores, even if the scores are not used for sorting.
      * $params['track_total_hits']              = (any) Number of hits matching the query to count accurately.If `true`, the exact number of hits is returned at the cost of some performance.If `false`, the response does not include the total number of hits matching the query.
      * $params['typed_keys']                    = (boolean) If `true`, aggregation and suggester names are be prefixed by their respective types in the response.
+     * $params['verbose_pipeline']              = (boolean) Enables or disables verbose mode for the search pipeline.When verbose mode is enabled, detailed information about each processorin the search pipeline is included in the search response. This includesthe processor name, execution status, input, output, and time taken for processing.This parameter is primarily intended for debugging purposes, allowing usersto track how data flows and transforms through the search pipeline.
      * $params['version']                       = (boolean) If `true`, returns document version as part of a hit.
-     * $params['pretty']                        = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                         = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                        = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                         = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']                   = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                        = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']                   = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']                   = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                          = (array) The search definition using the Query DSL
      *
      * @param array $params Associative array of parameters
@@ -1573,12 +1631,12 @@ class Client
      * $params['ignore_unavailable'] = (boolean) If `false`, the request returns an error if it targets a missing or closed index.
      * $params['local']              = (boolean) If `true`, the request retrieves information from the local node only. (Default = false)
      * $params['preference']         = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
-     * $params['routing']            = (any) Custom value used to route operations to a specific shard.
-     * $params['pretty']             = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']              = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['routing']            = (any) A custom value used to route operations to a specific shard.
+     * $params['pretty']             = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']              = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']        = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']             = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']        = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']        = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1586,10 +1644,12 @@ class Client
     public function searchShards(array $params = [])
     {
         $index = $this->extractArgument($params, 'index');
+        $body = $this->extractArgument($params, 'body');
 
         $endpoint = $this->endpointFactory->getEndpoint(SearchShards::class);
         $endpoint->setParams($params);
         $endpoint->setIndex($index);
+        $endpoint->setBody($body);
 
         return $this->performRequest($endpoint);
     }
@@ -1597,25 +1657,27 @@ class Client
     /**
      * Allows to use the Mustache language to pre-render a search definition.
      *
-     * $params['index']                   = (array) Comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (*).
+     * $params['index']                   = (array) A comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (*).
      * $params['allow_no_indices']        = (boolean) If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indexes.This behavior applies even if the request targets other open indexes.For example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.
      * $params['ccs_minimize_roundtrips'] = (boolean) If `true`, network round-trips are minimized for cross-cluster search requests. (Default = true)
      * $params['expand_wildcards']        = (any) Type of index that wildcard patterns can match.If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams.Supports comma-separated values, such as `open,hidden`.Valid values are: `all`, `open`, `closed`, `hidden`, `none`.
      * $params['explain']                 = (boolean) If `true`, the response includes additional details about score computation as part of a hit.
      * $params['ignore_throttled']        = (boolean) If `true`, specified concrete, expanded, or aliased indexes are not included in the response when throttled.
      * $params['ignore_unavailable']      = (boolean) If `false`, the request returns an error if it targets a missing or closed index.
+     * $params['phase_took']              = (boolean) Indicates whether to return phase-level `took` time values in the response. (Default = false)
      * $params['preference']              = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
      * $params['profile']                 = (boolean) If `true`, the query execution is profiled.
      * $params['rest_total_hits_as_int']  = (boolean) If `true`, `hits.total` are rendered as an integer in the response. (Default = false)
-     * $params['routing']                 = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                 = (any) A custom value used to route operations to a specific shard.
      * $params['scroll']                  = (string) Specifies how long a consistent view of the indexshould be maintained for scrolled search.
+     * $params['search_pipeline']         = (string) Customizable sequence of processing stages applied to search queries.
      * $params['search_type']             = (any) The type of the search operation.
      * $params['typed_keys']              = (boolean) If `true`, the response prefixes aggregation and suggester names with their respective types.
-     * $params['pretty']                  = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                   = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                  = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                   = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']             = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                  = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']             = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']             = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                    = (array) The search definition template and its parameters. (Required)
      *
      * @param array $params Associative array of parameters
@@ -1637,24 +1699,24 @@ class Client
     /**
      * Returns information and statistics about terms in the fields of a particular document.
      *
-     * $params['index']            = (string) Name of the index that contains the document. (Required)
-     * $params['id']               = (string) Unique identifier of the document.
+     * $params['index']            = (string) The name of the index containing the document. (Required)
+     * $params['id']               = (string) The unique identifier of the document.
      * $params['field_statistics'] = (boolean) If `true`, the response includes the document count, sum of document frequencies, and sum of total term frequencies. (Default = true)
-     * $params['fields']           = (any) Comma-separated list or wildcard expressions of fields to include in the statistics.Used as the default list unless a specific field list is provided in the `completion_fields` or `fielddata_fields` parameters.
+     * $params['fields']           = (any)
      * $params['offsets']          = (boolean) If `true`, the response includes term offsets. (Default = true)
      * $params['payloads']         = (boolean) If `true`, the response includes term payloads. (Default = true)
      * $params['positions']        = (boolean) If `true`, the response includes term positions. (Default = true)
-     * $params['preference']       = (string) Specifies the node or shard the operation should be performed on.Random by default. (Default = random)
-     * $params['realtime']         = (boolean) If `true`, the request is real-time as opposed to near-real-time. (Default = true)
-     * $params['routing']          = (any) Custom value used to route operations to a specific shard.
+     * $params['preference']       = (string) Specifies the node or shard on which the operation should be performed. See [preference query parameter]({{site.url}}{{site.baseurl}}/api-reference/search-apis/search/#the-preference-query-parameter) for a list of available options. By default the requests are routed randomly to available shard copies (primary or replica), with no guarantee of consistency across repeated queries.
+     * $params['realtime']         = (boolean) If `true`, the request is real time as opposed to near real time. (Default = true)
+     * $params['routing']          = (any) A custom value used to route operations to a specific shard.
      * $params['term_statistics']  = (boolean) If `true`, the response includes term frequency and document frequency. (Default = false)
      * $params['version']          = (integer) If `true`, returns the document version as part of a hit.
-     * $params['version_type']     = (enum) Specific version type. (Options = external,external_gte,force,internal)
-     * $params['pretty']           = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']            = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['version_type']     = (any) The specific version type.
+     * $params['pretty']           = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']            = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']      = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']           = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']      = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']      = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']             = (array) Define parameters and or supply a document to get termvectors for. See documentation.
      *
      * @param array $params Associative array of parameters
@@ -1689,14 +1751,14 @@ class Client
      * $params['refresh']                = (any) If 'true', OpenSearch refreshes the affected shards to make this operationvisible to search, if `wait_for` then wait for a refresh to make this operationvisible to search, if `false` do nothing with refreshes.
      * $params['require_alias']          = (boolean) If `true`, the destination must be an index alias. (Default = false)
      * $params['retry_on_conflict']      = (integer) Specify how many times should the operation be retried when a conflict occurs. (Default = 0)
-     * $params['routing']                = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                = (any) A custom value used to route operations to a specific shard.
      * $params['timeout']                = (string) Period to wait for dynamic mapping updates and active shards.This guarantees OpenSearch waits for at least the timeout before failing.The actual wait time could be longer, particularly when multiple waits occur.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operations.Set to 'all' or any positive integer up to the total number of shards in the index(number_of_replicas+1). Defaults to 1 meaning the primary shard.
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                   = (array) The request definition requires either `script` or partial `doc` (Required)
      *
      * @param array $params Associative array of parameters
@@ -1720,14 +1782,14 @@ class Client
     /**
      * Performs an update on every document in the index without changing the source,for example to pick up a mapping change.
      *
-     * $params['index']                  = (array) Comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams or indexes, omit this parameter or use `*` or `_all`. (Required)
+     * $params['index']                  = (array) A comma-separated list of data streams, indexes, and aliases to search. Supports wildcards (`*`). To search all data streams or indexes, omit this parameter or use `*` or `_all`. (Required)
      * $params['_source']                = (any) Set to `true` or `false` to return the `_source` field or not, or a list of fields to return.
      * $params['_source_excludes']       = (array) List of fields to exclude from the returned `_source` field.
      * $params['_source_includes']       = (array) List of fields to extract and return from the `_source` field.
      * $params['allow_no_indices']       = (boolean) If `false`, the request returns an error if any wildcard expression, index alias, or `_all` value targets only missing or closed indexes.This behavior applies even if the request targets other open indexes.For example, a request targeting `foo*,bar*` returns an error if an index starts with `foo` but no index starts with `bar`.
      * $params['analyze_wildcard']       = (boolean) If `true`, wildcard and prefix queries are analyzed. (Default = false)
      * $params['analyzer']               = (string) Analyzer to use for the query string.
-     * $params['conflicts']              = (enum) What to do if update by query hits version conflicts: `abort` or `proceed`. (Options = abort,proceed)
+     * $params['conflicts']              = (any) What to do if update by query hits version conflicts: `abort` or `proceed`.
      * $params['default_operator']       = (enum) The default operator for query string query: `AND` or `OR`. (Options = and,AND,or,OR)
      * $params['df']                     = (string) Field to use as default where no field prefix is given in the query string.
      * $params['expand_wildcards']       = (any) Type of index that wildcard patterns can match.If the request can target data streams, this argument determines whether wildcard expressions match hidden data streams.Supports comma-separated values, such as `open,hidden`.Valid values are: `all`, `open`, `closed`, `hidden`, `none`.
@@ -1741,7 +1803,7 @@ class Client
      * $params['refresh']                = (any) If `true`, OpenSearch refreshes affected shards to make the operation visible to search.
      * $params['request_cache']          = (boolean) If `true`, the request cache is used for this request.
      * $params['requests_per_second']    = (number) The throttle for this request in sub-requests per second. (Default = 0)
-     * $params['routing']                = (any) Custom value used to route operations to a specific shard.
+     * $params['routing']                = (any) A custom value used to route operations to a specific shard.
      * $params['scroll']                 = (string) Period to retain the search context for scrolling.
      * $params['scroll_size']            = (integer) Size of the scroll request that powers the operation. (Default = 100)
      * $params['search_timeout']         = (string) Explicit timeout for each search request.
@@ -1755,11 +1817,11 @@ class Client
      * $params['version']                = (boolean) If `true`, returns the document version as part of a hit.
      * $params['wait_for_active_shards'] = (any) The number of shard copies that must be active before proceeding with the operation.Set to `all` or any positive integer up to the total number of shards in the index (`number_of_replicas+1`).
      * $params['wait_for_completion']    = (boolean) If `true`, the request blocks until the operation is complete. (Default = true)
-     * $params['pretty']                 = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']                  = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']                 = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']                  = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']            = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']                 = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']            = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']            = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      * $params['body']                   = (array) The search definition using the Query DSL
      *
      * @param array $params Associative array of parameters
@@ -1783,11 +1845,11 @@ class Client
      *
      * $params['task_id']             = (string) The ID for the task. (Required)
      * $params['requests_per_second'] = (number) The throttle for this request in sub-requests per second.
-     * $params['pretty']              = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']               = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']              = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']               = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']         = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']              = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']         = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']         = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -1913,6 +1975,13 @@ class Client
         return $this->flowFramework;
     }
     /**
+     * Returns the geospatial namespace
+     */
+    public function geospatial(): GeospatialNamespace
+    {
+        return $this->geospatial;
+    }
+    /**
      * Returns the indices namespace
      */
     public function indices(): IndicesNamespace
@@ -1925,6 +1994,13 @@ class Client
     public function ingest(): IngestNamespace
     {
         return $this->ingest;
+    }
+    /**
+     * Returns the ingestion namespace
+     */
+    public function ingestion(): IngestionNamespace
+    {
+        return $this->ingestion;
     }
     /**
      * Returns the insights namespace
@@ -1955,6 +2031,13 @@ class Client
         return $this->list;
     }
     /**
+     * Returns the ltr namespace
+     */
+    public function ltr(): LtrNamespace
+    {
+        return $this->ltr;
+    }
+    /**
      * Returns the ml namespace
      */
     public function ml(): MlNamespace
@@ -1970,6 +2053,13 @@ class Client
     {
         @trigger_error(__METHOD__ . '() is deprecated since 2.4.2 and will be removed in 3.0.0.', E_USER_DEPRECATED);
         return $this->monitoring;
+    }
+    /**
+     * Returns the neural namespace
+     */
+    public function neural(): NeuralNamespace
+    {
+        return $this->neural;
     }
     /**
      * Returns the nodes namespace
@@ -2035,6 +2125,13 @@ class Client
         return $this->searchPipeline;
     }
     /**
+     * Returns the searchRelevance namespace
+     */
+    public function searchRelevance(): SearchRelevanceNamespace
+    {
+        return $this->searchRelevance;
+    }
+    /**
      * Returns the searchableSnapshots namespace
      *
      * @deprecated in 2.4.2 and will be removed in 3.0.0.
@@ -2050,6 +2147,13 @@ class Client
     public function security(): SecurityNamespace
     {
         return $this->security;
+    }
+    /**
+     * Returns the securityAnalytics namespace
+     */
+    public function securityAnalytics(): SecurityAnalyticsNamespace
+    {
+        return $this->securityAnalytics;
     }
     /**
      * Returns the sm namespace
@@ -2095,6 +2199,13 @@ class Client
     public function transforms(): TransformsNamespace
     {
         return $this->transforms;
+    }
+    /**
+     * Returns the ubi namespace
+     */
+    public function ubi(): UbiNamespace
+    {
+        return $this->ubi;
     }
     /**
      * Returns the wlm namespace
@@ -2155,7 +2266,7 @@ class Client
         string $method,
         string $uri,
         array $attributes = []
-    ): array|string|null {
+    ): iterable|string|null {
         $params = $attributes['params'] ?? [];
         $body = $attributes['body'] ?? null;
         $options = $attributes['options'] ?? [];
@@ -2169,7 +2280,7 @@ class Client
      * @throws \Psr\Http\Client\ClientExceptionInterface
      * @throws \OpenSearch\Exception\HttpExceptionInterface
      */
-    private function performRequest(AbstractEndpoint $endpoint): array|string|null
+    private function performRequest(AbstractEndpoint $endpoint): iterable|string|null
     {
         return $this->httpTransport->sendRequest(
             $endpoint->getMethod(),

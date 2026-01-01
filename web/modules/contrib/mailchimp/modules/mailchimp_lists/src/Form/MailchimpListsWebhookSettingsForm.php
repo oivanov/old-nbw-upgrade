@@ -9,7 +9,7 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Configure settings for a Mailchimp list webhook.
+ * Configure settings for a Mailchimp audience webhook.
  */
 class MailchimpListsWebhookSettingsForm extends ConfigFormBase {
 
@@ -128,7 +128,7 @@ class MailchimpListsWebhookSettingsForm extends ConfigFormBase {
         'api' => FALSE,
       ];
 
-       // Add webhook with enabled events.
+      // Add webhook with enabled events.
       $result = mailchimp_webhook_add(
         $list->id,
         mailchimp_webhook_url(),

@@ -30,7 +30,7 @@ class PatchUser extends AbstractEndpoint
         if (!isset($this->username) || $this->username === '') {
             throw new RuntimeException('username is required for patch_user');
         }
-        $username = $this->username;
+        $username = rawurlencode($this->username);
 
         return "/_plugins/_security/api/internalusers/$username";
     }

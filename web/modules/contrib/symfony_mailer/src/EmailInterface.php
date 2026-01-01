@@ -70,7 +70,31 @@ interface EmailInterface extends BaseEmailInterface {
   ];
 
   /**
-   * Add an email processor.
+   * Adds a callback function for a specified phase.
+   *
+   * Valid: initialisation.
+   *
+   * @param callable $function
+   *   The function to call.
+   * @param int $phase
+   *   (Optional) The phase to run in, one of the EmailInterface::PHASE_
+   *   constants.
+   * @param int $weight
+   *   (Optional) The weight, lower values run earlier.
+   * @param string $id
+   *   (Optional) An ID that can be used to alter or debug.
+   *
+   * @return $this
+   *
+   * @deprecated in symfony_mailer:1.6.0 and is removed from symfony_mailer:2.0.0.
+   * Instead you should use addCallback().
+   *
+   * @see https://www.drupal.org/node/3501754
+   */
+  public function addProcessor(callable $function, int $phase = self::PHASE_BUILD, int $weight = self::DEFAULT_WEIGHT, ?string $id = NULL);
+
+  /**
+   * Adds a callback function for a specified phase.
    *
    * Valid: initialisation.
    *
@@ -86,7 +110,7 @@ interface EmailInterface extends BaseEmailInterface {
    *
    * @return $this
    */
-  public function addProcessor(callable $function, int $phase = self::PHASE_BUILD, int $weight = self::DEFAULT_WEIGHT, string $id = NULL);
+  public function addCallback(callable $function, int $phase = self::PHASE_BUILD, int $weight = self::DEFAULT_WEIGHT, ?string $id = NULL);
 
   /**
    * Gets the langcode.
@@ -318,7 +342,8 @@ interface EmailInterface extends BaseEmailInterface {
   /**
    * Sets the email theme.
    *
-   * Valid: build.
+   * Valid: initialisation or build (build is deprecated in 1.6.0 and will fail
+   * in 2.0.0).
    *
    * @param string $theme_name
    *   The theme name to use for email.

@@ -29,14 +29,14 @@ use OpenSearch\Endpoints\Query\DatasourcesUpdate;
 class QueryNamespace extends AbstractNamespace
 {
     /**
-     * Deletes specific datasource specified by name.
+     * Deletes a specific data source by name.
      *
-     * $params['datasource_name'] = (string) The Name of the DataSource to delete.
-     * $params['pretty']          = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']           = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['datasource_name'] = (string) The name of the data source to delete.
+     * $params['pretty']          = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']           = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']     = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']          = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']     = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']     = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -53,14 +53,14 @@ class QueryNamespace extends AbstractNamespace
     }
 
     /**
-     * Retrieves specific datasource specified by name.
+     * Retrieves a specific data source by name.
      *
-     * $params['datasource_name'] = (string) The Name of the DataSource to retrieve.
-     * $params['pretty']          = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']           = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['datasource_name'] = (string) The name of the data source to retrieve.
+     * $params['pretty']          = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']           = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']     = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']          = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']     = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']     = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -77,13 +77,13 @@ class QueryNamespace extends AbstractNamespace
     }
 
     /**
-     * Creates a new query datasource.
+     * Creates a new query data source.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -100,13 +100,13 @@ class QueryNamespace extends AbstractNamespace
     }
 
     /**
-     * Retrieves list of all datasources.
+     * Retrieves a list of all available data sources.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -120,13 +120,13 @@ class QueryNamespace extends AbstractNamespace
     }
 
     /**
-     * Updates an existing query datasource.
+     * Updates an existing query data source.
      *
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array

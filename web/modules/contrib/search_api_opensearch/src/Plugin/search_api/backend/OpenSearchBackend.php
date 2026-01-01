@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\search_api_opensearch\Plugin\search_api\backend;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Form\SubformState;
 use Drupal\Core\Link;
 use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\search_api\Attribute\SearchApiBackend;
 use Drupal\search_api\Backend\BackendPluginBase;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Query\QueryInterface;
+use Drupal\search_api_opensearch\Connector\ConnectorFormTrait;
 use Drupal\search_api_opensearch\Connector\ConnectorPluginManager;
-use Drupal\search_api_opensearch\Connector\InvalidConnectorException;
 use Drupal\search_api_opensearch\Connector\OpenSearchConnectorInterface;
 use Drupal\search_api_opensearch\Event\SupportsDataTypeEvent;
 use Drupal\search_api_opensearch\SearchAPI\BackendClientFactory;
@@ -25,19 +27,19 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Provides an OpenSearch backend for Search API.
- *
- * @SearchApiBackend(
- *   id = "opensearch",
- *   label = @Translation("OpenSearch"),
- *   description = @Translation("Provides an OpenSearch backend.")
- * )
  */
+#[SearchApiBackend(
+  id: 'opensearch',
+  label: new TranslatableMarkup("OpenSearch"),
+  description: new TranslatableMarkup("Provides an OpenSearch backend."),
+)]
 class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface {
 
   use DependencySerializationTrait {
     __sleep as traitSleep;
   }
   use PluginDependencyTrait;
+  use ConnectorFormTrait;
 
   /**
    * Auto fuzziness setting.
@@ -135,24 +137,8 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
-
-    $options = $this->getConnectorOptions();
-    $form['connector'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('OpenSearch Connector'),
-      '#description' => $this->t('Choose a connector to use for this OpenSearch server.'),
-      '#options' => $options,
-      '#default_value' => $this->configuration['connector'],
-      '#required' => TRUE,
-      '#ajax' => [
-        'callback' => [$this, 'buildAjaxConnectorConfigForm'],
-        'wrapper' => 'opensearch-connector-config-form',
-        'method' => 'replace',
-        'effect' => 'fade',
-      ],
-    ];
-
-    $this->buildConnectorConfigForm($form, $form_state);
+    $completeForm = $form_state->getCompleteFormState();
+    $this->buildConnectorConfigForm($form, $completeForm, $this->configuration);
 
     $form['advanced'] = [
       '#type' => 'details',
@@ -198,45 +184,9 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
   }
 
   /**
-   * Builds the backend-specific configuration form.
-   *
-   * @param array $form
-   *   The form array.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
-   */
-  public function buildConnectorConfigForm(array &$form, FormStateInterface $form_state) {
-    $form['connector_config'] = [];
-
-    $connector_id = $this->configuration['connector'];
-    if (isset($connector_id)) {
-      $connector = $this->connectorPluginManager->createInstance($connector_id, $this->configuration['connector_config']);
-      if ($connector instanceof PluginFormInterface) {
-        $form_state->set('connector', $connector_id);
-        // Attach the OpenSearch connector plugin configuration form.
-        $connector_form_state = SubformState::createForSubform($form['connector_config'], $form, $form_state);
-        $form['connector_config'] = $connector->buildConfigurationForm($form['connector_config'], $connector_form_state);
-
-        // Modify the backend plugin configuration container element.
-        $form['connector_config']['#type'] = 'details';
-        $form['connector_config']['#title'] = $this->t('Configure %plugin OpenSearch connector', ['%plugin' => $connector->getLabel()]);
-        $form['connector_config']['#description'] = $connector->getDescription();
-        $form['connector_config']['#open'] = TRUE;
-      }
-    }
-    $form['connector_config'] += ['#type' => 'container'];
-    $form['connector_config']['#attributes'] = [
-      'id' => 'opensearch-connector-config-form',
-    ];
-    $form['connector_config']['#tree'] = TRUE;
-  }
-
-  /**
    * Handles switching the selected connector plugin.
    */
-  public static function buildAjaxConnectorConfigForm(array $form, FormStateInterface $form_state) {
+  public static function buildAjaxConnectorConfigForm(array $form, FormStateInterface $form_state): array {
     // The work is already done in form(), where we rebuild the entity according
     // to the current form values and then create the backend configuration form
     // based on that. So we just need to return the relevant part of the form
@@ -245,43 +195,10 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
   }
 
   /**
-   * Gets a list of connectors for use in an HTML options list.
-   *
-   * @return array
-   *   An associative array of plugin id => label.
-   */
-  protected function getConnectorOptions(): array {
-    $options = [];
-    foreach ($this->connectorPluginManager->getDefinitions() as $plugin_id => $plugin_definition) {
-      $options[$plugin_id] = Html::escape($plugin_definition['label']);
-    }
-    return $options;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // Check if the OpenSearch connector plugin changed.
-    if ($form_state->getValue('connector') != $form_state->get('connector')) {
-      $new_connector = $this->connectorPluginManager->createInstance($form_state->getValue('connector'));
-      if (!$new_connector instanceof PluginFormInterface) {
-        $form_state->setError($form['connector'], $this->t('The connector could not be activated.'));
-        return;
-      }
-      $form_state->setRebuild();
-      return;
-    }
-
-    // Check before loading the backend plugin so we don't throw an exception.
-    $this->configuration['connector'] = $form_state->get('connector');
-    $connector = $this->getConnector();
-    if (!$connector instanceof PluginFormInterface) {
-      $form_state->setError($form['connector'], $this->t('The connector could not be activated.'));
-      return;
-    }
-    $connector_form_state = SubformState::createForSubform($form['connector_config'], $form, $form_state);
-    $connector->validateConfigurationForm($form['connector_config'], $connector_form_state);
+    $this->validateConnectorConfigForm($form, $form_state, []);
   }
 
   /**
@@ -294,33 +211,7 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
       'synonyms',
     ], ''));
     $this->setConfiguration($values);
-    $this->configuration['connector'] = $form_state->getValue('connector');
-    $connector = $this->getConnector();
-    if ($connector instanceof PluginFormInterface) {
-      $connector_form_state = SubformState::createForSubform($form['connector_config'], $form, $form_state);
-      $connector->submitConfigurationForm($form['connector_config'], $connector_form_state);
-      // Overwrite the form values with type casted values.
-      $form_state->setValue('connector_config', $connector->getConfiguration());
-    }
-  }
-
-  /**
-   * Gets the OpenSearch connector.
-   *
-   * @return \Drupal\search_api_opensearch\Connector\OpenSearchConnectorInterface
-   *   The OpenSearch connector.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
-   *   Thrown when a plugin error occurs.
-   * @throws \Drupal\search_api_opensearch\Connector\InvalidConnectorException
-   *   Thrown when a connector is invalid.
-   */
-  public function getConnector(): OpenSearchConnectorInterface {
-    $connector = $this->connectorPluginManager->createInstance($this->configuration['connector'], $this->configuration['connector_config']);
-    if (!$connector instanceof OpenSearchConnectorInterface) {
-      throw new InvalidConnectorException(sprintf("Invalid connector %s", $this->configuration['connector']));
-    }
-    return $connector;
+    $this->submitConnectorConfigForm($form, $form_state);
   }
 
   /**
@@ -331,7 +222,7 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
    */
   public function getClient(): Client {
     if (!isset($this->client)) {
-      $this->client = $this->getConnector()->getClient();
+      $this->client = $this->doGetConnector()->getClient();
     }
     return $this->client;
   }
@@ -379,7 +270,7 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
   public function viewSettings(): array {
     $info = [];
 
-    $connector = $this->getConnector();
+    $connector = $this->doGetConnector();
     $url = $connector->getUrl();
     $info[] = [
       'label' => $this->t('OpenSearch cluster URL'),
@@ -409,7 +300,7 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
    * {@inheritdoc}
    */
   public function calculateDependencies() {
-    $this->calculatePluginDependencies($this->getConnector());
+    $this->calculatePluginDependencies($this->doGetConnector());
   }
 
   /**
@@ -500,6 +391,13 @@ class OpenSearchBackend extends BackendPluginBase implements PluginFormInterface
     $event = new SupportsDataTypeEvent($type);
     $this->eventDispatcher->dispatch($event);
     return $event->isSupported() || parent::supportsDataType($type);
+  }
+
+  /**
+   * Gets the configured connector.
+   */
+  private function doGetConnector(): OpenSearchConnectorInterface {
+    return $this->getConnector($this->configuration['connector'], $this->configuration['connector_config']);
   }
 
 }

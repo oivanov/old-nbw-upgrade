@@ -10,6 +10,11 @@ use Drupal\Tests\BrowserTestBase;
 abstract class DownloadStatisticsTestBase extends BrowserTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Modules to enable.
    *
    * @var array

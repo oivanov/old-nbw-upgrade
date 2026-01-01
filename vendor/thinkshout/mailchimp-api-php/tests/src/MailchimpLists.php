@@ -37,8 +37,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function getLists($parameters = []) {
-    parent::getLists($parameters);
-
     $response = (object) [
       'lists' => [
         (object) [
@@ -64,8 +62,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function getList($list_id, $parameters = []) {
-    parent::getList($list_id, $parameters);
-
     $response = (object) [
       'id' => $list_id,
       'name' => 'Test List One',
@@ -75,11 +71,27 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getListsForEmail($email) {
+    // Return lists that the email is subscribed to.
+    $list_data = $this->getLists();
+    $subscribed_lists = [];
+
+    if ($list_data->total_items > 0) {
+      // Return the first list if email matches test pattern.
+      if (strpos($email, 'test') !== FALSE) {
+        $subscribed_lists[] = $list_data->lists[0];
+      }
+    }
+
+    return $subscribed_lists;
+  }
+
+  /**
    * @inheritdoc
    */
   public function getInterestCategories($list_id, $parameters = []) {
-    parent::getInterestCategories($list_id, $parameters);
-
     $response = (object) [
       'list_id' => $list_id,
       'categories' => [
@@ -87,6 +99,7 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
           'list_id' => $list_id,
           'id' => 'a1e9f4b7f6',
           'title' => 'Test Interest Category',
+          'type' => 'checkboxes',
         ],
       ],
       'total_items' => 1,
@@ -99,8 +112,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function addInterestCategories($list_id, $title, $type, $parameters = [], $batch = FALSE) {
-    parent::addInterestCategories($list_id, $title, $type, $parameters = [], $batch = FALSE);
-
     $response = (object) [
       'list_id' => $list_id,
       'id' => 'a1e9f4b7f6',
@@ -115,8 +126,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function updateInterestCategories($list_id, $interest_category_id, $title, $type, $parameters = [], $batch = FALSE) {
-    parent::updateInterestCategories($list_id, $interest_category_id, $title, $type, $parameters = [], $batch = FALSE);
-
     $response = (object) [
       'list_id' => $list_id,
       'id' => 'a1e9f4b7f6',
@@ -132,8 +141,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function deleteInterestCategories($list_id, $interest_category_id, $parameters = [], $batch = FALSE) {
-    parent::deleteInterestCategories($list_id, $interest_category_id, $parameters = [], $batch = FALSE);
-
     return (!empty($list_id) && !empty($interest_category_id));
   }
 
@@ -141,8 +148,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function getInterests($list_id, $interest_category_id, $parameters = []) {
-    parent::getInterests($list_id, $interest_category_id, $parameters);
-
     $response = (object) [
       'interests' => [
         (object) [
@@ -162,8 +167,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function addInterests($list_id, $interest_category_id, $name, $parameters = [], $batch = FALSE) {
-    parent::addInterests($list_id, $interest_category_id, $name, $parameters = [], $batch = FALSE);
-
     $response = (object) [
       'list_id' => $list_id,
       'category_id' => $interest_category_id,
@@ -178,8 +181,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function updateInterests($list_id, $interest_category_id, $interest_id, $name, $parameters = [], $batch = FALSE) {
-    parent::updateInterests($list_id, $interest_category_id, $interest_id, $name, $parameters = [], $batch = FALSE);
-
     $response = (object) [
       'list_id' => $list_id,
       'category_id' => $interest_category_id,
@@ -194,8 +195,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function deleteInterests($list_id, $interest_category_id, $interest_id, $parameters = [], $batch = FALSE) {
-    parent::deleteInterests($list_id, $interest_category_id, $interest_id, $parameters = [], $batch = FALSE);
-
     return (!empty($list_id) && !empty($interest_category_id) && !empty($interest_id));
   }
 
@@ -203,19 +202,54 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function getMergeFields($list_id, $parameters = []) {
-    parent::getMergeFields($list_id, $parameters);
-
     $response = (object) [
       'merge_fields' => [
         (object) [
           'merge_id' => 1,
           'tag' => 'FNAME',
+          'name' => 'First name',
+          'required' => FALSE,
+          'public' => TRUE,
           'list_id' => $list_id,
         ],
         (object) [
           'merge_id' => 2,
           'tag' => 'LNAME',
+          'name' => 'Last name',
+          'required' => TRUE,
+          'public' => TRUE,
           'list_id' => $list_id,
+        ],
+        (object) [
+          'merge_id' => 3,
+          'tag' => 'PRIVATE',
+          'name' => 'Private mergevar',
+          'required' => FALSE,
+          'public' => FALSE,
+          'list_id' => $list_id,
+        ],
+      ],
+      'total_items' => 3,
+    ];
+
+    return $response;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMembers($list_id, $parameters = []) {
+    $response = (object) [
+      'members' => [
+        (object) [
+          'id' => md5('test1@example.com'),
+          'email_address' => 'test1@example.com',
+          'status' => 'subscribed',
+        ],
+        (object) [
+          'id' => md5('test2@example.com'),
+          'email_address' => 'test2@example.com',
+          'status' => 'subscribed',
         ],
       ],
       'total_items' => 2,
@@ -228,7 +262,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function getMemberInfo($list_id, $email, $parameters = []) {
-    parent::getMemberInfo($list_id, $email, $parameters);
 
     $response = (object) [
       'id' => md5(strtolower($email)),
@@ -243,8 +276,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function addMember($list_id, $email, $parameters = [], $batch = FALSE) {
-    parent::addMember($list_id, $email, $parameters, $batch);
-
     $response = (object) [
       'id' => md5(strtolower($email)),
       'email_address' => $email,
@@ -260,16 +291,12 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
   /**
    * @inheritdoc
    */
-  public function removeMember($list_id, $email) {
-    parent::removeMember($list_id, $email);
-  }
+  public function removeMember($list_id, $email) {}
 
   /**
    * @inheritdoc
    */
   public function updateMember($list_id, $email, $parameters = [], $batch = FALSE) {
-    parent::updateMember($list_id, $email, $parameters, $batch);
-
     $response = (object) [
       'id' => md5(strtolower($email)),
       'email_address' => $email,
@@ -286,8 +313,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function addOrUpdateMember($list_id, $email, $parameters = [], $batch = FALSE) {
-    parent::addOrUpdateMember($list_id, $email, $parameters, $batch);
-
     $response = (object) [
       'id' => md5(strtolower($email)),
       'email_address' => $email,
@@ -304,8 +329,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function getSegments($list_id, $parameters = []) {
-    parent::getSegments($list_id, $parameters);
-
     $response = (object) [
       'segments' => [
         (object) [
@@ -331,8 +354,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function getSegment($list_id, $segment_id, $parameters = []) {
-    parent::getSegment($list_id, $segment_id, $parameters);
-
     $response = (object) [
       'id' => 49377,
       'name' => 'Test Segment One',
@@ -347,8 +368,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function addSegment($list_id, $name, $parameters = [], $batch = FALSE) {
-    parent::addSegment($list_id, $name, $parameters, $batch);
-
     $response = (object) [];
 
     if (!empty($list_id) && !empty($name) && !empty($parameters['type'])) {
@@ -365,8 +384,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function updateSegment($list_id, $segment_id, $name, $parameters = [], $batch = FALSE) {
-    parent::updateSegment($list_id, $segment_id, $name, $parameters);
-
     $response = (object) [
       'id' => $segment_id,
       'name' => $name,
@@ -378,11 +395,36 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function addSegmentMember($list_id, $segment_id, $email, $parameters = []) {
+    $response = (object) [
+      'id' => md5(strtolower($email)),
+      'email_address' => $email,
+      'list_id' => $list_id,
+      'segment_id' => $segment_id,
+    ];
+
+    return $response;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addTagsMember($list_id, array $tags, $email, array $parameters = []) {
+    $response = (object) [
+      'id' => md5(strtolower($email)),
+      'email_address' => $email,
+      'tags' => $tags,
+    ];
+
+    return $response;
+  }
+
+  /**
    * @inheritdoc
    */
   public function getWebhooks($list_id, $parameters = []) {
-    parent::getWebhooks($list_id, $parameters);
-
     $response = (object) [
       'webhooks' => [
         (object) [
@@ -409,8 +451,6 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function addWebhook($list_id, $url, $parameters = [], $batch = FALSE) {
-    parent::addWebhook($list_id, $url, $parameters, $batch);
-
     $response = (object) [
       'id' => 'ab24521a00',
       'url' => $url,
@@ -428,9 +468,31 @@ class MailchimpLists extends \Mailchimp\MailchimpLists {
    * @inheritdoc
    */
   public function deleteWebhook($list_id, $webhook_id, $parameters = []) {
-    parent::deleteWebhook($list_id, $webhook_id, $parameters);
-
     return (!empty($list_id) && !empty($webhook_id));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processBatchOperations() {
+    // Initialize batch_operations if not set.
+    if (!isset($this->api_class->batch_operations)) {
+      $this->api_class->batch_operations = [];
+    }
+
+    $response = (object) [
+      'id' => 'batch-' . uniqid(),
+      'status' => 'pending',
+      'total_operations' => count($this->api_class->batch_operations),
+      'finished_operations' => 0,
+      'errored_operations' => 0,
+      'submitted_at' => date('c'),
+    ];
+
+    // Reset batch operations after processing.
+    $this->api_class->batch_operations = [];
+
+    return $response;
   }
 
 }

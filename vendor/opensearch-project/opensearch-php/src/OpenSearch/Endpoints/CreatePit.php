@@ -27,7 +27,7 @@ class CreatePit extends AbstractEndpoint
         if (!isset($this->index) || $this->index === '') {
             throw new RuntimeException('index is required for create_pit');
         }
-        $index = $this->index;
+        $index = rawurlencode($this->index);
 
         return "/$index/_search/point_in_time";
     }

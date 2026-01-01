@@ -27,7 +27,7 @@ class SendTest extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $config_id = $this->config_id ?? null;
+        $config_id = $this->config_id ? rawurlencode($this->config_id) : null;
         if (isset($config_id)) {
             return "/_plugins/_notifications/feature/test/$config_id";
         }

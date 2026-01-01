@@ -47,6 +47,7 @@ EntityEventInsertSubscriber
 EntityEventUpdateSubscriber
 EntityEventDeleteSubscriber
 EntityEventPresaveSubscriber
+EntityEventPredeleteSubscriber
 ```
 Extend these classes with your own module subscribers.
 
@@ -61,7 +62,7 @@ use Drupal\entity_events\EventSubscriber\EntityEventInsertSubscriber;
 class MyModuleSubscriber extends EntityEventInsertSubscriber {
 
   public function onEntityInsert(EntityEvent $event) {
-    drupal_set_message('Entity inserted');
+    // Implement your logic here.
   }
 
 }

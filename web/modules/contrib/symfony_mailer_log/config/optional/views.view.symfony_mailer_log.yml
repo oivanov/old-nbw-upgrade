@@ -378,7 +378,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'administer symfony mailer entity log entries'
+          perm: 'view symfony mailer log entries'
       cache:
         type: tag
         options: {  }

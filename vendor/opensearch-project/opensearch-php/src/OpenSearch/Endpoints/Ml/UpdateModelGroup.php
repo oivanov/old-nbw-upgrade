@@ -25,7 +25,7 @@ class UpdateModelGroup extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $model_group_id = $this->model_group_id ?? null;
+        $model_group_id = $this->model_group_id ? rawurlencode($this->model_group_id) : null;
         if (isset($model_group_id)) {
             return "/_plugins/_ml/model_groups/$model_group_id";
         }

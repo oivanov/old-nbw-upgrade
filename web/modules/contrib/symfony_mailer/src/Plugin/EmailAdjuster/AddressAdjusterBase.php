@@ -17,9 +17,16 @@ abstract class AddressAdjusterBase extends EmailAdjusterBase {
   use MailerHelperTrait;
 
   /**
+   * The name of the associated header. This must be set by the sub-class.
+   */
+  protected const NAME = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public function build(EmailInterface $email) {
+    $addresses = [];
+
     foreach ($this->configuration['addresses'] as $item) {
       $value = $item['value'];
       $display = $item['display'];
@@ -89,6 +96,8 @@ abstract class AddressAdjusterBase extends EmailAdjusterBase {
    * {@inheritdoc}
    */
   public function getSummary() {
+    $summary = [];
+
     foreach ($this->configuration['addresses'] as $item) {
       $value = $item['value'];
 

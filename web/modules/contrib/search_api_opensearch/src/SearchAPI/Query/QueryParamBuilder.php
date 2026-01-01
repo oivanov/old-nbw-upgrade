@@ -8,6 +8,7 @@ use Drupal\search_api\Utility\FieldsHelperInterface;
 use Drupal\search_api_opensearch\Event\QueryParamsEvent;
 use Drupal\search_api_opensearch\SearchAPI\MoreLikeThisParamBuilder;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -15,39 +16,8 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class QueryParamBuilder {
 
-  /**
-   * The default query offset.
-   */
-  const DEFAULT_OFFSET = 0;
-
-  /**
-   * The default query limit.
-   */
-  const DEFAULT_LIMIT = 10;
-
-  /**
-   * Creates a new QueryParamBuilder.
-   *
-   * @param \Drupal\search_api\Utility\FieldsHelperInterface $fieldsHelper
-   *   The fields helper.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\QuerySortBuilder $sortBuilder
-   *   The sort builder.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\FilterBuilder $filterBuilder
-   *   The filter builder.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\SearchParamBuilder $searchParamBuilder
-   *   The search param builder.
-   * @param \Drupal\search_api_opensearch\SearchAPI\MoreLikeThisParamBuilder $mltParamBuilder
-   *   The More Like This param builder.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\FacetParamBuilder $facetBuilder
-   *   The facet param builder.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\SpellCheckBuilder $spellCheckBuilder
-   *   The spell check query builder.
-   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $eventDispatcher
-   *   The event dispatcher.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
-   */
   public function __construct(
+    #[Autowire(service: 'search_api.fields_helper')]
     protected FieldsHelperInterface $fieldsHelper,
     protected QuerySortBuilder $sortBuilder,
     protected FilterBuilder $filterBuilder,
@@ -56,6 +26,7 @@ class QueryParamBuilder {
     protected FacetParamBuilder $facetBuilder,
     protected SpellCheckBuilder $spellCheckBuilder,
     protected EventDispatcherInterface $eventDispatcher,
+    #[Autowire(service: 'logger.channel.search_api_opensearch')]
     protected LoggerInterface $logger,
   ) {
   }
@@ -85,8 +56,12 @@ class QueryParamBuilder {
     $body = [];
 
     // Set the size and from parameters.
-    $body['from'] = $query->getOption('offset') ?? self::DEFAULT_OFFSET;
-    $body['size'] = $query->getOption('limit') ?? self::DEFAULT_LIMIT;
+    if (($offset = $query->getOption('offset')) !== NULL) {
+      $body['from'] = $offset;
+    }
+    if (($limit = $query->getOption('limit')) !== NULL) {
+      $body['size'] = $limit;
+    }
 
     // Sort.
     $sort = $this->sortBuilder->getSortSearchQuery($query);

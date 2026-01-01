@@ -35,7 +35,7 @@ class DeleteByQueryRethrottle extends AbstractEndpoint
         if (!isset($this->task_id) || $this->task_id === '') {
             throw new RuntimeException('task_id is required for delete_by_query_rethrottle');
         }
-        $task_id = $this->task_id;
+        $task_id = rawurlencode($this->task_id);
 
         return "/_delete_by_query/$task_id/_rethrottle";
     }

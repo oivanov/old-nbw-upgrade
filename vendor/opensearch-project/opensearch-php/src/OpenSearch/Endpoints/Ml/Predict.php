@@ -26,8 +26,8 @@ class Predict extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $algorithm_name = $this->algorithm_name ?? null;
-        $model_id = $this->model_id ?? null;
+        $algorithm_name = $this->algorithm_name ? rawurlencode($this->algorithm_name) : null;
+        $model_id = $this->model_id ? rawurlencode($this->model_id) : null;
         if (isset($algorithm_name) && isset($model_id)) {
             return "/_plugins/_ml/_predict/$algorithm_name/$model_id";
         }

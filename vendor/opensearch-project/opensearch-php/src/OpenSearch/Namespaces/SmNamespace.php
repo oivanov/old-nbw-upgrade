@@ -34,12 +34,12 @@ class SmNamespace extends AbstractNamespace
     /**
      * Creates a snapshot management policy.
      *
-     * $params['policy_name'] = (string) The name of the snapshot management policy.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['policy_name'] = (string) The name of the snapshot management policy to create.
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -60,12 +60,12 @@ class SmNamespace extends AbstractNamespace
     /**
      * Deletes a snapshot management policy.
      *
-     * $params['policy_name'] = (string) The name of the snapshot management policy.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['policy_name'] = (string) The name of the snapshot management policy to delete.
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -84,12 +84,12 @@ class SmNamespace extends AbstractNamespace
     /**
      * Explains the state of the snapshot management policy.
      *
-     * $params['policy_name'] = (string) The name of the snapshot management policy.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['policy_name'] = (string) The name of the snapshot management policy to explain.
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -108,16 +108,16 @@ class SmNamespace extends AbstractNamespace
     /**
      * Retrieves all snapshot management policies with optional pagination and filtering.
      *
-     * $params['from']        = (integer) The starting index (default: 0)
-     * $params['queryString'] = (string) A query string to filter policies.
-     * $params['size']        = (integer) The number of policies to return.
-     * $params['sortField']   = (string) The field to sort on.
-     * $params['sortOrder']   = (enum) The order of sorting. (Options = asc,desc) (Default = asc)
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['from']        = (integer) The starting index from which to retrieve snapshot management policies. (Default = 0)
+     * $params['queryString'] = (string) The query string to filter the returned snapshot management policies.
+     * $params['size']        = (integer) The number of snapshot management policies to return.
+     * $params['sortField']   = (string) The name of the field to sort the snapshot management policies by.
+     * $params['sortOrder']   = (enum) The order to sort the snapshot management policies. (Options = asc,desc)
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -133,12 +133,12 @@ class SmNamespace extends AbstractNamespace
     /**
      * Retrieves a specific snapshot management policy by name.
      *
-     * $params['policy_name'] = (string) The name of the snapshot management policy.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['policy_name'] = (string) The name of the snapshot management policy to retrieve.
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -157,12 +157,12 @@ class SmNamespace extends AbstractNamespace
     /**
      * Starts a snapshot management policy.
      *
-     * $params['policy_name'] = (string) The name of the snapshot management policy.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['policy_name'] = (string) The name of the snapshot management policy to start.
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -181,12 +181,12 @@ class SmNamespace extends AbstractNamespace
     /**
      * Stops a snapshot management policy.
      *
-     * $params['policy_name'] = (string) The name of the snapshot management policy.
-     * $params['pretty']      = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']       = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['policy_name'] = (string) The name of the snapshot management policy to stop.
+     * $params['pretty']      = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']       = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace'] = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']      = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path'] = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path'] = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array
@@ -205,14 +205,14 @@ class SmNamespace extends AbstractNamespace
     /**
      * Updates an existing snapshot management policy. Requires `if_seq_no` and `if_primary_term`.
      *
-     * $params['policy_name']     = (string) The name of the snapshot management policy.
+     * $params['policy_name']     = (string) The name of the snapshot management policy to update.
      * $params['if_primary_term'] = (integer) The primary term of the policy to update.
      * $params['if_seq_no']       = (integer) The sequence number of the policy to update.
-     * $params['pretty']          = (boolean) Whether to pretty format the returned JSON response. (Default = false)
-     * $params['human']           = (boolean) Whether to return human readable values for statistics. (Default = true)
+     * $params['pretty']          = (boolean) Whether to pretty-format the returned JSON response. (Default = false)
+     * $params['human']           = (boolean) Whether to return human-readable values for statistics. (Default = false)
      * $params['error_trace']     = (boolean) Whether to include the stack trace of returned errors. (Default = false)
      * $params['source']          = (string) The URL-encoded request definition. Useful for libraries that do not accept a request body for non-POST requests.
-     * $params['filter_path']     = (any) Used to reduce the response. This parameter takes a comma-separated list of filters. It supports using wildcards to match any field or part of a field’s name. You can also exclude fields with "-".
+     * $params['filter_path']     = (any) A comma-separated list of filters used to filter the response. Use wildcards to match any field or part of a field's name. To exclude fields, use `-`.
      *
      * @param array $params Associative array of parameters
      * @return array

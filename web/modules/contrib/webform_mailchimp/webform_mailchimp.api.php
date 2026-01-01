@@ -18,9 +18,9 @@ use Drupal\webform\WebformSubmissionInterface;
  *
  * @param array $mergevars
  *   The current mergevars.
- * @param WebformSubmissionInterface $submission
+ * @param \Drupal\webform\WebformSubmissionInterface $submission
  *   The webform submission entity used to populate the mergevars.
- * @param WebformHandlerInterface $handler
+ * @param \Drupal\webform\Plugin\WebformHandlerInterface $handler
  *   The webform submission handler used to populate the mergevars.
  *
  * @ingroup webform_mailchimp
@@ -32,4 +32,3 @@ function hook_webform_mailchimp_lists_mergevars_alter(&$mergevars, WebformSubmis
 /**
  * @} End of "addtogroup hooks".
  */
-

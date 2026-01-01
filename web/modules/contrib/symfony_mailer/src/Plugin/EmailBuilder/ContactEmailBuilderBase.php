@@ -17,6 +17,16 @@ class ContactEmailBuilderBase extends EmailBuilderBase {
   /**
    * {@inheritdoc}
    */
+  public function init(EmailInterface $email) {
+    parent::init($email);
+    if ($email->getSubType() != 'mail') {
+      $email->setTo($email->getParam('sender'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function build(EmailInterface $email) {
     /** @var \Drupal\user\UserInterface $sender */
     $sender = $email->getParam('sender');
@@ -31,9 +41,6 @@ class ContactEmailBuilderBase extends EmailBuilderBase {
 
     if ($email->getSubType() == 'mail') {
       $email->setReplyTo($sender);
-    }
-    else {
-      $email->setTo($sender);
     }
   }
 

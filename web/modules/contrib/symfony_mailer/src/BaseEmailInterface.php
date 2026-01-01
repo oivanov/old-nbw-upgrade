@@ -64,20 +64,21 @@ interface BaseEmailInterface {
   public function getAddress(string $name): array;
 
   /**
-   * Sets one or more from addresses.
+   * Sets "from" addresses.
    *
    * @param mixed $addresses
-   *   The addresses to set, see Address::convert().
+   *   The addresses to set, see Address::convert(). Passing NULL as a value
+   *   will erase the addresses.
    *
    * @return $this
    */
   public function setFrom($addresses);
 
   /**
-   * Gets the from addresses.
+   * Gets the "from" addresses.
    *
    * @return \Drupal\symfony_mailer\AddressInterface[]
-   *   The from addresses.
+   *   The "from" addresses.
    */
   public function getFrom(): array;
 
@@ -86,38 +87,39 @@ interface BaseEmailInterface {
    *
    * @param mixed $addresses
    *   The addresses to set, see Address::convert(). Passing NULL as a value
-   *   will erase the reply-to address.
+   *   will erase the addresses.
    *
    * @return $this
    */
   public function setReplyTo($addresses);
 
   /**
-   * Gets the reply-to addresses.
+   * Gets the "reply-to" addresses.
    *
    * @return \Drupal\symfony_mailer\AddressInterface[]
-   *   The reply-to addresses.
+   *   The "reply-to" addresses.
    */
   public function getReplyTo(): array;
 
   /**
    * Sets "to" addresses.
    *
-   * Valid: build.
+   * Valid: initialisation or build (build is deprecated in 1.6.0 and will fail
+   * in 2.0.0).
    *
    * @param mixed $addresses
    *   The addresses to set, see Address::convert(). Passing NULL as a value
-   *   will erase "to" address.
+   *   will erase the addresses.
    *
    * @return $this
    */
   public function setTo($addresses);
 
   /**
-   * Gets the to addresses.
+   * Gets the "to" addresses.
    *
    * @return \Drupal\symfony_mailer\AddressInterface[]
-   *   The to addresses.
+   *   The "to" addresses.
    */
   public function getTo(): array;
 
@@ -126,17 +128,17 @@ interface BaseEmailInterface {
    *
    * @param mixed $addresses
    *   The addresses to set, see Address::convert(). Passing NULL as a value
-   *   will erase "сс" addresses.
+   *   will erase the addresses.
    *
    * @return $this
    */
   public function setCc($addresses);
 
   /**
-   * Gets the cc addresses.
+   * Gets the "cc" addresses.
    *
    * @return \Drupal\symfony_mailer\AddressInterface[]
-   *   The cc addresses.
+   *   The "cc" addresses.
    */
   public function getCc(): array;
 
@@ -145,17 +147,17 @@ interface BaseEmailInterface {
    *
    * @param mixed $addresses
    *   The addresses to set, see Address::convert(). Passing NULL as a value
-   *   will erase "bсс" addresses.
+   *   will erase the addresses.
    *
    * @return $this
    */
   public function setBcc($addresses);
 
   /**
-   * Gets the bcc addresses.
+   * Gets the "bcc" addresses.
    *
    * @return \Drupal\symfony_mailer\AddressInterface[]
-   *   The bcc addresses.
+   *   The "bcc" addresses.
    */
   public function getBcc(): array;
 
@@ -223,6 +225,21 @@ interface BaseEmailInterface {
   public function getHtmlBody(): ?string;
 
   /**
+   * Adds an attachment.
+   *
+   * This function automatically 'embeds' the attachment when needed.
+   * - Any images in the email body with a 'src' attribute that matches the
+   *   attachment filename are converted to references.
+   * - The attachment is set to 'inline' if it is referenced.
+   *
+   * @param Drupal\symfony_mailer\AttachmentInterface $attachment
+   *   The attachment.
+   *
+   * @return $this
+   */
+  public function attach(AttachmentInterface $attachment): static;
+
+  /**
    * Adds an attachment from a path.
    *
    * @param string $path
@@ -230,11 +247,11 @@ interface BaseEmailInterface {
    * @param string|null $name
    *   (optional) The file name. Defaults to the base name of the path.
    * @param string|null $mimeType
-   *   (optional) The mime type. If omitted, the type will be guessed.
+   *   (optional) The MIME type. If omitted, the type will be guessed.
    *
    * @return $this
    */
-  public function attachFromPath(string $path, string $name = NULL, string $mimeType = NULL);
+  public function attachFromPath(string $path, ?string $name = NULL, ?string $mimeType = NULL);
 
   /**
    * Adds an attachment from temporary content that's not related to a path.
@@ -248,18 +265,34 @@ interface BaseEmailInterface {
    * @param string|null $name
    *   (optional) The file name.
    * @param string|null $mimeType
-   *   (optional) The mime type. If omitted, the type will be guessed.
+   *   (optional) The MIME type. If omitted, the type will be guessed.
+   *
+   * @return $this
+   *
+   * @deprecated in symfony_mailer:1.6.0 and is removed from symfony_mailer:2.0.0.
+   *   Instead you should use attach().
+   *
+   * @see https://www.drupal.org/node/3476132
+   */
+  public function attachNoPath(string $body, ?string $name = NULL, ?string $mimeType = NULL);
+
+  /**
+   * Gets the attachments.
+   *
+   * @return \Drupal\symfony_mailer\AttachmentInterface[]
+   *   The attachments. The key is the URI if there is one, else the content ID.
+   */
+  public function getAttachments(): array;
+
+  /**
+   * Removes an attachment.
+   *
+   * @param string $key
+   *   The key to the attachment within the array returned by getAttachments().
    *
    * @return $this
    */
-  public function attachNoPath(string $body, string $name = NULL, string $mimeType = NULL);
-
-  // @codingStandardsIgnoreStart
-  /**
-   * @return $this
-   */
-  // public function embedFromPath(string $path, string $name = null, string $contentType = null);
-  // @codingStandardsIgnoreEnd
+  public function removeAttachment(string $key): static;
 
   /**
    * Gets the headers object for getting or setting headers.

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\migrate_tools\Functional;
 
@@ -56,7 +56,7 @@ final class DrushCommandsGeneratorTest extends BrowserTestBase {
     $this->sourceData = <<<'EOD'
 vid,name,description,hierarchy,weight
 tags,Tags,Use tags to group articles,0,0
-forums,Sujet de discussion,Forum navigation vocabulary,1,0
+forums,Subject of discussion,Forum navigation vocabulary,1,0
 test_vocabulary,Test Vocabulary,This is the vocabulary description,1,0
 genre,Genre,Genre description,1,0
 EOD;
@@ -75,6 +75,8 @@ EOD;
     $this->assertStringNotContainsString('5/5', $this->getErrorOutput());
     $vocabulary = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load('genre');
     $this->assertEquals('Genre', $vocabulary->label());
+    // Flush cache so recently added vocabularies actually appear.
+    drupal_flush_all_caches();
     $this->assertEquals(4, \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->getQuery()->accessCheck(TRUE)->count()->execute());
 
     // Remove one vocab and replace with another.

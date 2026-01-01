@@ -2,6 +2,7 @@
 
 namespace Drupal\gatsby\Form;
 
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -49,9 +50,11 @@ class GatsbyAdminForm extends ConfigFormBase {
    *   The module handler.
    * @param \Drupal\gatsby\PathMapping $pathMapping
    *   The path mapping.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typed_config_manager
+   *   The interface for managing config schema type plugins.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entityTypeManager, ModuleHandlerInterface $moduleHandler, PathMapping $pathMapping) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entityTypeManager, ModuleHandlerInterface $moduleHandler, PathMapping $pathMapping, TypedConfigManagerInterface $typed_config_manager) {
+    parent::__construct($config_factory, $typed_config_manager);
     $this->entityTypeManager = $entityTypeManager;
     $this->moduleHandler = $moduleHandler;
     $this->pathMapping = $pathMapping;
@@ -65,7 +68,8 @@ class GatsbyAdminForm extends ConfigFormBase {
       $container->get('config.factory'),
       $container->get('entity_type.manager'),
       $container->get('module_handler'),
-      $container->get('gatsby.path_mapping')
+      $container->get('gatsby.path_mapping'),
+      $container->get('config.typed'),
     );
   }
 

@@ -1,62 +1,91 @@
 (function ($, Drupal, once) {
-
-  "use strict";
-
   Drupal.behaviors.environmentIndicatorSwitcher = {
-    attach: function (context, settings) {
-      $('#environment-indicator', context).bind('click', function () {
-        $('#environment-indicator .environment-switcher-container', context).slideToggle('fast');
+    attach(context) {
+      const indicators = once(
+        'environmentIndicatorSwitcher',
+        '#environment-indicator',
+        context,
+      );
+      if (indicators.length === 0) {
+        return;
+      }
+      indicators.forEach((el) => {
+        $(el).on('click', () => {
+          $('.environment-switcher-container', context).slideToggle('fast');
+        });
       });
-    }
+    },
   };
 
+  // @todo Remove this function in environment_indicator 5.0.0
   Drupal.behaviors.environmentIndicatorToolbar = {
-    attach: function (context, settings) {
-      if (typeof(settings.environmentIndicator) != 'undefined') {
+    attach(context, settings) {
+      if (settings.environmentIndicator !== undefined) {
         const $body = $('body');
-        const borderWidth = getComputedStyle(document.body).getPropertyValue('--enviroment-indicator-border-width') || '6px';
-
-        // Only apply text and background color if not using gin_toolbar
-        if (!$body.hasClass('gin--vertical-toolbar') && !$body.hasClass('gin--horizontal-toolbar')) {
-          $('.toolbar .toolbar-bar .toolbar-tab > .toolbar-item').css('background-color', settings.environmentIndicator.bgColor);
-          $('#toolbar-bar .toolbar-tab a.toolbar-item', context).css('border-bottom', '0px');
-          $('#toolbar-bar .toolbar-tab a.toolbar-item', context).css('color', settings.environmentIndicator.fgColor);
-          $('#toolbar-bar', context).css('background-color', settings.environmentIndicator.bgColor);
-          $('#toolbar-bar .toolbar-tab a.toolbar-item', context).not('.is-active').css('color', settings.environmentIndicator.fgColor);
+        const borderWidth =
+          getComputedStyle(document.body).getPropertyValue(
+            '--environment-indicator-border-width',
+          ) || '6px';
+        // Set environment color if not using gin_toolbar.
+        if (
+          settings.environmentIndicator.toolbars === true &&
+          !$body.hasClass('gin--vertical-toolbar') &&
+          !$body.hasClass('gin--horizontal-toolbar')
+        ) {
+          // Replaced $.css with direct style assignment using JavaScript.
+          document.querySelector('#toolbar-bar').style.backgroundColor =
+            settings.environmentIndicator.bgColor;
+          document
+            .querySelectorAll('#toolbar-bar .toolbar-item a:not(.is-active)')
+            .forEach((el) => {
+              el.style.borderBottom = '0px';
+              el.style.color = settings.environmentIndicator.fgColor;
+            });
+          document
+            .querySelectorAll(
+              '.toolbar .toolbar-bar .toolbar-tab > .toolbar-item',
+            )
+            .forEach((el) => {
+              el.style.backgroundColor = settings.environmentIndicator.bgColor;
+            });
         }
-
         // Set environment color for gin_toolbar vertical toolbar.
         if ($body.hasClass('gin--vertical-toolbar')) {
-          $('.toolbar-menu-administration', context).css({'border-left-color': settings.environmentIndicator.bgColor, 'border-left-width': borderWidth});
-          $('.toolbar-tray-horizontal .toolbar-menu li.menu-item', context).css({'margin-left': 'calc(var(--enviroment-indicator-border-width) * -0.5)'});
+          document.querySelector(
+            '.toolbar-menu-administration',
+          ).style.borderLeftColor = settings.environmentIndicator.bgColor;
+          document.querySelector(
+            '.toolbar-menu-administration',
+          ).style.borderLeftWidth = borderWidth;
+          document
+            .querySelectorAll(
+              '.toolbar-tray-horizontal .toolbar-menu li.menu-item',
+            )
+            .forEach((el) => {
+              el.style.marginLeft =
+                'calc(var(--environment-indicator-border-width) * -0.5)';
+              return el;
+            });
         }
         // Set environment color for gin_toolbar horizontal toolbar.
         if ($body.hasClass('gin--horizontal-toolbar')) {
-          $('#toolbar-item-administration-tray').css({'border-top-color': settings.environmentIndicator.bgColor, 'border-top-width': borderWidth});
+          document.querySelector(
+            '#toolbar-item-administration-tray',
+          ).style.borderTopColor = settings.environmentIndicator.bgColor;
+          document.querySelector(
+            '#toolbar-item-administration-tray',
+          ).style.borderTopWidth = borderWidth;
         }
         // Set environment color on the icon of the gin_toolbar
-        if($body.hasClass('gin--horizontal-toolbar') || $body.hasClass('gin--vertical-toolbar')) {
-          $('head', context).append("<style>.toolbar .toolbar-bar #toolbar-item-administration-tray a.toolbar-icon-admin-toolbar-tools-help.toolbar-icon-default::before{ background-color: " + settings.environmentIndicator.bgColor + " }</style>");
+        if (
+          $body.hasClass('gin--horizontal-toolbar') ||
+          $body.hasClass('gin--vertical-toolbar')
+        ) {
+          $('head', context).append(
+            `<style>.toolbar .toolbar-bar #toolbar-item-administration-tray a.toolbar-icon-admin-toolbar-tools-help.toolbar-icon-default::before{ background-color: ${settings.environmentIndicator.bgColor} }</style>`,
+          );
         }
       }
-    }
+    },
   };
-
-  Drupal.behaviors.environmentIndicatorTinycon = {
-    attach: function (context, settings) {
-      $(once('env-ind-tinycon', 'html', context)).each(function() {
-        if (typeof(settings.environmentIndicator) != 'undefined' &&
-          typeof(settings.environmentIndicator.addFavicon) != 'undefined' &&
-          settings.environmentIndicator.addFavicon) {
-          // Draw favicon label.
-          Tinycon.setBubble(settings.environmentIndicator.name.slice(0, 1).trim());
-          Tinycon.setOptions({
-            background: settings.environmentIndicator.bgColor,
-            colour: settings.environmentIndicator.fgColor
-          });
-        }
-      })
-    }
-  }
-
 })(jQuery, Drupal, once);

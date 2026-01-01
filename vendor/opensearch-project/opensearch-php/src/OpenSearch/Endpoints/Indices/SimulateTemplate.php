@@ -32,7 +32,7 @@ class SimulateTemplate extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $name = $this->name ?? null;
+        $name = $this->name ? rawurlencode($this->name) : null;
         if (isset($name)) {
             return "/_index_template/_simulate/$name";
         }

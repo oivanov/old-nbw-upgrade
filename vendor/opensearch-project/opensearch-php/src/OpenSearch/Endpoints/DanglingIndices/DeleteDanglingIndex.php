@@ -33,7 +33,7 @@ class DeleteDanglingIndex extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $index_uuid = $this->index_uuid ?? null;
+        $index_uuid = $this->index_uuid ? rawurlencode($this->index_uuid) : null;
         if (isset($index_uuid)) {
             return "/_dangling/$index_uuid";
         }

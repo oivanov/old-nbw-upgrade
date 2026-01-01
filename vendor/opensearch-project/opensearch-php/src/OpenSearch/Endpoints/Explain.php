@@ -33,11 +33,11 @@ class Explain extends AbstractEndpoint
         if (!isset($this->id) || $this->id === '') {
             throw new RuntimeException('id is required for explain');
         }
-        $id = $this->id;
+        $id = rawurlencode($this->id);
         if (!isset($this->index) || $this->index === '') {
             throw new RuntimeException('index is required for explain');
         }
-        $index = $this->index;
+        $index = rawurlencode($this->index);
 
         return "/$index/_explain/$id";
     }

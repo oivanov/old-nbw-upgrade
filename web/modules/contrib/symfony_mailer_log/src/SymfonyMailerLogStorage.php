@@ -12,7 +12,7 @@ class SymfonyMailerLogStorage extends SqlContentEntityStorage implements Symfony
   /**
    * {@inheritdoc}
    */
-  public function deleteExpiredBatched(\DateInterval $maximum_age, int $batch_size = NULL): void {
+  public function deleteExpiredBatched(\DateInterval $maximum_age, ?int $batch_size = NULL): void {
     $now = new \DateTimeImmutable();
     $min_created = $now->sub($maximum_age);
     $query = $this->getQuery()

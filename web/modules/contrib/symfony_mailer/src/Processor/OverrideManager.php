@@ -150,7 +150,7 @@ class OverrideManager implements OverrideManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getInfo(string $filterId = NULL) {
+  public function getInfo(?string $filterId = NULL) {
     if ($filterId == self::ALL_OVERRIDES) {
       return [
         'name' => $this->t('<b>*All*</b>'),

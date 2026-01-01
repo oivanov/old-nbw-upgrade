@@ -7,7 +7,7 @@ dependencies:
   - fullcalendar:fullcalendar
   - drupal:block
 
-# Information added by Drupal.org packaging script on 2024-11-25
-version: '3.0.2'
+# Information added by Drupal.org packaging script on 2025-06-07
+version: '3.0.3'
 project: 'fullcalendar'
-datestamp: 1732561996
+datestamp: 1749323251

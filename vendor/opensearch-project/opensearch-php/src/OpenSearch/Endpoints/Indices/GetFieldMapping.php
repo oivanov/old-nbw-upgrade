@@ -36,8 +36,8 @@ class GetFieldMapping extends AbstractEndpoint
         if (!isset($this->fields) || $this->fields === '') {
             throw new RuntimeException('fields is required for get_field_mapping');
         }
-        $fields = $this->fields;
-        $index = $this->index ?? null;
+        $fields = rawurlencode($this->fields);
+        $index = $this->index ? rawurlencode($this->index) : null;
         if (isset($index)) {
             return "/$index/_mapping/field/$fields";
         }
@@ -67,13 +67,13 @@ class GetFieldMapping extends AbstractEndpoint
 
     public function setFields($fields): static
     {
-        if (isset($fields) !== true) {
+        if (!isset($fields)) {
             return $this;
         }
         if (is_array($fields) === true) {
             $fields = implode(",", $fields);
         }
-        $this->fields = $fields;
+        $this->fields = rawurlencode($fields);
 
         return $this;
     }

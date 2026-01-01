@@ -4,7 +4,7 @@ namespace Drupal\fullcalendar\Controller;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Render\Renderer;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\fullcalendar\Ajax\ResultsCommand;
 use Drupal\views\Entity\View;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -25,9 +25,9 @@ class ResultsController extends ControllerBase {
   /**
    * The renderer.
    *
-   * @var \Drupal\Core\Render\Renderer
+   * @var \Drupal\Core\Render\RendererInterface
    */
-  protected Renderer $renderer;
+  protected RendererInterface $renderer;
 
   /**
    * {@inheritdoc}

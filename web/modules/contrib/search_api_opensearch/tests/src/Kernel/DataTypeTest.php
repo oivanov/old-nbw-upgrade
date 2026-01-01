@@ -53,7 +53,7 @@ class DataTypeTest extends KernelTestBase {
   /**
    * Data provider for data types.
    */
-  protected function provideDataTypes(): array {
+  public static function provideDataTypes(): array {
     return [
       ['object'],
       ['search_api_opensearch_date_range'],

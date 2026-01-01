@@ -6,15 +6,27 @@ use Drupal\Tests\BrowserTestBase;
 
 /**
  * Defines a base class for testing the DownloadStatistics module.
+ *
+ * @deprecated in download_statistics:1.1.0 and is removed from
+ *   download_statistics:2.0.0. Use
+ *   \Drupal\Tests\download_statistics\Functional\DownloadStatisticsTestBase
+ *   instead.
+ *
+ * @see \Drupal\Tests\download_statistics\Functional\DownloadStatisticsTestBase
  */
 abstract class DownloadStatisticsTestBase extends BrowserTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  protected static $modules = ['node', 'block', 'ban', 'statistics'];
+  protected static $modules = ['node', 'block', 'ban', 'download_statistics'];
 
   /**
    * User with permissions to ban IP's.

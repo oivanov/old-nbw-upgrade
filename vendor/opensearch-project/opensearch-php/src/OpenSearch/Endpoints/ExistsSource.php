@@ -33,11 +33,11 @@ class ExistsSource extends AbstractEndpoint
         if (!isset($this->id) || $this->id === '') {
             throw new RuntimeException('id is required for exists_source');
         }
-        $id = $this->id;
+        $id = rawurlencode($this->id);
         if (!isset($this->index) || $this->index === '') {
             throw new RuntimeException('index is required for exists_source');
         }
-        $index = $this->index;
+        $index = rawurlencode($this->index);
 
         return "/$index/_source/$id";
     }

@@ -143,7 +143,7 @@ class MailchimpWebformHandler extends WebformHandlerBase {
   /**
    * Submit callback for the refresh button.
    */
-  public function updateConfigSubmit(array $form, FormStateInterface $form_state) {
+  public static function updateConfigSubmit(array $form, FormStateInterface $form_state) {
     $form_state->setRebuild();
   }
 
@@ -220,7 +220,7 @@ class MailchimpWebformHandler extends WebformHandlerBase {
       ]);
 
       try {
-        $response = $client->lists->getAllLists();
+        $response = $client->lists->getAllLists(NULL, NULL, 999);
       }
       catch (RequestException $request_exception) {
       }
@@ -275,7 +275,7 @@ class MailchimpWebformHandler extends WebformHandlerBase {
    * @return array
    *   An associative array containing entity reference details element.
    */
-  public function ajaxCallback(array $form, FormStateInterface $form_state) {
+  public static function ajaxCallback(array $form, FormStateInterface $form_state) {
     return NestedArray::getValue($form, ['settings', 'api_settings']);
   }
 

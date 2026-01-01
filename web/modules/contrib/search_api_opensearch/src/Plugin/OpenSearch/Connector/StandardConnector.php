@@ -6,40 +6,31 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\search_api_opensearch\Attribute\OpenSearchConnector;
 use Drupal\search_api_opensearch\Connector\OpenSearchConnectorInterface;
+use Drupal\search_api_opensearch\Event\ClientOptionsEvent;
 use OpenSearch\Client;
-use OpenSearch\ClientBuilder;
-use Psr\Log\LoggerInterface;
+use OpenSearch\ClientFactoryInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a standard OpenSearch connector.
- *
- * @OpenSearchConnector(
- *   id = "standard",
- *   label = @Translation("Standard"),
- *   description = @Translation("A standard connector without authentication")
- * )
  */
+#[OpenSearchConnector(
+  id: "standard",
+  label: new TranslatableMarkup("Standard"),
+  description: new TranslatableMarkup("A standard connector without authentication"),
+)]
 class StandardConnector extends PluginBase implements OpenSearchConnectorInterface, ContainerFactoryPluginInterface {
 
-  /**
-   * Constructs a new StandardConnector.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
-   */
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    protected LoggerInterface $logger,
+    protected readonly ClientFactoryInterface $clientFactory,
+    protected readonly EventDispatcherInterface $eventDispatcher,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -52,7 +43,8 @@ class StandardConnector extends PluginBase implements OpenSearchConnectorInterfa
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('logger.channel.search_api_opensearch_client')
+      $container->get(ClientFactoryInterface::class),
+      $container->get(EventDispatcherInterface::class),
     );
   }
 
@@ -95,12 +87,8 @@ class StandardConnector extends PluginBase implements OpenSearchConnectorInterfa
    * {@inheritdoc}
    */
   public function getClient(): Client {
-    // We only support one host.
-    return ClientBuilder::create()
-      ->setHosts([$this->configuration['url']])
-      ->setSSLVerification((bool) $this->configuration['ssl_verification'])
-      ->setLogger($this->logger)
-      ->build();
+    $options = $this->getClientOptions();
+    return $this->createClient($options);
   }
 
   /**
@@ -150,6 +138,32 @@ class StandardConnector extends PluginBase implements OpenSearchConnectorInterfa
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration['url'] = trim($form_state->getValue('url'), '/ ');
     $this->configuration['ssl_verification'] = (bool) $form_state->getValue('ssl_verification');
+  }
+
+  /**
+   * Creates an OpenSearch client.
+   *
+   * @param array<string,mixed> $options
+   *   The HTTP client options.
+   */
+  protected function createClient(array $options): Client {
+    $event = new ClientOptionsEvent($options);
+    $this->eventDispatcher->dispatch($event);
+    $options = $event->getOptions();
+    return $this->clientFactory->create($options);
+  }
+
+  /**
+   * Get the client options.
+   *
+   * @return array<string,mixed>
+   *   The client options.
+   */
+  protected function getClientOptions(): array {
+    return [
+      'base_uri' => $this->configuration['url'],
+      'verify' => $this->configuration['ssl_verification'],
+    ];
   }
 
 }

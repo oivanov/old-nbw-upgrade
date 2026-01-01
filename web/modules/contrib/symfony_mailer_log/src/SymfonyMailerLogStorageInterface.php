@@ -22,6 +22,6 @@ interface SymfonyMailerLogStorageInterface extends ContentEntityStorageInterface
    * @throws \Drupal\Core\Entity\EntityStorageException
    *   In case of failures, an exception is thrown.
    */
-  public function deleteExpiredBatched(\DateInterval $maximum_age, int $batch_size = NULL): void;
+  public function deleteExpiredBatched(\DateInterval $maximum_age, ?int $batch_size = NULL): void;
 
 }

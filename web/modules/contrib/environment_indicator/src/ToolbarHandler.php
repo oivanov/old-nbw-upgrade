@@ -12,10 +12,18 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use Drupal\environment_indicator\Entity\EnvironmentIndicator;
+use Drupal\environment_indicator\Entity\EnvironmentIndicator as EnvironmentSwitcher;
+use Drupal\environment_indicator\Service\EnvironmentIndicator;
+
+@trigger_error('The ' . __NAMESPACE__ . '\ToolbarHandler is deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0. Instead, use \Drupal\environment_indicator\Service\EnvironmentIndicator or the environment_indicator_toolbar module. See https://www.drupal.org/node/3526893', E_USER_DEPRECATED);
 
 /**
  * Toolbar integration handler.
+ *
+ * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0. Use
+ * \Drupal\environment_indicator_toolbar\Service\ToolbarHandler.
+ *
+ * @see https://www.drupal.org/node/3526893
  */
 class ToolbarHandler {
 
@@ -26,49 +34,56 @@ class ToolbarHandler {
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
-  protected ModuleHandlerInterface $moduleHandler;
+  protected $moduleHandler;
 
   /**
    * The environment indicator config.
    *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
-  protected ImmutableConfig $config;
+  protected $config;
 
   /**
    * The active environment.
    *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
-  protected ImmutableConfig $activeEnvironment;
+  protected $activeEnvironment;
 
   /**
    * The current user.
    *
    * @var \Drupal\Core\Session\AccountProxyInterface
    */
-  protected AccountProxyInterface $account;
+  protected $account;
 
   /**
    * The state system.
    *
    * @var \Drupal\Core\State\StateInterface
    */
-  protected StateInterface $state;
+  protected $state;
 
   /**
    * Drupal settings.
    *
    * @var \Drupal\Core\Site\Settings
    */
-  protected Settings $settings;
+  protected $settings;
 
   /**
    * Entity Type Manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected EntityTypeManagerInterface $entityTypeManager;
+  protected  $entityTypeManager;
+
+  /**
+   * The indicator service.
+   *
+   * @var \Drupal\environment_indicator\Service\EnvironmentIndicator
+   */
+  protected  $environmentIndicator;
 
   /**
    * ToolbarHandler constructor.
@@ -85,6 +100,8 @@ class ToolbarHandler {
    *   The settings.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\environment_indicator\Service\EnvironmentIndicator $environment_indicator
+   *   The environment indicator service.
    */
   public function __construct(
     ModuleHandlerInterface $module_handler,
@@ -93,6 +110,7 @@ class ToolbarHandler {
     StateInterface $state,
     Settings $settings,
     EntityTypeManagerInterface $entity_type_manager,
+    EnvironmentIndicator $environment_indicator
   ) {
     $this->moduleHandler = $module_handler;
     $this->config = $config_factory->get('environment_indicator.settings');
@@ -101,13 +119,18 @@ class ToolbarHandler {
     $this->state = $state;
     $this->settings = $settings;
     $this->entityTypeManager = $entity_type_manager;
+    $this->environmentIndicator = $environment_indicator;
   }
-
 
   /**
    * User can access all indicators.
    *
    * @return bool
+   *   TRUE on success, FALSE on failure.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0. There is no
+   *  direct replacement for this method.
+   * @see https://www.drupal.org/node/3526812
    */
   public function hasAccessAll(): bool {
     return $this->account->hasPermission('access environment indicator');
@@ -116,10 +139,15 @@ class ToolbarHandler {
   /**
    * User can access a specific indicator.
    *
-   * @param $environment
+   * @param object $environment
    *   The environment identifier.
    *
    * @return bool
+   *   TRUE on success, FALSE on failure.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0. There is no
+   *  direct replacement for this method.
+   * @see https://www.drupal.org/node/3526812
    */
   public function hasAccessEnvironment($environment): bool {
     return $this->hasAccessAll() || $this->account->hasPermission('access environment indicator ' . $environment);
@@ -129,6 +157,11 @@ class ToolbarHandler {
    * User can access the indicator for the active environment.
    *
    * @return bool
+   *   TRUE on success, FALSE on failure.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0. There is no
+   *  direct replacement for this method.
+   * @see https://www.drupal.org/node/3526812
    */
   public function hasAccessActiveEnvironment(): bool {
     return $this->hasAccessEnvironment($this->activeEnvironment->get('machine'));
@@ -148,11 +181,11 @@ class ToolbarHandler {
         'contexts' => ['user.permissions'],
       ],
     ];
-
+    // @phpstan-ignore-next-line
     if ($this->hasAccessActiveEnvironment() && $this->externalIntegration('toolbar')) {
-
+      // @phpstan-ignore-next-line
       $title = $this->getTitle();
-
+      $toolbar_integration = in_array('toolbar', $this->config->get('toolbar_integration') ?? [], TRUE);
       $items['environment_indicator'] += [
         '#type' => 'toolbar_item',
         '#weight' => 125,
@@ -176,18 +209,22 @@ class ToolbarHandler {
               'name' => $this->activeEnvironment->get('name') ?: ' ',
               'fgColor' => $this->activeEnvironment->get('fg_color'),
               'bgColor' => $this->activeEnvironment->get('bg_color'),
-              'addFavicon' => $this->config->get('favicon'),
+              'toolbars' => $toolbar_integration,
             ],
           ],
         ],
       ];
-
+      if ($this->config->get('favicon')) {
+        $items['environment_indicator']['#attached']['drupalSettings']['environmentIndicator']['addFavicon'] = $this->config->get('favicon');
+        $items['environment_indicator']['#attached']['library'][] = 'environment_indicator/favicon';
+      }
       // Add cache tags to the toolbar item while preserving context.
       $items['environment_indicator']['#cache']['tags'] = Cache::mergeTags(
         [
           'config:environment_indicator.settings',
           'config:environment_indicator.indicator',
         ],
+        // @phpstan-ignore-next-line
         $this->getCacheTags()
       );
       if ($this->account->hasPermission('administer environment indicator settings')) {
@@ -200,7 +237,7 @@ class ToolbarHandler {
           ],
         ];
       }
-
+      // @phpstan-ignore-next-line
       if ($links = $this->getLinks()) {
         $items['environment_indicator']['tray']['environment_links'] = [
           '#theme' => 'links__toolbar_shortcuts',
@@ -219,6 +256,13 @@ class ToolbarHandler {
    * Retrieve value from the selected version identifier source.
    *
    * @return string|null
+   *   The current release identifier as a string, or NULL if not available.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+   *   Use
+   *   \Drupal::service('environment_indicator.indicator')->getCurrentRelease()
+   *   instead.
+   * @see https://www.drupal.org/node/3526812
    */
   public function getCurrentRelease(): ?string {
     $version_identifier = $this->config->get('version_identifier') ?? 'environment_indicator_current_release';
@@ -243,6 +287,13 @@ class ToolbarHandler {
    *   The type of version identifier.
    *
    * @return string|null
+   *   The version identifier.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+   *   Use
+   *   \Drupal::service('environment_indicator.indicator')->getVersionIdentifier()
+   *   instead.
+   * @see https://www.drupal.org/node/3526812
    */
   protected function getVersionIdentifier(string $type): ?string {
     switch ($type) {
@@ -267,6 +318,14 @@ class ToolbarHandler {
    * Construct the title for the active environment.
    *
    * @return string|null
+   *   The constructed title, including the release if available, or NULL if the
+   *   environment name is not set.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+   *   Use
+   *   \Drupal::service('environment_indicator.indicator')->getTitle()
+   *   instead.
+   * @see https://www.drupal.org/node/3526812
    */
   public function getTitle(): ?string {
     $environment = $this->activeEnvironment->get('name');
@@ -277,7 +336,7 @@ class ToolbarHandler {
   /**
    * Helper function that checks if there is external integration.
    *
-   * @param $integration
+   * @param string $integration
    *   Name of the integration: toolbar, admin_menu, ...
    *
    * @return bool
@@ -302,6 +361,12 @@ class ToolbarHandler {
    *
    * @return array
    *   The cache tags.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+   *   Use
+   *   \Drupal::service('environment_indicator.indicator')->getCacheTags()
+   *   instead.
+   * @see https://www.drupal.org/node/3526812
    */
   public function getCacheTags(): array {
     return $this->entityTypeManager->getDefinition('environment_indicator')->getListCacheTags();
@@ -311,17 +376,29 @@ class ToolbarHandler {
    * Get all the links for the switcher.
    *
    * @return array
+   *   Returns all the links.
+   *
+   * @deprecated in environment_indicator:4.0.22 and is removed from environment_indicator:5.0.0.
+   *   Use
+   *   \Drupal::service('environment_indicator.indicator')->getLinks()
+   *   instead.
+   * @see https://www.drupal.org/node/3526812
    */
   public function getLinks(): array {
-    if (!$environment_entities = EnvironmentIndicator::loadMultiple()) {
+    if (!$environment_entities = EnvironmentSwitcher::loadMultiple()) {
       return [];
     }
 
     $current = Url::fromRoute('<current>');
     $current_path = $current->toString();
+    $url = parse_url($current_path);
+    $path = $url['path'];
+    if (isset($url['query'])) {
+      $path .= '?' . $url['query'];
+    }
     $environment_entities = array_filter(
       $environment_entities,
-      function (EnvironmentIndicator $entity) {
+      function (EnvironmentSwitcher $entity) {
         return $entity->status()
           && !empty($entity->getUrl())
           && $this->hasAccessEnvironment($entity->id());
@@ -329,14 +406,14 @@ class ToolbarHandler {
     );
 
     $links = array_map(
-      function (EnvironmentIndicator $entity) use ($current_path) {
+      function (EnvironmentSwitcher $entity) use ($path) {
         return [
           'attributes' => [
             'style' => 'color: ' . $entity->getFgColor() . '; background-color: ' . $entity->getBgColor() . ';',
             'title' => $this->t('Opens the current page in the selected environment.'),
           ],
           'title' => $this->t('Open on @label', ['@label' => $entity->label()]),
-          'url' => Url::fromUri($entity->getUrl() . $current_path),
+          'url' => Url::fromUri($entity->getUrl() . $path),
           'type' => 'link',
           'weight' => $entity->getWeight(),
         ];
@@ -354,4 +431,3 @@ class ToolbarHandler {
   }
 
 }
-

@@ -21,7 +21,7 @@ trait DelayableQueueRunnerTrait {
    * @param string $queue_name
    *   The queue to process.
    */
-  protected function runQueue($queue_name): void {
+  protected function runQueue(string $queue_name): void {
     $queue = $this->container->get('queue')->get($queue_name);
     $worker = $this->container->get('plugin.manager.queue_worker')->createInstance($queue_name);
     while ($item = $queue->claimItem()) {
@@ -54,7 +54,7 @@ trait DelayableQueueRunnerTrait {
    * @param string $queue_name
    *   The queue to process.
    */
-  protected function garbageCollectionForQueue($queue_name): void {
+  protected function garbageCollectionForQueue(string $queue_name): void {
     $queue = $this->container->get('queue')->get($queue_name);
     if ($queue instanceof QueueGarbageCollectionInterface) {
       $queue->garbageCollection();

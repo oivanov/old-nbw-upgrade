@@ -45,7 +45,7 @@ trait ViewsAutocompleteFiltersTrait {
   /**
    * Build the options form.
    */
-  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::buildOptionsForm($form, $form_state);
 
     if (!$this->canExpose() || empty($form['expose'])) {
@@ -164,11 +164,11 @@ trait ViewsAutocompleteFiltersTrait {
    * @return array
    *   The list of options.
    */
-  protected function getFieldOptions() {
+  protected function getFieldOptions(): array {
     $field_options = [];
 
     // Limit options to fields with the same name.
-    /** @var \Drupal\views\Plugin\views\field\FieldHandlerInterface $handler */
+    /** @var \Drupal\views\Plugin\views\field\FieldPluginBase $handler */
     foreach ($this->view->display_handler->getHandlers('field') as $id => $handler) {
       if (in_array($this->realField, [
         $handler->field,
@@ -190,7 +190,7 @@ trait ViewsAutocompleteFiltersTrait {
   /**
    * {@inheritdoc}
    */
-  public function valueForm(&$form, FormStateInterface $form_state) {
+  public function valueForm(&$form, FormStateInterface $form_state): void {
     parent::valueForm($form, $form_state);
     $exposed = $form_state->get('exposed');
     if (!$exposed || empty($this->options['expose']['autocomplete_filter'])) {
@@ -217,13 +217,13 @@ trait ViewsAutocompleteFiltersTrait {
     // list to be sure it is added after the "misc/autocomplete.js" file. Also
     // mark the field with special class.
     if (!empty($this->options['expose']['autocomplete_dependent'])) {
-      $form['#attached']['library'][] = 'views_autocomplete_filters/drupal.views-autocomplete-filters-dependent';
+      $form['#attached']['library'][] = 'views_autocomplete_filters/1-dependent';
       $form['value']['#attributes']['class'][] = 'views-ac-dependent-filter';
     }
 
     // Add JS script for autosubmit.
-    if ($this->options['expose']['autocomplete_autosubmit']) {
-      $form['#attached']['library'][] = 'views_autocomplete_filters/drupal.views-autocomplete-filters-autosubmit';
+    if (!empty($this->options['expose']['autocomplete_autosubmit'])) {
+      $form['#attached']['library'][] = 'views_autocomplete_filters/2-autosubmit';
       $form['value']['#attributes']['class'][] = 'views-ac-autosubmit';
     }
   }

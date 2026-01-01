@@ -10,7 +10,7 @@ use Composer\Json\JsonManipulator;
 
 class PatchEnableCommand extends PatchBaseCommand {
 
-  protected function configure() {
+  protected function configure(): void {
     $this->setName('patch-enable')
       ->setDescription('Enables the patch functionality in your composer.json.')
       ->addOption(
@@ -24,10 +24,10 @@ class PatchEnableCommand extends PatchBaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $extra = $this->getComposer()->getPackage()->getExtra();
+    $extra = $this->requireComposer()->getPackage()->getExtra();
 
     // Check, if patch file is already defined.
-    if (!empty($extra['patches-file'])) {
+    if (!empty($extra['patches-file']) || !empty($extra['composer-patches']['patches-file'])) {
       throw new \Exception('Patch file was already defined in your composer.json.');
     }
 
@@ -43,23 +43,32 @@ class PatchEnableCommand extends PatchBaseCommand {
       $patches_file = new JsonFile($patches_filename);
       if (!$patches_file->exists()) {
         if (copy(dirname(__FILE__) . '/../Fixtures/composer.patches.json', $patches_filename)) {
+          print_r(dirname(__FILE__));
           $output->writeln('The composer patches file was created.');
         }
         else {
           throw new \Exception('Patch could not be created.');
         }
       }
-      $manipulator->addProperty('extra.patches-file', $patches_filename);
+
+      if ($this->isComposerPatches1()) {
+        $manipulator->addProperty('extra.patches-file', $patches_filename);
+      }
+      else {
+        $manipulator->addProperty('extra.composer-patches.patches-file', $patches_filename);
+      }
     }
     else {
       // Create an empty patches definition in the root composer.json.
-      if (!isset($extra['patches'])) {
-        $manipulator->addProperty('extra.patches', []);
+      if (!isset($extra['patches']) && !isset($extra['composer-patches']['patches'])) {
+        if ($this->isComposerPatches1()) {
+          $manipulator->addProperty('extra.patches', []);
+        }
+        else {
+          $manipulator->addProperty('extra.composer-patches.patches', []);
+        }
       }
     }
-
-    // Enable patching.
-    $manipulator->addProperty('extra.enable-patching', TRUE);
 
     // Store the manipulated JSON file.
     if (!file_put_contents($composer_filename, $manipulator->getContents())) {

@@ -15,7 +15,7 @@
     "issues": "https://www.drupal.org/project/issues/symfony_mailer_queue"
   },
   "require": {
-    "drupal/symfony_mailer": "^1.4",
-    "drupal/core": "^10.1 || ^11"
+    "drupal/symfony_mailer": "^1.5",
+    "drupal/core": "^10.3 || ^11"
   }
 }

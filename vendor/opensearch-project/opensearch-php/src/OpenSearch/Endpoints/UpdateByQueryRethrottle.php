@@ -35,7 +35,7 @@ class UpdateByQueryRethrottle extends AbstractEndpoint
         if (!isset($this->task_id) || $this->task_id === '') {
             throw new RuntimeException('task_id is required for update_by_query_rethrottle');
         }
-        $task_id = $this->task_id;
+        $task_id = rawurlencode($this->task_id);
 
         return "/_update_by_query/$task_id/_rethrottle";
     }

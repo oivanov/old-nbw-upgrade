@@ -36,6 +36,7 @@ environment_indicator.settings:
       sequence:
         type: string
         label: 'Toolbar identifier'
+      deprecated: "The 'toolbar_integration' config schema is deprecated in environment_indicator:4.0.22 and and is removed from environment_indicator:5.0.0. Use submodules for integrations instead. See http://drupal.org/node/3526893."
     favicon:
       type: boolean
       label: 'Show a colored favicon for environment'

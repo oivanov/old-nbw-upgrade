@@ -30,7 +30,7 @@ class ClearScroll extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $scroll_id = $this->scroll_id ?? null;
+        $scroll_id = $this->scroll_id ? rawurlencode($this->scroll_id) : null;
         if (isset($scroll_id)) {
             @trigger_error('A scroll id can be quite large and should be specified as part of the body', E_USER_DEPRECATED);
         }
@@ -69,13 +69,13 @@ class ClearScroll extends AbstractEndpoint
 
     public function setScrollId($scroll_id): static
     {
-        if (isset($scroll_id) !== true) {
+        if (!isset($scroll_id)) {
             return $this;
         }
         if (is_array($scroll_id) === true) {
             $scroll_id = implode(",", $scroll_id);
         }
-        $this->scroll_id = $scroll_id;
+        $this->scroll_id = rawurlencode($scroll_id);
 
         return $this;
     }

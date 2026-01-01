@@ -32,7 +32,7 @@ class EnvironmentIndicatorListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /* @var \Drupal\environment_indicator\Entity\EnvironmentIndicator $entity */
+    /** @var \Drupal\environment_indicator\Entity\EnvironmentIndicator $entity */
     $row = [
       'style' => 'color: ' . $entity->getFgColor() . '; background-color: ' . $entity->getBgColor() . ';',
     ];

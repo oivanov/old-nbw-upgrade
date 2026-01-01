@@ -28,14 +28,14 @@ class UpdateController extends ControllerBase {
    *
    * @var \Drupal\Core\DependencyInjection\ClassResolverInterface
    */
-  protected $classResolver;
+  protected ClassResolverInterface $classResolver;
 
   /**
    * CSRF Token.
    *
    * @var \Drupal\Core\Access\CsrfTokenGenerator
    */
-  protected $csrfToken;
+  protected CsrfTokenGenerator $csrfToken;
 
   // Fullcalendar is using defaultTimedEventDuration parameter
   // for event objects without a specified end value:

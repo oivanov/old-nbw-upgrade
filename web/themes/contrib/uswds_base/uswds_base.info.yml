@@ -3,7 +3,7 @@ name: U.S. Web Design Standards Base Theme
 base theme: false
 description: 'Drupal USWDS Base Theme - The U.S. Web Design System provides design guidelines and code to help you quickly create trustworthy, accessible, and consistent digital government services.'
 package: USWDS Base
-core_version_requirement: ^9 || ^10 || ^11
+core_version_requirement: ^10 || ^11
 logo: 'logo.png'
 screenshot: 'screenshot.png'
 
@@ -26,7 +26,7 @@ regions:
 libraries:
   - 'uswds_base/framework'
 
-# Information added by Drupal.org packaging script on 2024-10-16
-version: '3.9.0'
+# Information added by Drupal.org packaging script on 2025-03-17
+version: '3.10.0'
 project: 'uswds_base'
-datestamp: 1729117061
+datestamp: 1742225412

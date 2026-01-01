@@ -226,7 +226,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
       '#type' => 'select',
       '#title' => $this->t('Title field'),
       '#options' => $field_options,
-      '#default_value' => $style_plugin->options['fields']['title_field'],
+      '#default_value' => $style_plugin->options['fields']['title_field'] ?? '',
       '#empty_option' => $this->t('- Select -'),
       '#description' => $this->t('Choose the field with the custom title.'),
       '#process' => ['\Drupal\Core\Render\Element\Select::processSelect'],
@@ -250,7 +250,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
       '#type' => 'select',
       '#title' => $this->t('URL field'),
       '#options' => $field_options,
-      '#default_value' => $style_plugin->options['fields']['url_field'],
+      '#default_value' => $style_plugin->options['fields']['url_field'] ?? '',
       '#empty_option' => $this->t('- Select -'),
       '#description' => $this->t('Choose the field with the custom link.'),
       '#process' => ['\Drupal\Core\Render\Element\Select::processSelect'],
@@ -274,7 +274,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
       '#type' => 'select',
       '#title' => $this->t('Date fields'),
       '#options' => $date_fields,
-      '#default_value' => $style_plugin->options['fields']['date_field'],
+      '#default_value' => $style_plugin->options['fields']['date_field'] ?? '',
       '#description' => $this->t('Select one or more date fields.'),
       '#multiple' => TRUE,
       '#size' => count($date_fields),
@@ -368,7 +368,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
       '#description' => $this->t('The bundle (content) type of a new event. Once this is set, you can create a new event by double clicking a calendar entry.'),
       '#type' => 'select',
       '#options' => array_merge(['' => t('None')], $bundlesList),
-      '#default_value' => $style_plugin->options['links']['bundle_type'] ?: '',
+      '#default_value' => $style_plugin->options['links']['bundle_type'] ?? '',
     ];
 
     // If the Form Mode Control module is installed, expose an option to use it.
@@ -376,7 +376,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
       $form_modes = $this->entityDisplayRepository->getFormModeOptions($entity_type);
       // Only expose the form element if our entity type has more than one
       // form mode.
-      if ($form_modes && is_array($form_modes) && count($form_modes) > 1) {
+      if ($form_modes && count($form_modes) > 1) {
         $form['links']['formMode'] = [
           '#title' => $this->t('Form mode'),
           '#description' => $this->t('The form mode to use for adding an entity.'),
@@ -400,7 +400,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
       '#description' => $this->t('Where a double-click should open the form to create a new event. Choose "Same window" to take the user away from the calendar, or "Modal dialog" to open the form in an overlay with the calendar still visible.'),
       '#type' => 'select',
       '#options' => $target_options,
-      '#default_value' => $style_plugin->options['links']['createTarget'] ?: '',
+      '#default_value' => $style_plugin->options['links']['createTarget'] ?? '',
       '#states' => [
         'invisible' => [
           ':input[name="style_options[links][bundle_type]"]' => ['value' => ''],
@@ -1474,7 +1474,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
 
     // If an event bundle was specified find the appropriate field.
     $start_field = '';
-    if ($settings['bundle_type']) {
+    if (!empty($settings['bundle_type'])) {
       $entity_type = $this->style->view->getBaseEntityType()->id();
       // Look first for a specified date field.
       if (!count($fields)) {
@@ -1701,7 +1701,7 @@ class FullCalendar extends FullcalendarBase implements ContainerFactoryPluginInt
       foreach ($terms[$vid] as $taxonomy) {
         // If the term name is a valid hex color, use as initial default color.
         $initial_color = preg_match('/^#[a-fA-F0-9]{6}$/', $taxonomy->name->value) ? $taxonomy->name->value : $this->defaultColor;
-        $defaults = $defaultValues[$taxonomy->id()];
+        $defaults = $defaultValues[$taxonomy->id()] ?? NULL;
         // Emulate new structure if old config passed.
         if (!is_array($defaults)) {
           $defaults = ['color' => $defaults];

@@ -158,6 +158,7 @@ Current maintainers:
 * e0ipso - https://www.drupal.org/u/e0ipso
 * Tom Kirkpatrick (mrfelton) - https://www.drupal.org/u/mrfelton
 * isholgueras - https://www.drupal.org/u/isholgueras
+* trackleft2 - https://www.drupal.org/u/trackleft2
 
 This project has been sponsored by:
 * Lullabot (Development and maintenance for the 7.x-2.x & 8.x-2.x branches).

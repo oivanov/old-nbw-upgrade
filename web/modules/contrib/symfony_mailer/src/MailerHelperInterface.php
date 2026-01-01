@@ -35,7 +35,7 @@ interface MailerHelperInterface {
    * @return \Drupal\symfony_mailer\Address[]
    *   The parsed address structures.
    */
-  public function parseAddress(string $encoded, string $langcode = NULL);
+  public function parseAddress(string $encoded, ?string $langcode = NULL);
 
   /**
    * Converts an address array into Policy configuration.

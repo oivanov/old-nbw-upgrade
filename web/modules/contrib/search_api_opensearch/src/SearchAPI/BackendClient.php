@@ -13,12 +13,15 @@ use Drupal\search_api\Utility\FieldsHelperInterface;
 use Drupal\search_api_opensearch\Analyser\AnalyserInterface;
 use Drupal\search_api_opensearch\Analyser\AnalyserManager;
 use Drupal\search_api_opensearch\Event\AlterSettingsEvent;
+use Drupal\search_api_opensearch\Event\BeforeIndexCreateEvent;
 use Drupal\search_api_opensearch\Event\IndexCreatedEvent;
 use Drupal\search_api_opensearch\SearchAPI\Query\QueryParamBuilder;
 use Drupal\search_api_opensearch\SearchAPI\Query\QueryResultParser;
 use OpenSearch\Client;
-use OpenSearch\Common\Exceptions\OpenSearchException;
+use OpenSearch\Exception\OpenSearchExceptionInterface;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -74,6 +77,7 @@ class BackendClient implements BackendClientInterface {
     protected QueryResultParser $resultParser,
     protected DeleteParamBuilder $deleteParamBuilder,
     protected IndexParamBuilder $indexParamBuilder,
+    #[Autowire(service: 'search_api.fields_helper')]
     protected FieldsHelperInterface $fieldsHelper,
     protected FieldMapper $fieldParamsBuilder,
     protected LoggerInterface $logger,
@@ -91,8 +95,13 @@ class BackendClient implements BackendClientInterface {
     if (empty($items)) {
       return [];
     }
-    $indexId = $this->getIndexId($index);
 
+    // Handle someone trying to push to an index that doesn't exist.
+    if (!$this->indexExists($index)) {
+      $this->addIndex($index);
+    }
+
+    $indexId = $this->getIndexId($index);
     $params = $this->indexParamBuilder->buildIndexParams($indexId, $index, $items);
 
     try {
@@ -112,7 +121,7 @@ class BackendClient implements BackendClientInterface {
         throw new SearchApiException('An error occurred indexing items.');
       }
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('%s when indexing items in index %s.', $e->getMessage(), $indexId), 0, $e);
     }
 
@@ -133,7 +142,7 @@ class BackendClient implements BackendClientInterface {
     try {
       $this->client->bulk($params);
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('An error occurred deleting items from the index %s.', $indexId), 0, $e);
     }
 
@@ -156,8 +165,8 @@ class BackendClient implements BackendClientInterface {
         return $resultSet;
       }
     }
-    catch (\Exception $e) {
-      throw new SearchApiException(sprintf('Error: %s', $e->getMessage()), 0, $e);
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
+      throw new SearchApiException(sprintf('Network error: %s', $e->getMessage()), 0, $e);
     }
 
     // Build OpenSearch query.
@@ -175,7 +184,7 @@ class BackendClient implements BackendClientInterface {
 
       return $resultSet;
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('Error querying index %s', $indexId), 0, $e);
     }
   }
@@ -193,7 +202,7 @@ class BackendClient implements BackendClientInterface {
         'index' => [$indexId],
       ]);
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('An error occurred removing the index %s.', $indexId), 0, $e);
     }
   }
@@ -207,16 +216,25 @@ class BackendClient implements BackendClientInterface {
       return;
     }
 
+    // Handle settings that can only be set on index creation.
+    $settings = [];
+    $event = new BeforeIndexCreateEvent($settings, $index);
+    $this->eventDispatcher->dispatch($event);
+    $settings = $event->getSettings();
+
     try {
-      $this->client->indices()->create([
-        'index' => $indexId,
-      ]);
+      $params = ['index' => $indexId];
+      if (!empty($settings)) {
+        $params['body']['settings'] = $settings;
+      }
+      $this->client->indices()->create($params);
+
       $this->updateSettings($index);
       $this->updateFieldMapping($index);
       $event = new IndexCreatedEvent($index);
       $this->eventDispatcher->dispatch($event);
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('An error occurred creating the index %s.', $indexId), 0, $e);
     }
   }
@@ -256,7 +274,7 @@ class BackendClient implements BackendClientInterface {
       $params = $this->fieldParamsBuilder->mapFieldParams($indexId, $index);
       $this->client->indices()->putMapping($params);
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('An error occurred updating field mappings for index %s.', $indexId), 0, $e);
     }
   }
@@ -279,7 +297,7 @@ class BackendClient implements BackendClientInterface {
         'index' => $indexId,
       ]);
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('An error occurred checking if the index %s exists.', $indexId), 0, $e);
     }
   }
@@ -352,7 +370,7 @@ class BackendClient implements BackendClientInterface {
         'body' => $settings,
       ]);
     }
-    catch (OpenSearchException $e) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface $e) {
       throw new SearchApiException(sprintf('An error occurred updating settings for index %s.', $indexId), 0, $e);
     }
     finally {
@@ -380,7 +398,7 @@ class BackendClient implements BackendClientInterface {
         'index' => $this->getIndexId($index),
       ]);
     }
-    catch (OpenSearchException) {
+    catch (OpenSearchExceptionInterface | ClientExceptionInterface) {
       // If we can't get mappings for some reason, then return early.
       return TRUE;
     }

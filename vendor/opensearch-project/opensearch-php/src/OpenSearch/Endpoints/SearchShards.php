@@ -28,7 +28,7 @@ class SearchShards extends AbstractEndpoint
 {
     public function getURI(): string
     {
-        $index = $this->index ?? null;
+        $index = $this->index ? rawurlencode($this->index) : null;
         if (isset($index)) {
             return "/$index/_search_shards";
         }
@@ -54,6 +54,16 @@ class SearchShards extends AbstractEndpoint
 
     public function getMethod(): string
     {
-        return 'GET';
+        return isset($this->body) ? 'POST' : 'GET';
+    }
+
+    public function setBody($body): static
+    {
+        if (is_null($body)) {
+            return $this;
+        }
+        $this->body = $body;
+
+        return $this;
     }
 }

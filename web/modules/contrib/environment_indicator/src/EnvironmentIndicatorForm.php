@@ -11,10 +11,10 @@ use Drupal\Core\Form\FormStateInterface;
 class EnvironmentIndicatorForm extends EntityForm {
 
   /**
-   * This actually builds your form.
+   * The form for the environment switcher.
    */
   public function form(array $form, FormStateInterface $form_state) {
-    /* @var \Drupal\environment_indicator\Entity\EnvironmentIndicator $environment_switcher */
+    /** @var \Drupal\environment_indicator\Entity\EnvironmentIndicator $environment_switcher */
     $environment_switcher = $this->getEntity();
 
     $form['name'] = [
@@ -33,8 +33,8 @@ class EnvironmentIndicatorForm extends EntityForm {
     ];
     $form['url'] = [
       '#type' => 'url',
-      '#title' => $this->t('Hostname'),
-      '#description' => $this->t('The hostname you want to switch to.'),
+      '#title' => $this->t('The Base URL'),
+      '#description' => $this->t('The base URL to switch to. Example: <code>https://example.com</code>.'),
       '#default_value' => $environment_switcher->getUrl(),
     ];
 
@@ -47,14 +47,14 @@ class EnvironmentIndicatorForm extends EntityForm {
     $form['bg_color'] = [
       '#type' => 'color',
       '#title' => $this->t('Background Color'),
-      '#description' => $this->t('Background color for the indicator. Ex: #0D0D0D.'),
-      '#default_value' => $environment_switcher->getBgColor() ?: '#0D0D0D',
+      '#description' => $this->t('Background color for the environment switcher. Ex: #0d0d0d.'),
+      '#default_value' => $environment_switcher->getBgColor() ?: '#0d0d0d',
     ];
     $form['fg_color'] = [
       '#type' => 'color',
       '#title' => $this->t('Color'),
-      '#description' => $this->t('Color for the indicator. Ex: #D0D0D0.'),
-      '#default_value' => $environment_switcher->getFgColor() ?: '#D0D0D0',
+      '#description' => $this->t('Color for the environment switcher. Ex: #d0d0d0.'),
+      '#default_value' => $environment_switcher->getFgColor() ?: '#d0d0d0',
     ];
 
     return $form;
@@ -70,12 +70,28 @@ class EnvironmentIndicatorForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $environment = $this->getEntity();
-    $environment->save();
+    $return = $environment->save();
     $this->messenger()->addMessage($this->t('Saved the %label environment.', [
       '%label' => $environment->label(),
     ]));
 
     $form_state->setRedirect('entity.environment_indicator.collection');
+
+    return $return;
+  }
+
+  /**
+   * Strips trailing slashes from the URL value.
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    parent::validateForm($form, $form_state);
+
+    // Get the URL value, strip *all* trailing slashes, and set it back.
+    $url = $form_state->getValue('url');
+    if (!empty($url)) {
+      $url = rtrim($url, '/');
+      $form_state->setValue('url', $url);
+    }
   }
 
 }

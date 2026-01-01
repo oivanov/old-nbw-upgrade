@@ -312,6 +312,7 @@ class FullCalendarDisplay extends StylePluginBase {
       '#fieldset' => 'display',
       '#title' => $this->t('Start time'),
       '#date_date_element' => 'none',
+      '#date_date_format' => 'none',
       '#date_time_element' => 'time',
       '#default_value' => new DrupalDateTime(!empty($this->options['minTime']) ? $this->options['minTime'] : '2000-01-01 00:00:00'),
       '#required' => TRUE,
@@ -322,6 +323,7 @@ class FullCalendarDisplay extends StylePluginBase {
       '#fieldset' => 'display',
       '#title' => $this->t('End time'),
       '#date_date_element' => 'none',
+      '#date_date_format' => 'none',
       '#date_time_element' => 'time',
       '#default_value' => new DrupalDateTime(!empty($this->options['maxTime']) ? $this->options['maxTime'] : '2000-01-01 23:59:59'),
       '#required' => TRUE,
@@ -632,7 +634,6 @@ class FullCalendarDisplay extends StylePluginBase {
       '#type' => 'select',
       '#empty_value' => '',
       '#options' => $field_names,
-      '#empty_value' => '',
       '#default_value' => (!empty($this->options['duration'])) ? $this->options['duration'] : '',
       '#states' => [
         // Only show this field when the 'rrule' is specified.
@@ -647,7 +648,7 @@ class FullCalendarDisplay extends StylePluginBase {
       '#title' => $this->t('Event bundle (Content) type'),
       '#description' => $this->t('The bundle (content) type of a new event. Once this is set, you can create a new event by double clicking a calendar entry.'),
       '#type' => 'select',
-      '#options' => array_merge(['' => t('None')], $bundlesList),
+      '#options' => array_merge(['' => $this->t('None')], $bundlesList),
       '#default_value' => (!empty($this->options['bundle_type'])) ? $this->options['bundle_type'] : '',
     ];
     // Extra CSS classes.
@@ -687,6 +688,8 @@ class FullCalendarDisplay extends StylePluginBase {
   }
 
   /**
+   * Validates the options form for Google Calendar settings.
+   *
    * @return $this
    */
   protected function validateOptionsFormGoogleCalendar(array &$form, FormStateInterface $form_state) {
@@ -761,7 +764,16 @@ class FullCalendarDisplay extends StylePluginBase {
   }
 
   /**
-   * Should the output of the style plugin be rendered even if it's a empty view.
+   * Determines if the style plugin should render for an empty view.
+   *
+   * For a calendar display, it is crucial to always render the calendar
+   * structure (e.g., grid, navigation) even if there are no events to
+   * display. This ensures a consistent user experience and prevents the
+   * calendar from disappearing entirely when no results are found, which could
+   * be confusing.
+   *
+   * @return bool
+   *   TRUE to render the calendar even when the view is empty.
    */
   public function evenEmpty() {
     // An empty calendar should be displayed if there are no calendar items.
@@ -769,7 +781,12 @@ class FullCalendarDisplay extends StylePluginBase {
   }
 
   /**
+   * Builds the options form for Google Calendar settings.
    *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\core\form\FormStateInterface $form_state
+   *   The form state.
    */
   protected function buildOptionsFormGoogleCalendar(array &$form, FormStateInterface $form_state) {
     $form['fetchGoogleHolidays'] = [
@@ -833,7 +850,7 @@ class FullCalendarDisplay extends StylePluginBase {
         '#fieldset' => 'display',
         '#default_value' => !empty($this->options['googleHolidaysSettings']['renderGoogleHolidaysAsBackground']),
         '#title' => $this->t('Render the holidays as background'),
-        '#description' => t('Check to render the holidays as a background color only, not showing them as events.'),
+        '#description' => $this->t('Check to render the holidays as a background color only, not showing them as events.'),
       ],
     ];
 
@@ -895,8 +912,8 @@ class FullCalendarDisplay extends StylePluginBase {
       'en.cu#holiday@group.v.calendar.google.com' => $this->t('Holidays in Cuba'),
       'en.cy#holiday@group.v.calendar.google.com' => $this->t('Holidays in Cyprus'),
       'en.czech#holiday@group.v.calendar.google.com' => $this->t('Holidays in Czech Republic'),
-      'en.ci#holiday@group.v.calendar.google.com' => $this->t('Holidays in C\u00f4te d\'Ivoire'),
-      'en.kp#holiday@group.v.calendar.google.com' => $this->t('Holidays in Democratic People\'s Republic of Korea'),
+      'en.ci#holiday@group.v.calendar.google.com' => $this->t("Holidays in C\u00f4te d\'Ivoire"),
+      'en.kp#holiday@group.v.calendar.google.com' => $this->t("Holidays in Democratic People\'s Republic of Korea"),
       'en.danish#holiday@group.v.calendar.google.com' => $this->t('Holidays in Denmark'),
       'en.do#holiday@group.v.calendar.google.com' => $this->t('Holidays in Dominican Republic'),
       'en.ec#holiday@group.v.calendar.google.com' => $this->t('Holidays in Ecuador'),

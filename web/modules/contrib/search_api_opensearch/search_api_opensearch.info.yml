@@ -1,13 +1,13 @@
 name: Search API OpenSearch
 description: Provides an OpenSearch backend for Search API.
-php: 8.0
-core_version_requirement: ^9 || ^10 || ^11
+php: 8.1
+core_version_requirement: ^10.3 || ^11
 package: Search
 type: module
 dependencies:
   - search_api:search_api
 
-# Information added by Drupal.org packaging script on 2025-02-10
-version: '2.3.0'
+# Information added by Drupal.org packaging script on 2025-11-09
+version: '2.5.0'
 project: 'search_api_opensearch'
-datestamp: 1739224559
+datestamp: 1762728090

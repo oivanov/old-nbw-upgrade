@@ -10,5 +10,5 @@ class EntityEventType {
   const UPDATE = 'event.update';
   const PRESAVE = 'event.presave';
   const DELETE = 'event.delete';
-
+  const PREDELETE = 'event.predelete';
 }

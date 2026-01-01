@@ -30,7 +30,7 @@ class UpdateDistinguishedName extends AbstractEndpoint
         if (!isset($this->cluster_name) || $this->cluster_name === '') {
             throw new RuntimeException('cluster_name is required for update_distinguished_name');
         }
-        $cluster_name = $this->cluster_name;
+        $cluster_name = rawurlencode($this->cluster_name);
 
         return "/_plugins/_security/api/nodesdn/$cluster_name";
     }

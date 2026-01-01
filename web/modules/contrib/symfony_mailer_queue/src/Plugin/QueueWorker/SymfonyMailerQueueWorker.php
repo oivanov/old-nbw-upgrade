@@ -3,16 +3,20 @@
 namespace Drupal\symfony_mailer_queue\Plugin\QueueWorker;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\DelayedRequeueException;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\Core\Queue\RequeueException;
 use Drupal\Core\Queue\SuspendQueueException;
+use Drupal\language\ConfigurableLanguageManagerInterface;
 use Drupal\symfony_mailer\EmailFactoryInterface;
 use Drupal\symfony_mailer_queue\Event\EmailSendFailureEvent;
 use Drupal\symfony_mailer_queue\Event\EmailSendRequeueEvent;
 use Drupal\symfony_mailer_queue\QueueableEmailInterface;
+use Drupal\symfony_mailer_queue\StaticLanguageNegotiatorInterface;
 use Drupal\symfony_mailer_queue\SymfonyMailerQueueItem;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -35,31 +39,33 @@ class SymfonyMailerQueueWorker extends QueueWorkerBase implements ContainerFacto
 
   /**
    * The config factory service.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected ConfigFactoryInterface $configFactory;
 
   /**
    * The email factory.
-   *
-   * @var \Drupal\symfony_mailer\EmailFactoryInterface
    */
   protected EmailFactoryInterface $emailFactory;
 
   /**
    * The event dispatcher.
-   *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
   protected EventDispatcherInterface $eventDispatcher;
 
   /**
    * The expirable key-value storage.
-   *
-   * @var \Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface
    */
   protected KeyValueExpirableFactoryInterface $keyValue;
+
+  /**
+   * The language manager.
+   */
+  protected LanguageManagerInterface $languageManager;
+
+  /**
+   * The static language negotiator or NULL if the language module is disabled.
+   */
+  protected ?StaticLanguageNegotiatorInterface $languageNegotiator;
 
   /**
    * {@inheritdoc}
@@ -70,6 +76,9 @@ class SymfonyMailerQueueWorker extends QueueWorkerBase implements ContainerFacto
     $instance->emailFactory = $container->get('email_factory');
     $instance->eventDispatcher = $container->get('event_dispatcher');
     $instance->keyValue = $container->get('keyvalue.expirable');
+    $instance->languageManager = $container->get('language_manager');
+    // @phpstan-ignore-next-line Service defined in service provider.
+    $instance->languageNegotiator = $container->get('symfony_mailer_queue.static_language_negotiator', ContainerInterface::NULL_ON_INVALID_REFERENCE);
     return $instance;
   }
 
@@ -83,15 +92,59 @@ class SymfonyMailerQueueWorker extends QueueWorkerBase implements ContainerFacto
       return;
     }
 
-    // Attempt to send the email. Considered done when successfully delivered.
-    $email = $this->emailFactory->newTypedEmail(
-      $item->type,
-      $item->subType,
-      ...$item->params,
-    );
+    // Restore the language context that was active when the email was
+    // originally queued.
+    if (
+      ($current_langcode = $item->langcode ?? NULL) &&
+      $this->languageManager instanceof ConfigurableLanguageManagerInterface &&
+      $this->languageNegotiator instanceof StaticLanguageNegotiatorInterface &&
+      $language = $this->languageManager->getLanguage($current_langcode)
+    ) {
+      $this->languageNegotiator->setLanguage($language);
+      $this->languageManager->setNegotiator($this->languageNegotiator);
+      $this->languageManager->reset();
+      $this->languageManager->setConfigOverrideLanguage($language);
+    }
+
+    // Reinitialize the email using data from the queue item. If a related
+    // config entity is present, initialize it as an entity email; otherwise,
+    // initialize it as a typed email.
+    if ($item->entity instanceof ConfigEntityInterface) {
+      $email = $this->emailFactory->newEntityEmail(
+        $item->entity,
+        $item->subType,
+        ...$item->params,
+      );
+    }
+    else {
+      $email = $this->emailFactory->newTypedEmail(
+        $item->type,
+        $item->subType,
+        ...$item->params,
+      );
+    }
+
     if (!$email instanceof QueueableEmailInterface) {
       throw new \LogicException('Attempted to process a non-queueable email.');
     }
+
+    // Reassign properties to the email, including variables, addresses,
+    // sender, and others. These may have originally been set during business
+    // logic execution. This reinstatement is necessary due to the Symfony
+    // Mailer email object's overloaded responsibilities and its lack of easy
+    // serialization. We also account for legacy queue items that may be
+    // missing some properties.
+    isset($item->variables) && $email->setVariables($item->variables);
+    isset($item->inner) && $email->setInner($item->inner);
+    isset($item->addresses) && $email->setAddresses($item->addresses);
+    isset($item->sender) && $email->setSender($item->sender);
+    isset($item->subject) && $email->setSubject($item->subject);
+    isset($item->subjectReplace) && $email->setSubjectReplace($item->subjectReplace);
+    isset($item->body) && $email->setBody($item->body);
+    isset($item->theme) && $email->setTheme($item->theme);
+    isset($item->transportDsn) && $email->setTransportDsn($item->transportDsn);
+
+    // Attempt to send the email. Considered done when successfully delivered.
     $email->markInQueue();
     // @phpstan-ignore-next-line Dependent typing is insufficient.
     if ($email->send() ?? FALSE) {

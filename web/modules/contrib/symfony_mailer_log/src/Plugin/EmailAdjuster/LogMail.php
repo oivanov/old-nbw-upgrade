@@ -34,14 +34,14 @@ class LogMail extends EmailAdjusterBase implements ContainerFactoryPluginInterfa
   protected $symfonyMailLogStorage;
 
   /**
-   * The log of the e-mail being processed.
+   * The log of the email being processed.
    *
    * @var \Drupal\symfony_mailer_log\Entity\SymfonyMailerLog
    */
   protected $log;
 
   /**
-   * Creates an email adjuster plugin for using Maillog via Symfony Mailer.
+   * Creates an email adjuster plugin for using Mail log via Symfony Mailer.
    *
    * @param array $configuration
    *   The plugin configuration.

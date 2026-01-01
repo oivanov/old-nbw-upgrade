@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\views_autocomplete_filters\FunctionalJavascript;
 
+use Drupal\FunctionalJavascriptTests\JSWebAssert;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 
@@ -31,9 +32,7 @@ class ViewsAutocompleteFiltersTest extends WebDriverTestBase {
   protected $page;
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'node',
@@ -72,7 +71,7 @@ class ViewsAutocompleteFiltersTest extends WebDriverTestBase {
     }
 
     $this->page = $this->getSession()->getPage();
-    $this->webAssert = $this->assertSession();
+    $this->webAssert = $this->assertSession() instanceof JSWebAssert ? $this->assertSession() : new JSWebAssert($this->getSession());
   }
 
   /**

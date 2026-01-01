@@ -3,6 +3,7 @@
 namespace Drupal\symfony_mailer;
 
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Access\AccessResult;
 
 /**
  * Provides the legacy mailer helper service.
@@ -114,10 +115,14 @@ class LegacyMailerHelper implements LegacyMailerHelperInterface {
     $attachments = $message['params']['attachments'] ?? [];
     foreach ($attachments as $attachment) {
       if (!empty($attachment['filepath'])) {
-        $email->attachFromPath($attachment['filepath'], $attachment['filename'] ?? NULL, $attachment['filemime'] ?? NULL);
+        $at = Attachment::fromPath($attachment['filepath'], $attachment['filename'] ?? NULL, $attachment['filemime'] ?? NULL);
+        // On the legacy interface, the code that sets an attachment is
+        // responsible for access checking.
+        $at->setAccess(AccessResult::allowed());
+        $email->attach($at);
       }
       elseif (!empty($attachment['filecontent'])) {
-        $email->attachNoPath($attachment["filecontent"], $attachment['filename'] ?? NULL, $attachment['filemime'] ?? NULL);
+        $email->attach(Attachment::fromData($attachment["filecontent"], $attachment['filename'] ?? NULL, $attachment['filemime'] ?? NULL));
       }
     }
 

@@ -47,6 +47,7 @@ function symfony_mailer_install($is_syncing) {
     // Import transport settings.
     $settings = \Drupal::config('swiftmailer.transport')->get();
 
+    // @phpstan-ignore constant.notFound
     if ($settings['transport'] == SWIFTMAILER_TRANSPORT_SMTP) {
       $config = [
         'user' => $settings['smtp_credentials']['swiftmailer']['username'],
@@ -206,7 +207,7 @@ function symfony_mailer_update_10008() {
     }
   }
 
-  if (isset($settings)) {
+  if (!empty($settings)) {
     \Drupal::configFactory()->getEditable('symfony_mailer.settings')
       ->set('override', $settings)
       ->save();
@@ -222,5 +223,16 @@ function symfony_mailer_update_10009() {
   $module_handler = \Drupal::service('module_handler');
   if ($module_handler->moduleExists('symfony_mailer_bc')) {
     $module_installer->uninstall(['symfony_mailer_bc'], FALSE);
+  }
+}
+
+/**
+ * Enable new dependency mailer_transport.
+ */
+function symfony_mailer_update_10010() {
+  $module_installer = \Drupal::service('module_installer');
+  $module_handler = \Drupal::service('module_handler');
+  if (!$module_handler->moduleExists('mailer_transport')) {
+    $module_installer->install(['mailer_transport']);
   }
 }

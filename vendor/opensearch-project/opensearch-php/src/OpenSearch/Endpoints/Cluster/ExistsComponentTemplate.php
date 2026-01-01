@@ -33,7 +33,7 @@ class ExistsComponentTemplate extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $name = $this->name ?? null;
+        $name = $this->name ? rawurlencode($this->name) : null;
         if (isset($name)) {
             return "/_component_template/$name";
         }

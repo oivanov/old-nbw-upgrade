@@ -27,7 +27,7 @@ class UpdateConnector extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $connector_id = $this->connector_id ?? null;
+        $connector_id = $this->connector_id ? rawurlencode($this->connector_id) : null;
         if (isset($connector_id)) {
             return "/_plugins/_ml/connectors/$connector_id";
         }

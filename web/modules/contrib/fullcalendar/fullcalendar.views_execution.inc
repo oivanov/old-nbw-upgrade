@@ -78,21 +78,11 @@ function fullcalendar_views_pre_view(ViewExecutable $view, string $display_id, a
     // First, we try to set initial Min and Max date values based on the
     // exposed form values.
     // @todo These offsets don't seem to be possible.
-    // @phpstan-ignore-next-line
     if (isset($exposed_input[$field_value]['min'], $exposed_input[$field_value]['max'])) {
       $dateMin->setTimestamp(strtotime($exposed_input[$field_value]['min']));
       $dateMax->setTimestamp(strtotime($exposed_input[$field_value]['max']));
     }
-    // If no exposed values set, use user-defined date values.
-    elseif (!empty($settings['date']['month']) && !empty($settings['date']['year'])) {
-      $ts = mktime(0, 0, 0, $settings['date']['month'] + 1, 1, $settings['date']['year']);
-
-      $dateMin->setTimestamp($ts);
-      $dateMax->setTimestamp($ts);
-
-      $dateMin->modify('first day of this month');
-      $dateMax->modify('first day of next month');
-    }
+    // @todo if $settings['nav']['initialDate'] has a value, use that.
     // Use default 1 month date-range.
     else {
       $dateMin->modify('first day of this month');
@@ -171,7 +161,7 @@ function fullcalendar_views_query_alter(ViewExecutable $view, QueryPluginBase $q
       }
 
       $data['field_min'] = $parts[0];
-      $data['field_max'] = str_replace('_value,', '_end_value,', $data['field_min']);
+      $data['field_max'] = $parts[1];
 
       // Try to extract dates from the current condition.
       $parts = explode(' AND ', $parts[1]);

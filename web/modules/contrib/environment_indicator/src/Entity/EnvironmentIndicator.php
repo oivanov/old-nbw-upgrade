@@ -30,7 +30,6 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *   },
  *   links = {
  *     "edit-form" = "/admin/config/development/environment-indicator/manage/{environment_indicator}",
- *     "edit-permissions-form" = "/admin/people/permissions/{user_role}",
  *     "delete-form" = "/admin/config/development/environment-indicator/manage/{environment_indicator}/delete",
  *     "collection" = "/admin/config/development/environment-indicator"
  *   },

@@ -32,8 +32,8 @@ class PutAlias extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $name = $this->name ?? null;
-        $index = $this->index ?? null;
+        $name = $this->name ? rawurlencode($this->name) : null;
+        $index = $this->index ? rawurlencode($this->index) : null;
         if (isset($index) && isset($name)) {
             return "/$index/_alias/$name";
         }

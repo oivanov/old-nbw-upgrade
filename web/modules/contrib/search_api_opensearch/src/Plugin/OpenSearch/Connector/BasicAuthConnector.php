@@ -1,33 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\search_api_opensearch\Plugin\OpenSearch\Connector;
 
 use Drupal\Core\Form\FormStateInterface;
-use OpenSearch\Client;
-use OpenSearch\ClientBuilder;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\search_api_opensearch\Attribute\OpenSearchConnector;
 
 /**
  * Provides an OpenSearch connector with basic auth.
- *
- * @OpenSearchConnector(
- *   id = "basicauth",
- *   label = @Translation("HTTP Basic Authentication"),
- *   description = @Translation("OpenSearch connector with HTTP Basic Auth.")
- * )
  */
+#[OpenSearchConnector(
+  id: "basicauth",
+  label: new TranslatableMarkup("HTTP Basic Authentication"),
+  description: new TranslatableMarkup("OpenSearch connector with HTTP Basic Auth."),
+)]
 class BasicAuthConnector extends StandardConnector {
 
   /**
    * {@inheritdoc}
    */
-  public function getClient(): Client {
-    // We only support one host.
-    return ClientBuilder::create()
-      ->setHosts([$this->configuration['url']])
-      ->setBasicAuthentication($this->configuration['username'], $this->configuration['password'])
-      ->setSSLVerification((bool) $this->configuration['ssl_verification'])
-      ->setLogger($this->logger)
-      ->build();
+  protected function getClientOptions(): array {
+    return parent::getClientOptions() + [
+      'auth' => [
+        $this->configuration['username'],
+        $this->configuration['password'],
+      ],
+    ];
   }
 
   /**

@@ -8,7 +8,7 @@ dependencies:
 
 configure: environment_indicator_ui.settings
 
-# Information added by Drupal.org packaging script on 2024-12-17
-version: '4.0.21'
+# Information added by Drupal.org packaging script on 2025-07-23
+version: '4.0.25'
 project: 'environment_indicator'
-datestamp: 1734428217
+datestamp: 1753296296

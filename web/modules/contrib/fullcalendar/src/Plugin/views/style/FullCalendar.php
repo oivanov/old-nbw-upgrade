@@ -13,7 +13,6 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\fullcalendar\Plugin\FullcalendarBase;
 use Drupal\fullcalendar\Plugin\FullcalendarPluginCollection;
 use Drupal\fullcalendar\Plugin\fullcalendar\type\OptionsFormHelperTrait;
 use Drupal\views\Plugin\views\style\StylePluginBase;
@@ -163,41 +162,51 @@ class FullCalendar extends StylePluginBase {
   protected function defineOptions(): array {
     $options = parent::defineOptions();
 
-    /** @var \Drupal\fullcalendar\Plugin\fullcalendar\type\FullCalendar $plugin */
+    /** @var \Drupal\fullcalendar\Plugin\FullcalendarInterface $plugin */
     foreach ($this->getPlugins() as $plugin) {
-      if ($plugin instanceof FullcalendarBase) {
-        $options += $plugin->defineOptions();
-      }
+      $options += $plugin->defineOptions();
     }
 
     return $options;
   }
 
   /**
-   * {@inheritdoc}
+   * Builds the options form.
+   *
+   * @todo remove this duplicate docblock. It was included to resolve a specific
+   * parameterByRef.type phpstan error.
+   *
+   * @param array $form
+   *   The form structure.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::buildOptionsForm($form, $form_state);
 
-    /** @var \Drupal\fullcalendar\Plugin\fullcalendar\type\FullCalendar $plugin */
+    /** @var \Drupal\fullcalendar\Plugin\FullcalendarInterface $plugin */
     foreach ($this->getPlugins() as $plugin) {
-      if ($plugin instanceof FullcalendarBase) {
-        $plugin->buildOptionsForm($form, $form_state);
-      }
+      $plugin->buildOptionsForm($form, $form_state);
     }
   }
 
   /**
-   * {@inheritdoc}
+   * Submits the options form.
+   *
+   * @todo remove this duplicate docblock. It was included to resolve a specific
+   * parameterByRef.type phpstan error.
+   *
+   * @param array $form
+   *   The form structure.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
    */
   public function submitOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::submitOptionsForm($form, $form_state);
 
-    /** @var \Drupal\fullcalendar\Plugin\fullcalendar\type\FullCalendar $plugin */
+    /** @var \Drupal\fullcalendar\Plugin\FullcalendarInterface $plugin */
     foreach ($this->getPlugins() as $plugin) {
-      if ($plugin instanceof FullcalendarBase) {
-        $plugin->submitOptionsForm($form, $form_state);
-      }
+      $plugin->submitOptionsForm($form, $form_state);
     }
   }
 
@@ -299,7 +308,7 @@ class FullCalendar extends StylePluginBase {
     }
 
     // Make any color settings available for event processing.
-    if ($settings['colors']) {
+    if (!empty($settings['colors'])) {
       $this->eventColors = $settings['colors'];
     }
 
@@ -373,7 +382,7 @@ class FullCalendar extends StylePluginBase {
 
       // Prepare title.
       $title = '';
-      if ($title_field && $entity instanceof FieldableEntityInterface && $entity->hasField($title_field)) {
+      if ($title_field && $entity instanceof FieldableEntityInterface) {
         // Retrieve the rewritten field value.
         $title = $this->view->style_plugin->getField($row->index, $title_field);
         if ($title instanceof MarkupInterface) {
@@ -514,13 +523,20 @@ class FullCalendar extends StylePluginBase {
 
     $event_start = $event_start_end['start'];
     $event_end = $event_start_end['end'];
+    $context = [
+      'entity' => $entity,
+      'fields' => $fields,
+    ];
+    $this->moduleHandler->alter('fullcalendar_process_dates', $event_start, $event_end, $context);
+    $event_start_end['start'] = $event_start;
+    $event_start_end['end'] = $event_end;
 
     $all_day = $this->isAllDayEvent($event_start_end);
 
     // Truncate all day events to reduce time zone issues.
     if ($all_day) {
       $event_start = substr($event_start, 0, 10);
-      $end = new \DateTime(substr($event_end, 0, 10));
+      $end = new \DateTime(substr(($event_end ?: $event_start), 0, 10));
       // Fullcalendar reads end time as exclusive, so add a day.
       $end->modify('+1 day');
       $event_end = $end->format('Y-m-d');
@@ -627,7 +643,6 @@ class FullCalendar extends StylePluginBase {
       // First, we try to set initial Min and Max date values based on the
       // exposed form values.
       // @todo These offsets don't seem to be possible.
-      // @phpstan-ignore-next-line
       if (isset($exposed_input[$field_value]['min'], $exposed_input[$field_value]['max'])) {
         $dateMin->setTimestamp(strtotime($exposed_input[$field_value]['min']));
         $dateMax->setTimestamp(strtotime($exposed_input[$field_value]['max']));

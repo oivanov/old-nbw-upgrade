@@ -27,7 +27,7 @@ class GetTool extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $tool_name = $this->tool_name ?? null;
+        $tool_name = $this->tool_name ? rawurlencode($this->tool_name) : null;
         if (isset($tool_name)) {
             return "/_plugins/_ml/tools/$tool_name";
         }

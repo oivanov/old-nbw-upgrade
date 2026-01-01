@@ -27,7 +27,7 @@ class Delete extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $workflow_id = $this->workflow_id ?? null;
+        $workflow_id = $this->workflow_id ? rawurlencode($this->workflow_id) : null;
         if (isset($workflow_id)) {
             return "/_plugins/_flow_framework/workflow/$workflow_id";
         }

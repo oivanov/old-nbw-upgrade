@@ -8,6 +8,7 @@ use Drupal\search_api\Utility\FieldsHelperInterface;
 use Drupal\search_api_opensearch\Event\FieldMappingEvent;
 use Drupal\search_api_opensearch\Plugin\OpenSearch\Analyser\EdgeNgram;
 use Drupal\search_api_opensearch\Plugin\OpenSearch\Analyser\Ngram;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -15,15 +16,8 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class FieldMapper {
 
-  /**
-   * Creates a new Field Mapper.
-   *
-   * @param \Drupal\search_api\Utility\FieldsHelperInterface $fieldsHelper
-   *   The fields helper.
-   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $eventDispatcher
-   *   The event dispatcher.
-   */
   public function __construct(
+    #[Autowire(service: 'search_api.fields_helper')]
     protected FieldsHelperInterface $fieldsHelper,
     protected EventDispatcherInterface $eventDispatcher,
   ) {

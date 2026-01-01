@@ -32,7 +32,7 @@ class GetRepository extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $repository = $this->repository ?? null;
+        $repository = $this->repository ? rawurlencode($this->repository) : null;
         if (isset($repository)) {
             return "/_snapshot/$repository";
         }
@@ -60,13 +60,13 @@ class GetRepository extends AbstractEndpoint
 
     public function setRepository($repository): static
     {
-        if (isset($repository) !== true) {
+        if (!isset($repository)) {
             return $this;
         }
         if (is_array($repository) === true) {
             $repository = implode(",", $repository);
         }
-        $this->repository = $repository;
+        $this->repository = rawurlencode($repository);
 
         return $this;
     }

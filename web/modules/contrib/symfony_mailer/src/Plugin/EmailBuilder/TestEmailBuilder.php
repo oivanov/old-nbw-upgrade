@@ -2,6 +2,7 @@
 
 namespace Drupal\symfony_mailer\Plugin\EmailBuilder;
 
+use Drupal\symfony_mailer\Attachment;
 use Drupal\symfony_mailer\EmailInterface;
 use Drupal\symfony_mailer\Processor\EmailBuilderBase;
 use Drupal\symfony_mailer\Processor\TokenProcessorTrait;
@@ -37,19 +38,28 @@ class TestEmailBuilder extends EmailBuilderBase {
   /**
    * {@inheritdoc}
    */
-  public function build(EmailInterface $email) {
+  public function init(EmailInterface $email) {
+    parent::init($email);
     if ($to = $email->getParam('to')) {
       $email->setTo($to);
     }
+  }
 
-    // - Add a custom CSS library. The library is defined in
-    //   \Drupal\symfony_mailer\symfony_mailer.libraries.yml. The CSS is
-    //   defined in \Drupal\symfony_mailer\css\test.email.css.
-    // - Set an parameter programmatically.
-    //   The variable is used by the mailer policy which specifies the
-    //   email title and body as defined in
-    //   \Drupal\symfony_mailer\config\install\symfony_mailer.mailer_policy.symfony_mailer.test.yml.
+  /**
+   * {@inheritdoc}
+   */
+  public function build(EmailInterface $email) {
+    $logo = \Drupal::service('extension.list.module')->getPath('symfony_mailer') . '/logo.png';
+    $logo_uri = \Drupal::service('file_url_generator')->generateString($logo);
+
+    // - Add a custom CSS library, defined in symfony_mailer.libraries.yml.
+    // - The CSS is defined in test.email.css.
+    // - Set variables, used by the mailer policy defined in
+    //   symfony_mailer.mailer_policy.symfony_mailer.test.yml.
+    // - Add an attachment.
     $email->addLibrary('symfony_mailer/test')
+      ->attach(Attachment::fromPath($logo_uri, isUri: TRUE))
+      ->setVariable('logo_url', $logo_uri)
       ->setVariable('day', date("l"));
   }
 

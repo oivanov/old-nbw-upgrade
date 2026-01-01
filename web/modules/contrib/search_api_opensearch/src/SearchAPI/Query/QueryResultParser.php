@@ -5,23 +5,15 @@ namespace Drupal\search_api_opensearch\SearchAPI\Query;
 use Drupal\search_api\Query\QueryInterface;
 use Drupal\search_api\Query\ResultSetInterface;
 use Drupal\search_api\Utility\FieldsHelperInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Provides a result set parser.
  */
 class QueryResultParser {
 
-  /**
-   * Creates a new QueryResultParser.
-   *
-   * @param \Drupal\search_api\Utility\FieldsHelperInterface $fieldsHelper
-   *   The fields helper.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\FacetResultParser $facetResultParser
-   *   The facet result parser.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\SpellCheckResultParser $spellCheckResultParser
-   *   The spellcheck result parser.
-   */
   public function __construct(
+    #[Autowire(service: 'search_api.fields_helper')]
     protected FieldsHelperInterface $fieldsHelper,
     protected FacetResultParser $facetResultParser,
     protected SpellCheckResultParser $spellCheckResultParser,

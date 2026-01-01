@@ -28,7 +28,7 @@ class Search extends AbstractEndpoint
 {
     public function getURI(): string
     {
-        $index = $this->index ?? null;
+        $index = $this->index ? rawurlencode($this->index) : null;
         if (isset($index)) {
             return "/$index/_search";
         }
@@ -83,6 +83,7 @@ class Search extends AbstractEndpoint
             'track_scores',
             'track_total_hits',
             'typed_keys',
+            'verbose_pipeline',
             'version',
             'pretty',
             'human',

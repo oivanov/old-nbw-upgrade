@@ -310,8 +310,8 @@ class GatsbyEntityLogger {
     array $relationships,
     array &$entity_data,
     array $included_types = [],
-    string $ref_type = NULL,
-    string $ref_bundle = NULL,
+    ?string $ref_type = NULL,
+    ?string $ref_bundle = NULL,
     string $type = 'build'
   ): void {
     foreach ($relationships as $data) {
@@ -354,8 +354,9 @@ class GatsbyEntityLogger {
           // preview working with entity reference draft content such as
           // paragraphs and blocks.
           if ($type == 'preview' && !empty($related_data['meta']['target_revision_id'])) {
-            $related_entity = $this->entityTypeManager->getStorage($entity_ref_type)
-              ->loadRevision($related_data['meta']['target_revision_id']);
+            /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
+            $storage = $this->entityTypeManager->getStorage($entity_ref_type);
+            $related_entity = $storage->loadRevision($related_data['meta']['target_revision_id']);
           }
           else {
             $related_entity = $this->entityRepository->loadEntityByUuid($entity_ref_type, $related_data['id']);

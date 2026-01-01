@@ -27,7 +27,7 @@ class UpdateModel extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $model_id = $this->model_id ?? null;
+        $model_id = $this->model_id ? rawurlencode($this->model_id) : null;
         if (isset($model_id)) {
             return "/_plugins/_ml/models/$model_id";
         }

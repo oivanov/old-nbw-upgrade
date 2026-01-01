@@ -50,7 +50,7 @@ class SynonymsSubscriberTest extends UnitTestCaseTest {
           ],
         ],
         'analyzer' => [
-          'querytime_synonyms' => [
+          'default' => [
             'type' => 'custom',
             'tokenizer' => 'standard',
             'filter' => ['lowercase', 'asciifolding', 'synonyms'],

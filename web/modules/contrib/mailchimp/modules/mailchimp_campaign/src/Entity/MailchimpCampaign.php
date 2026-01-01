@@ -16,7 +16,6 @@ use Drupal\mailchimp_campaign\MailchimpCampaignInterface;
  * @ContentEntityType(
  *   id = "mailchimp_campaign",
  *   label = @Translation("Mailchimp Campaign"),
- *   fieldable = FALSE,
  *   handlers = {
  *     "access" = "Drupal\mailchimp_campaign\MailchimpCampaignAccessControlHandler",
  *     "view_builder" = "Drupal\mailchimp_campaign\Entity\MailchimpCampaignViewBuilder",
@@ -128,7 +127,7 @@ class MailchimpCampaign extends ContentEntityBase implements MailchimpCampaignIn
   /**
    * {@inheritdoc}
    */
-  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     if ($operation == 'create') {
       return $this->entityTypeManager()
         ->getAccessControlHandler($this->entityTypeId)

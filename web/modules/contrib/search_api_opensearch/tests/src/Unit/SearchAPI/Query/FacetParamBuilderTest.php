@@ -38,24 +38,38 @@ class FacetParamBuilderTest extends UnitTestCase {
           'field' => 'field1',
           'operator' => 'or',
         ],
+        'facet3' => [
+          'field' => 'field3',
+          'operator' => 'and',
+          'limit' => 0,
+        ],
+        'facet4' => [
+          'field' => 'field4',
+          'operator' => 'and',
+          'limit' => 20,
+        ],
       ]);
 
     $indexFields = [
       'field1' => [],
       'field2' => [],
+      'field3' => [],
+      'field4' => [],
     ];
 
     $params = $builder->buildFacetParams($query->reveal(), $indexFields);
 
     $expected = [
-      'facet1' => ['terms' => ['field' => 'field1', 'size' => '10']],
+      'facet1' => ['terms' => ['field' => 'field1']],
       'facet2_global' => [
         'global' => (object) NULL,
         'aggs' => [
           'facet2' =>
-            ['terms' => ['field' => 'field1', 'size' => '10']],
+            ['terms' => ['field' => 'field1']],
         ],
       ],
+      'facet3' => ['terms' => ['field' => 'field3', 'size' => '10000']],
+      'facet4' => ['terms' => ['field' => 'field4', 'size' => '20']],
     ];
 
     $this->assertNotEmpty($params);

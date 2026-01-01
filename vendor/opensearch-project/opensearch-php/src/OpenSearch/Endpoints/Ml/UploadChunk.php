@@ -28,8 +28,8 @@ class UploadChunk extends AbstractEndpoint
 
     public function getURI(): string
     {
-        $chunk_number = $this->chunk_number ?? null;
-        $model_id = $this->model_id ?? null;
+        $chunk_number = $this->chunk_number ? rawurlencode($this->chunk_number) : null;
+        $model_id = $this->model_id ? rawurlencode($this->model_id) : null;
         if (isset($model_id) && isset($chunk_number)) {
             return "/_plugins/_ml/models/$model_id/upload_chunk/$chunk_number";
         }

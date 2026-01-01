@@ -6,20 +6,27 @@ use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Tests\ViewTestData;
 
 /**
- * Tests basic integration of views data from the statistics module.
+ * Tests basic integration of views data from the download_statistics module.
  *
- * @group statistics
- * @see
+ * @group download_statistics
+ *
+ * @deprecated in download_statistics:1.1.0 and is removed from
+ *   download_statistics:2.0.0. Use
+ *   \Drupal\Tests\download_statistics\Functional\Views\IntegrationTest instead.
  */
 class IntegrationTest extends ViewTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  protected static $modules = ['statistics', 'statistics_test_views', 'node'];
+  protected static $modules = ['download_statistics', 'download_statistics_test_views', 'node'];
 
   /**
    * Stores the user object that accesses the page.
@@ -47,17 +54,17 @@ class IntegrationTest extends ViewTestBase {
    *
    * @var array
    */
-  public static $testViews = ['test_statistics_integration'];
+  public static $testViews = ['test_download_statistics_integration'];
 
   /**
    * {@inheritdoc}
-
+   *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function setUp($import_test_views = TRUE): void {
     parent::setUp();
 
-    ViewTestData::createTestViews(get_class($this), ['statistics_test_views']);
+    ViewTestData::createTestViews(get_class($this), ['download_statistics_test_views']);
 
     // Create a new user for viewing nodes and statistics.
     $this->webUser = $this->drupalCreateUser(['access content', 'view file download statistics']);
@@ -73,38 +80,16 @@ class IntegrationTest extends ViewTestBase {
   /**
    * Tests the integration of the {download_statistics} table in views.
    */
-  public function testNodeCounterIntegration() {
+  public function testDownloadCounterIntegration() {
     $this->drupalLogin($this->webUser);
 
     $this->drupalGet('node/' . $this->node->id());
-    // Manually calling statistics.php, simulating ajax behavior.
-    // @see \Drupal\download_statistics\Tests\StatisticsLoggingTest::testLogging().
-    global $base_url;
-    $stats_path = $base_url . '/' . \Drupal::service('extension.list.module')->getPath('statistics') . '/statistics.php';
-    $client = \Drupal::httpClient();
-    $client->post($stats_path, ['form_params' => ['nid' => $this->node->id()]]);
-    $this->drupalGet('test_statistics_integration');
-
-    $expected = \Drupal::service('statistics.storage.node')->fetchView($this->node->id());
-    // Convert the timestamp to year, to match the expected output of the date
-    // handler.
-    $expected['timestamp'] = date('Y', $expected['timestamp']);
-
-    foreach ($expected as $field => $value) {
-      $xpath = "//div[contains(@class, views-field-$field)]/span[@class = 'field-content']";
-      $this->assertFieldByXpath($xpath, $value, "The $field output matches the expected.");
-    }
+    $this->drupalGet('test_download_statistics_integration');
 
     $this->drupalLogout();
     $this->drupalLogin($this->deniedUser);
-    $this->drupalGet('test_statistics_integration');
+    $this->drupalGet('test_download_statistics_integration');
     $this->assertSession()->statusCodeEquals(200);
-
-    foreach ($expected as $field => $value) {
-      $xpath = "//div[contains(@class, views-field-$field)]/span[@class = 'field-content']";
-      $this->assertNoFieldByXpath($xpath, $value, "The $field output is not displayed.");
-    }
-
   }
 
 }

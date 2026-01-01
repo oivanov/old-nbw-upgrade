@@ -8,6 +8,7 @@ use Drupal\search_api_opensearch\SearchAPI\Query\QueryParamBuilder;
 use Drupal\search_api_opensearch\SearchAPI\Query\QueryResultParser;
 use OpenSearch\Client;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -18,35 +19,15 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class BackendClientFactory {
 
-  /**
-   * Creates a backend client factory.
-   *
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\QueryParamBuilder $queryParamBuilder
-   *   The query param builder.
-   * @param \Drupal\search_api_opensearch\SearchAPI\Query\QueryResultParser $resultParser
-   *   The query result parser.
-   * @param \Drupal\search_api_opensearch\SearchAPI\DeleteParamBuilder $deleteParamBuilder
-   *   The delete param builder.
-   * @param \Drupal\search_api_opensearch\SearchAPI\IndexParamBuilder $itemParamBuilder
-   *   The index param builder.
-   * @param \Drupal\search_api\Utility\FieldsHelperInterface $fieldsHelper
-   *   The fields helper.
-   * @param \Drupal\search_api_opensearch\SearchAPI\FieldMapper $fieldParamsBuilder
-   *   The field mapper.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
-   * @param \Drupal\search_api_opensearch\Analyser\AnalyserManager $analyserManager
-   *   Analyser manager.
-   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $eventDispatcher
-   *   The event dispatcher.
-   */
   public function __construct(
     protected QueryParamBuilder $queryParamBuilder,
     protected QueryResultParser $resultParser,
     protected DeleteParamBuilder $deleteParamBuilder,
     protected IndexParamBuilder $itemParamBuilder,
+    #[Autowire(service: 'search_api.fields_helper')]
     protected FieldsHelperInterface $fieldsHelper,
     protected FieldMapper $fieldParamsBuilder,
+    #[Autowire(service: 'logger.channel.search_api_opensearch')]
     protected LoggerInterface $logger,
     protected AnalyserManager $analyserManager,
     protected EventDispatcherInterface $eventDispatcher,

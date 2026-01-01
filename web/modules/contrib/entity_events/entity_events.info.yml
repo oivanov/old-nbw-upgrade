@@ -1,10 +1,10 @@
 type: module
 name: Entity Events
-description: 'Dispatches events on entity create, update, presave and delete.'
+description: 'Dispatches events on entity create, update, presave, predelete and delete.'
 package: Entity
 core_version_requirement: ^9 || ^10 || ^11
 
-# Information added by Drupal.org packaging script on 2025-01-30
-version: '2.0.4'
+# Information added by Drupal.org packaging script on 2025-06-21
+version: '2.0.5'
 project: 'entity_events'
-datestamp: 1738256811
+datestamp: 1750485634

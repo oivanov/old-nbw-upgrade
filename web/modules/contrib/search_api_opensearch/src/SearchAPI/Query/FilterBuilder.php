@@ -6,19 +6,15 @@ use Drupal\search_api\Query\Condition;
 use Drupal\search_api\Query\ConditionGroupInterface;
 use Drupal\search_api\SearchApiException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Provides a query filter builder.
  */
 class FilterBuilder {
 
-  /**
-   * Creates a new filter builder.
-   *
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
-   */
   public function __construct(
+    #[Autowire(service: 'logger.channel.search_api_opensearch')]
     protected LoggerInterface $logger,
   ) {
   }
@@ -55,20 +51,22 @@ class FilterBuilder {
 
         // Simple filter [field_id, value, operator].
         if ($condition instanceof Condition) {
+          $field_id = (string) $condition->getField();
+          $value = $condition->getValue();
+          $operator = (string) $condition->getOperator();
 
-          if (!$condition->getField() || !$condition->getValue() || !$condition->getOperator()) {
+          if ($field_id === '' || is_null($value) || $operator === '') {
             // @todo When using views the sort field is coming as a filter and
             // messing with this section.
             $this->logger->warning("Invalid condition %condition", ['%condition' => $condition]);
           }
 
-          $field_id = $condition->getField();
           if (!isset($index_fields[$field_id]) && !isset($backend_fields[$field_id])) {
             throw new SearchApiException(sprintf("Invalid field '%s' in search filter", $field_id));
           }
 
           // Check operator.
-          if (!$condition->getOperator()) {
+          if ($operator === '') {
             throw new SearchApiException(sprintf('Unspecified filter operator for field "%s"', $field_id));
           }
 
@@ -76,7 +74,7 @@ class FilterBuilder {
           if (isset($index_fields[$field_id])) {
             $field = $index_fields[$field_id];
             if ($field->getType() === 'boolean') {
-              $condition->setValue((bool) $condition->getValue());
+              $condition->setValue((bool) $value);
             }
           }
 

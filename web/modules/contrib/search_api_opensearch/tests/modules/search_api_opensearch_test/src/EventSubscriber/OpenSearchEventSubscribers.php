@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\search_api_opensearch_test\EventSubscriber;
 
 use Drupal\search_api\IndexInterface;

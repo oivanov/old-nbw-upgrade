@@ -8,6 +8,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\views\Plugin\views\field\Custom;
 use Drupal\views\Plugin\views\field\EntityField;
 
 /**
@@ -70,13 +71,18 @@ function fullcalendar_form_views_ui_edit_display_form_alter(array &$form, FormSt
 /**
  * Determines if a given field is a date field.
  *
- * @param \Drupal\views\Plugin\views\field\EntityField $field
+ * @param \Drupal\views\Plugin\views\field\EntityField|\Drupal\views\Plugin\views\field\Custom $field
  *   A Views field handler object.
  *
  * @return bool
  *   Boolean, TRUE if the field is a date field, FALSE otherwise.
  */
-function fullcalendar_field_is_date(EntityField $field): bool {
+function fullcalendar_field_is_date(EntityField|Custom $field): bool {
+  // If the field is of non-entity types.
+  if ($field->definition['id'] === 'custom') {
+    return FALSE;
+  }
+
   $entity_type = $field->definition['entity_type'];
 
   if (empty($entity_type)) {

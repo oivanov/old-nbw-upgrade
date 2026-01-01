@@ -10,10 +10,9 @@ include:
 
 variables:
   SKIP_ESLINT: '1'
-  OPT_IN_TEST_NEXT_MAJOR: '1'
-  # OPT_IN_TEST_PREVIOUS_MAJOR: '1'
+  OPT_IN_TEST_PREVIOUS_MAJOR: '1'
   OPT_IN_TEST_NEXT_MINOR: '1'
-  _CSPELL_WORDS: 'Bäse, Queueable, queueable'
+  _CSPELL_WORDS: 'Bäse, queueable'
 
 phpcs:
   allow_failure: false

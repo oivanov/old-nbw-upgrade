@@ -37,6 +37,13 @@ trait BaseEmailTrait {
   protected $sender;
 
   /**
+   * The attachments.
+   *
+   * @var \Symfony\Component\Mime\Part\DataPart[]
+   */
+  protected $attachments = [];
+
+  /**
    * {@inheritdoc}
    */
   public function setSender($address) {
@@ -53,12 +60,20 @@ trait BaseEmailTrait {
 
   /**
    * {@inheritdoc}
+   *
+   * The $legacy parameter is @internal and may be removed at any time.
    */
-  public function setAddress(string $name, $addresses) {
+  public function setAddress(string $name, $addresses, bool $legacy = FALSE) {
     $name = strtolower($name);
     assert(isset($this->addresses[$name]));
-    if ($name == 'to') {
-      $this->valid(self::PHASE_BUILD);
+    // Allow late setting of the to address for legacy emails. The langcode
+    // will not be updated, however that is a limitation of the legacy mail
+    // system.
+    if (!$legacy && $name == 'to') {
+      $this->valid(self::PHASE_BUILD, self::PHASE_INIT);
+      if ($this->phase == self::PHASE_BUILD) {
+        @trigger_error('Calling \Drupal\symfony_mailer\Email::setTo() in the build phase is deprecated in symfony_mailer:1.6.0 and will fail in symfony_mailer:2.0.0. Call it in the initialisation phase instead. See https://www.drupal.org/node/3501754', E_USER_DEPRECATED);
+      }
     }
 
     // Either erasing all addresses or updating them for the specified header.
@@ -196,22 +211,41 @@ trait BaseEmailTrait {
   /**
    * {@inheritdoc}
    */
-  public function attachFromPath(string $path, string $name = NULL, string $mimeType = NULL) {
-    $this->inner->attachFromPath($path, $name, $mimeType);
+  public function attachFromPath(string $path, ?string $name = NULL, ?string $mimeType = NULL) {
+    return $this->attach(Attachment::fromPath($path, $name, $mimeType));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function attachNoPath(string $body, ?string $name = NULL, ?string $mimeType = NULL) {
+    @trigger_error('\Drupal\symfony_mailer\Email::attachNoPath() is deprecated in symfony_mailer:1.6.0 and is removed from symfony_mailer:2.0.0. Use ::attach() instead. See https://www.drupal.org/node/3476132', E_USER_DEPRECATED);
+    return $this->attach(Attachment::fromData($body, $name, $mimeType));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function attach(AttachmentInterface $attachment): static {
+    $key = $attachment->getUri() ?: $attachment->getContentId();
+    $this->attachments[$key] = $attachment;
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function attachNoPath(string $body, string $name = NULL, string $mimeType = NULL) {
-    $this->inner->attach($body, $name, $mimeType);
-    return $this;
+  public function getAttachments(): array {
+    return $this->attachments;
   }
 
-  // @codingStandardsIgnoreStart
-  // public function embedFromPath(string $path, string $name = null, string $contentType = null);
-  // @codingStandardsIgnoreEnd
+  /**
+   * {@inheritdoc}
+   */
+  public function removeAttachment(string $key): static {
+    unset($this->attachments[$key]);
+    return $this;
+  }
 
   /**
    * {@inheritdoc}
