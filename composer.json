@@ -16,7 +16,7 @@
     "require": {
         "pantheon-upstreams/upstream-configuration": "dev-main",
         "composer/installers": "^2.0",
-        "drupal/address": "^1.11",
+        "drupal/address": "^2.0",
         "drupal/admin_toolbar": "^3.3",
         "drupal/allowed_formats": "^3.0",
         "drupal/backup_migrate": "^5.0",
