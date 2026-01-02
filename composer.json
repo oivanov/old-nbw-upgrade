@@ -89,7 +89,8 @@
         "drupal/bpmn_io": "^2.0",
         "drupal/views_autocomplete_filters": "^2.0",
         "drupal/mailchimp_webform_handler": "^1.0",
-        "drupal/upgrade_status": "^4.3"
+        "drupal/upgrade_status": "^4.3",
+        "drupal/watchdog_search": "^1.0@beta"
     },
     "require-dev": {
         "drupal/core-dev": "^10"

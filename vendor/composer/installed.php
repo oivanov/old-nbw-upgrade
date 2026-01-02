@@ -3,7 +3,7 @@
         'name' => 'pantheon-upstreams/drupal-composer-managed',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '679a40686a1146f6d0b4bab988cc64dbdd19f4d4',
+        'reference' => '47510e7b41153e6affba11486f710ddc1e353231',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -1303,6 +1303,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/watchdog_search' => array(
+            'pretty_version' => '1.0.0-beta2',
+            'version' => '1.0.0.0-beta2',
+            'reference' => '1.0.0-beta2',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/watchdog_search',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/webform' => array(
             'pretty_version' => '6.3.0-beta6',
             'version' => '6.3.0.0-beta6',
@@ -1708,7 +1717,7 @@
         'pantheon-upstreams/drupal-composer-managed' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '679a40686a1146f6d0b4bab988cc64dbdd19f4d4',
+            'reference' => '47510e7b41153e6affba11486f710ddc1e353231',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

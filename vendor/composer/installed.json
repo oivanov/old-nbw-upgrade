@@ -8678,6 +8678,54 @@
             "install-path": "../../web/modules/contrib/viewsreference"
         },
         {
+            "name": "drupal/watchdog_search",
+            "version": "1.0.0-beta2",
+            "version_normalized": "1.0.0.0-beta2",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/watchdog_search.git",
+                "reference": "1.0.0-beta2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/watchdog_search-1.0.0-beta2.zip",
+                "reference": "1.0.0-beta2",
+                "shasum": "38daa3ac6d344a2bfd2860611de0c24f565d7a30"
+            },
+            "require": {
+                "drupal/core": "^9 || ^10 || ^11"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "1.0.0-beta2",
+                    "datestamp": "1766345212",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Project has not opted into security advisory coverage!"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Brocatus",
+                    "homepage": "https://www.drupal.org/user/3557088",
+                    "email": "kevinbrocatus@gmail.com"
+                }
+            ],
+            "description": "Enhances the Watchdog log messages page by adding a search field and advanced filtering options.",
+            "homepage": "https://www.drupal.org/project/watchdog_search",
+            "support": {
+                "source": "https://git.drupalcode.org/project/watchdog_search"
+            },
+            "install-path": "../../web/modules/contrib/watchdog_search"
+        },
+        {
             "name": "drupal/webform",
             "version": "6.3.0-beta6",
             "version_normalized": "6.3.0.0-beta6",

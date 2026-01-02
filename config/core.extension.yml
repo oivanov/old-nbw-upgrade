@@ -185,6 +185,7 @@ module:
   views_bootstrap: 0
   views_ui: 0
   viewsreference: 0
+  watchdog_search: 0
   webform: 0
   webform_access: 0
   webform_attachment: 0
